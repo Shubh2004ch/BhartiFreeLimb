@@ -62,9 +62,12 @@ app.use('/api/waterponds', waterPondRoutes);
 app.use('/api/shelters', shelterRoutes);
 app.use('/api/auth', authRoutes);
 
-// Add a test route
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'API is working!' });
+// Serve static files from the frontend build directory
+app.use(express.static(path.join(__dirname, '../../frontend/build')));
+
+// Handle React routing, return all requests to React app
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../frontend/build', 'index.html'));
 });
 
 app.listen(5000, () => console.log('Server running on port 5000'));
