@@ -13,31 +13,31 @@ const API_BASE_URL = getBaseUrl();
 
 export const API_ENDPOINTS = {
   AUTH: {
-    LOGIN: `${API_BASE_URL}/auth/login`,
-    REGISTER: `${API_BASE_URL}/auth/register`,
-    LOGOUT: `${API_BASE_URL}/auth/logout`,
+    LOGIN: `/auth/login`,
+    REGISTER: `/auth/register`,
+    LOGOUT: `/auth/logout`,
   },
   CENTERS: {
-    LIST: `${API_BASE_URL}/centers`,
-    DETAILS: (id) => `${API_BASE_URL}/centers/${id}`,
-    CREATE: `${API_BASE_URL}/centers`,
-    UPDATE: (id) => `${API_BASE_URL}/centers/${id}`,
-    DELETE: (id) => `${API_BASE_URL}/centers/${id}`,
+    LIST: `/centers`,
+    DETAILS: (id) => `/centers/${id}`,
+    CREATE: `/centers`,
+    UPDATE: (id) => `/centers/${id}`,
+    DELETE: (id) => `/centers/${id}`,
   },
   MEDIA: {
-    LIST: `${API_BASE_URL}/media`,
-    UPLOAD: `${API_BASE_URL}/media/upload`,
-    DELETE: (id) => `${API_BASE_URL}/media/${id}`,
+    LIST: `/media`,
+    UPLOAD: `/media/upload`,
+    DELETE: (id) => `/media/${id}`,
   },
   REVIEWS: {
-    LIST: `${API_BASE_URL}/reviews`,
-    CREATE: `${API_BASE_URL}/reviews`,
-    UPDATE: (id) => `${API_BASE_URL}/reviews/${id}`,
-    DELETE: (id) => `${API_BASE_URL}/reviews/${id}`,
+    LIST: `/reviews`,
+    CREATE: `/reviews`,
+    UPDATE: (id) => `/reviews/${id}`,
+    DELETE: (id) => `/reviews/${id}`,
   },
   USERS: {
-    PROFILE: `${API_BASE_URL}/users/profile`,
-    UPDATE: `${API_BASE_URL}/users/profile`,
+    PROFILE: `/users/profile`,
+    UPDATE: `/users/profile`,
   }
 };
 

@@ -20,6 +20,7 @@ import {
 import { Delete, Edit, Add, LocationOn, LocalPhone, Image as ImageIcon } from '@mui/icons-material';
 import axios from 'axios';
 import { ENDPOINTS, getImageUrl } from '../../constants';
+import api from '../../services/api';
 
 const WaterPondForm = () => {
   const [waterPonds, setWaterPonds] = useState([]);
@@ -47,7 +48,7 @@ const WaterPondForm = () => {
   const fetchWaterPonds = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(ENDPOINTS.WATER_PONDS);
+      const response = await api.get(ENDPOINTS.WATER_PONDS);
       setWaterPonds(response.data);
       setError(null);
     } catch (error) {

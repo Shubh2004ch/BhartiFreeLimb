@@ -16,8 +16,8 @@ import {
   Button
 } from '@mui/material';
 import { LocationOn, AccessTime, Water, Phone, Directions, Star } from '@mui/icons-material';
-import axios from 'axios';
-import { ENDPOINTS, getImageUrl } from '../../constants';
+import { getImageUrl } from '../../constants';
+import { waterPondService } from '../../services/api';
 
 // Loading Skeleton Component
 const LoadingSkeleton = () => (
@@ -146,7 +146,7 @@ const WaterPondSection = () => {
 
   const fetchItems = async () => {
     try {
-      const response = await axios.get(ENDPOINTS.WATER_PONDS);
+      const response = await waterPondService.getWaterPonds();
       setItems(response.data);
     } catch (error) {
       console.error('Error fetching water ponds:', error);

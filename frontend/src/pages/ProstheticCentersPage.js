@@ -19,6 +19,7 @@ import { Search, ArrowBack, LocationOn } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ENDPOINTS, getImageUrl } from '../constants';
+import api from '../services/api';
 
 const ProstheticCentersPage = () => {
   const [centers, setCenters] = useState([]);
@@ -34,7 +35,7 @@ const ProstheticCentersPage = () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await axios.get(ENDPOINTS.CENTERS);
+        const response = await api.get(ENDPOINTS.CENTERS);
         if (response.data && Array.isArray(response.data)) {
           setCenters(response.data);
         } else {

@@ -15,6 +15,7 @@ import { ArrowBack, LocationOn, Phone, Email, Image as ImageIcon } from '@mui/ic
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { ENDPOINTS, getImageUrl } from '../constants';
+import api from '../services/api';
 
 const CenterDetailsPage = () => {
   const [center, setCenter] = useState(null);
@@ -31,7 +32,7 @@ const CenterDetailsPage = () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await axios.get(`${ENDPOINTS.CENTERS}/${id}`);
+        const response = await api.get(`${ENDPOINTS.CENTERS}/${id}`);
         if (response.data) {
           console.log('Center data:', response.data); // Debug log
           setCenter(response.data);

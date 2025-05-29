@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { ENDPOINTS, getImageUrl } from '../../constants';
 import { Star } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { reviewService } from '../../services/api';
 
 const SuccessStoriesSection = () => {
   const [stories, setStories] = useState([]);
@@ -12,7 +11,7 @@ const SuccessStoriesSection = () => {
   useEffect(() => {
     const fetchStories = async () => {
       try {
-        const response = await axios.get(ENDPOINTS.REVIEWS);
+        const response = await reviewService.getReviews();
         setStories(response.data);
       } catch (error) {
         console.error('Error fetching success stories:', error);
@@ -45,7 +44,7 @@ const SuccessStoriesSection = () => {
           >
             {story.imagePath && (
               <img
-                src={getImageUrl(story.imagePath)}
+                src={story.imagePath}
                 alt={story.name}
                 className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
                 draggable={false}

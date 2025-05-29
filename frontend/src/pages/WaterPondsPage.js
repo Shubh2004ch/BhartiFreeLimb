@@ -25,6 +25,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ENDPOINTS, getImageUrl } from '../constants';
+import api from '../services/api';
 
 // Beautiful loading skeletons
 const WaterPondSkeleton = () => (
@@ -59,7 +60,7 @@ const WaterPondsPage = () => {
   useEffect(() => {
     const fetchWaterPonds = async () => {
       try {
-        const response = await axios.get(ENDPOINTS.WATER_PONDS);
+        const response = await api.get(ENDPOINTS.WATER_PONDS);
         setWaterPonds(response.data);
         setLoading(false);
       } catch (error) {

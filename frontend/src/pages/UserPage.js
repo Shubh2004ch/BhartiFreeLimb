@@ -13,6 +13,7 @@ import { ENDPOINTS, getImageUrl, CONTACT_PHONE, CONTACT_ADDRESS } from '../const
 import SectionPreview from '../components/sections/SectionPreview';
 import SuccessStoriesSection from '../components/sections/SuccessStoriesSection';
 import ShelterSection from '../components/sections/ShelterSection';
+import api from '../services/api';
 
 function UserPage() {
   const navigate = useNavigate();
@@ -50,14 +51,14 @@ function UserPage() {
         waterPondsRes,
         sheltersRes
       ] = await Promise.all([
-        axios.get(ENDPOINTS.MEDIA).catch(() => ({ data: [] })),
-        axios.get(ENDPOINTS.REVIEWS).catch(() => ({ data: [] })),
-        axios.get(ENDPOINTS.CENTERS).catch(() => ({ data: [] })),
-        axios.get(ENDPOINTS.FOOD_STALLS).catch(() => ({ data: [] })),
-        axios.get(ENDPOINTS.CLINICS).catch(() => ({ data: [] })),
-        axios.get(ENDPOINTS.SLEEPING_BAGS).catch(() => ({ data: [] })),
-        axios.get(ENDPOINTS.WATER_PONDS).catch(() => ({ data: [] })),
-        axios.get(ENDPOINTS.SHELTERS).catch(() => ({ data: [] }))
+        api.get(ENDPOINTS.REVIEWS).catch(() => ({ data: [] })),
+        api.get(ENDPOINTS.CENTERS).catch(() => ({ data: [] })),
+        api.get(ENDPOINTS.MEDIA).catch(() => ({ data: [] })),
+        api.get(ENDPOINTS.FOOD_STALLS).catch(() => ({ data: [] })),
+        api.get(ENDPOINTS.CLINICS).catch(() => ({ data: [] })),
+        api.get(ENDPOINTS.SLEEPING_BAGS).catch(() => ({ data: [] })),
+        api.get(ENDPOINTS.WATER_PONDS).catch(() => ({ data: [] })),
+        api.get(ENDPOINTS.SHELTERS).catch(() => ({ data: [] }))
       ]);
 
       setMedia(Array.isArray(mediaRes.data) ? mediaRes.data : []);

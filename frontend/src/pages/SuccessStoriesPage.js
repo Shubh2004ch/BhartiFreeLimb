@@ -15,6 +15,7 @@ import { Search, ArrowBack, Star } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { ENDPOINTS, getImageUrl } from '../constants';
+import api from '../services/api';
 
 const SuccessStoriesPage = () => {
   const [stories, setStories] = useState([]);
@@ -38,7 +39,7 @@ const SuccessStoriesPage = () => {
 
   const fetchStories = async () => {
     try {
-      const response = await axios.get(ENDPOINTS.REVIEWS);
+      const response = await api.get(ENDPOINTS.REVIEWS);
       setStories(response.data);
     } catch (error) {
       console.error('Failed to fetch stories:', error);

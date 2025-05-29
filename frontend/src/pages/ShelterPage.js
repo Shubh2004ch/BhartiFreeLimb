@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ENDPOINTS } from '../constants';
 import ShelterCard from '../components/sections/ShelterSection';
+import api from '../services/api';
 
 const ShelterPage = () => {
   const [shelters, setShelters] = useState([]);
@@ -30,7 +31,7 @@ const ShelterPage = () => {
 
   const fetchShelters = async () => {
     try {
-      const response = await axios.get(ENDPOINTS.SHELTERS);
+      const response = await api.get(ENDPOINTS.SHELTERS);
       setShelters(response.data);
     } catch (error) {
       console.error('Failed to fetch shelters:', error);

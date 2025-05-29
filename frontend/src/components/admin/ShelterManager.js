@@ -24,6 +24,7 @@ import {
 import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon } from '@mui/icons-material';
 import axios from 'axios';
 import { ENDPOINTS, getImageUrl } from '../../constants';
+import api from '../../services/api';
 
 const ShelterManager = () => {
   const navigate = useNavigate();
@@ -88,7 +89,7 @@ const ShelterManager = () => {
       const authConfig = getAuthConfig();
       if (!authConfig) return;
       
-      const response = await axios.get(ENDPOINTS.SHELTERS, authConfig);
+      const response = await api.get(ENDPOINTS.SHELTERS, authConfig);
       setShelters(response.data);
     } catch (error) {
       if (error.response?.status === 401) {
@@ -197,10 +198,10 @@ const ShelterManager = () => {
       };
 
       if (editingShelter) {
-        await axios.put(`${ENDPOINTS.SHELTERS}/${editingShelter._id}`, formDataToSend, uploadConfig);
+        await api.put(`${ENDPOINTS.SHELTERS}/${editingShelter._id}`, formDataToSend, uploadConfig);
         setSuccess('Shelter updated successfully');
       } else {
-        await axios.post(ENDPOINTS.SHELTERS, formDataToSend, uploadConfig);
+        await api.post(ENDPOINTS.SHELTERS, formDataToSend, uploadConfig);
         setSuccess('Shelter added successfully');
       }
       fetchShelters();
@@ -220,7 +221,7 @@ const ShelterManager = () => {
 
     if (window.confirm('Are you sure you want to delete this shelter?')) {
       try {
-        await axios.delete(`${ENDPOINTS.SHELTERS}/${id}`, authConfig);
+        await api.delete(`${ENDPOINTS.SHELTERS}/${id}`, authConfig);
         setSuccess('Shelter deleted successfully');
         fetchShelters();
       } catch (error) {

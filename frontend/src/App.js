@@ -10,7 +10,6 @@ import FoodStallsPage from './pages/FoodStallsPage';
 import MedicalClinicsPage from './pages/MedicalClinicsPage';
 import SleepingBagsPage from './pages/SleepingBagsPage';
 import WaterPondsPage from './pages/WaterPondsPage';
-import SectionDetails from './pages/SectionDetails';
 import ShelterPage from './pages/ShelterPage';
 import SuccessStoriesPage from './pages/SuccessStoriesPage';
 
@@ -29,7 +28,7 @@ function App() {
       <Route path="/water-ponds" element={<WaterPondsPage />} />
       <Route path="/shelters" element={<ShelterPage />} />
       <Route path="/success-stories" element={<SuccessStoriesPage />} />
-      <Route path="/:section" element={<SectionDetails />} />
+    
     </Routes>
   );
 }

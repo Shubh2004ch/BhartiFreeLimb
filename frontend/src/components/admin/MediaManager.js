@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ENDPOINTS, getImageUrl } from '../../constants';
 import { Delete, Edit, Add, PlayCircle } from '@mui/icons-material';
+import api from '../../services/api';
 
 const MediaManager = () => {
   const [media, setMedia] = useState([]);
@@ -23,7 +24,7 @@ const MediaManager = () => {
   const fetchMedia = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(ENDPOINTS.MEDIA);
+      const response = await api.get(ENDPOINTS.MEDIA);
       setMedia(response.data);
       setError(null);
     } catch (error) {

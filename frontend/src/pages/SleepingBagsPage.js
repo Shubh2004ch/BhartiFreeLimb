@@ -25,6 +25,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ENDPOINTS, getImageUrl } from '../constants';
+import api from '../services/api';
 
 // Loading skeleton for beautiful loading state
 const SleepingBagSkeleton = () => (
@@ -59,7 +60,7 @@ const SleepingBagsPage = () => {
   useEffect(() => {
     const fetchSleepingBags = async () => {
       try {
-        const response = await axios.get(ENDPOINTS.SLEEPING_BAGS);
+        const response = await api.get(ENDPOINTS.SLEEPING_BAGS);
         setSleepingBags(response.data);
         setLoading(false);
       } catch (error) {

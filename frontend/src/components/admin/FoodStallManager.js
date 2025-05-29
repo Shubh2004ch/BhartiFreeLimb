@@ -30,6 +30,7 @@ import {
 } from '@mui/icons-material';
 import axios from 'axios';
 import { ENDPOINTS, getImageUrl } from '../../constants';
+import api from '../../services/api';
 
 // Skeleton loader for nicely animated loading state
 const FoodStallSkeleton = () => (
@@ -83,7 +84,7 @@ const FoodStallManager = () => {
   const fetchFoodStalls = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(ENDPOINTS.FOOD_STALLS);
+      const response = await api.get(ENDPOINTS.FOOD_STALLS);
       setFoodStalls(response.data);
     } catch (error) {
       console.error('Error fetching food stalls:', error);

@@ -1,13 +1,13 @@
 import axios from 'axios';
-import { API_BASE_URL } from '../constants';
+import { API_BASE_URL, ENDPOINTS } from '../constants';
 
 // Create axios instance with default config
 const api = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 10000, // 10 second timeout
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true
 });
 
 // Add request interceptor for authentication
@@ -20,6 +20,7 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    console.error('Request error:', error);
     return Promise.reject(error);
   }
 );
@@ -28,48 +29,113 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error('API Error:', error.response?.data || error.message);
+    
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       window.location.href = '/login';
     }
+    
+    // Handle network errors
+    if (!error.response) {
+      console.error('Network Error:', error.message);
+      return Promise.reject(new Error('Network error. Please check your connection.'));
+    }
+    
+    // Handle server errors
+    if (error.response.status >= 500) {
+      console.error('Server Error:', error.response.data);
+      return Promise.reject(new Error('Server error. Please try again later.'));
+    }
+    
     return Promise.reject(error);
   }
 );
 
+// Auth Service
 export const authService = {
-  login: (credentials) => api.post('/api/auth/login', credentials),
-  register: (userData) => api.post('/api/auth/register', userData),
-  logout: () => api.post('/api/auth/logout'),
+  login: (credentials) => api.post(ENDPOINTS.AUTH + '/login', credentials),
+  register: (userData) => api.post(ENDPOINTS.AUTH + '/register', userData),
+  logout: () => api.post(ENDPOINTS.AUTH + '/logout'),
 };
 
+// Center Service
 export const centerService = {
-  getCenters: () => api.get('/api/centers'),
-  getCenter: (id) => api.get(`/api/centers/${id}`),
-  createCenter: (data) => api.post('/api/centers', data),
-  updateCenter: (id, data) => api.put(`/api/centers/${id}`, data),
-  deleteCenter: (id) => api.delete(`/api/centers/${id}`),
+  getCenters: () => api.get(ENDPOINTS.CENTERS),
+  getCenter: (id) => api.get(`${ENDPOINTS.CENTERS}/${id}`),
+  createCenter: (data) => api.post(ENDPOINTS.CENTERS, data),
+  updateCenter: (id, data) => api.put(`${ENDPOINTS.CENTERS}/${id}`, data),
+  deleteCenter: (id) => api.delete(`${ENDPOINTS.CENTERS}/${id}`),
 };
 
+// Media Service
 export const mediaService = {
-  getMedia: () => api.get('/api/media'),
+  getMedia: () => api.get(ENDPOINTS.MEDIA),
   uploadMedia: (formData) => {
     const config = {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     };
-    return api.post('/api/media/upload', formData, config);
+    return api.post(ENDPOINTS.MEDIA + '/upload', formData, config);
   },
-  deleteMedia: (id) => api.delete(`/api/media/${id}`),
+  deleteMedia: (id) => api.delete(`${ENDPOINTS.MEDIA}/${id}`),
 };
 
+// Review Service
 export const reviewService = {
-  getReviews: () => api.get('/api/reviews'),
-  createReview: (data) => api.post('/api/reviews', data),
-  updateReview: (id, data) => api.put(`/api/reviews/${id}`, data),
-  deleteReview: (id) => api.delete(`/api/reviews/${id}`),
+  getReviews: () => api.get(ENDPOINTS.REVIEWS),
+  createReview: (data) => api.post(ENDPOINTS.REVIEWS, data),
+  updateReview: (id, data) => api.put(`${ENDPOINTS.REVIEWS}/${id}`, data),
+  deleteReview: (id) => api.delete(`${ENDPOINTS.REVIEWS}/${id}`),
 };
 
+// Food Stall Service
+export const foodStallService = {
+  getFoodStalls: () => api.get(ENDPOINTS.FOOD_STALLS),
+  getFoodStall: (id) => api.get(`${ENDPOINTS.FOOD_STALLS}/${id}`),
+  createFoodStall: (data) => api.post(ENDPOINTS.FOOD_STALLS, data),
+  updateFoodStall: (id, data) => api.put(`${ENDPOINTS.FOOD_STALLS}/${id}`, data),
+  deleteFoodStall: (id) => api.delete(`${ENDPOINTS.FOOD_STALLS}/${id}`),
+};
+
+// Clinic Service
+export const clinicService = {
+  getClinics: () => api.get(ENDPOINTS.CLINICS),
+  getClinic: (id) => api.get(`${ENDPOINTS.CLINICS}/${id}`),
+  createClinic: (data) => api.post(ENDPOINTS.CLINICS, data),
+  updateClinic: (id, data) => api.put(`${ENDPOINTS.CLINICS}/${id}`, data),
+  deleteClinic: (id) => api.delete(`${ENDPOINTS.CLINICS}/${id}`),
+};
+
+// Sleeping Bag Service
+export const sleepingBagService = {
+  getSleepingBags: () => api.get(ENDPOINTS.SLEEPING_BAGS),
+  getSleepingBag: (id) => api.get(`${ENDPOINTS.SLEEPING_BAGS}/${id}`),
+  createSleepingBag: (data) => api.post(ENDPOINTS.SLEEPING_BAGS, data),
+  updateSleepingBag: (id, data) => api.put(`${ENDPOINTS.SLEEPING_BAGS}/${id}`, data),
+  deleteSleepingBag: (id) => api.delete(`${ENDPOINTS.SLEEPING_BAGS}/${id}`),
+};
+
+// Water Pond Service
+export const waterPondService = {
+  getWaterPonds: () => api.get(ENDPOINTS.WATER_PONDS),
+  getWaterPond: (id) => api.get(`${ENDPOINTS.WATER_PONDS}/${id}`),
+  createWaterPond: (data) => api.post(ENDPOINTS.WATER_PONDS, data),
+  updateWaterPond: (id, data) => api.put(`${ENDPOINTS.WATER_PONDS}/${id}`, data),
+  deleteWaterPond: (id) => api.delete(`${ENDPOINTS.WATER_PONDS}/${id}`),
+};
+
+// Shelter Service
+export const shelterService = {
+  getShelters: () => api.get(ENDPOINTS.SHELTERS),
+  getShelter: (id) => api.get(`${ENDPOINTS.SHELTERS}/${id}`),
+  createShelter: (data) => api.post(ENDPOINTS.SHELTERS, data),
+  updateShelter: (id, data) => api.put(`${ENDPOINTS.SHELTERS}/${id}`, data),
+  deleteShelter: (id) => api.delete(`${ENDPOINTS.SHELTERS}/${id}`),
+};
+
+// User Service
 export const userService = {
   getProfile: () => api.get('/api/users/profile'),
   updateProfile: (data) => api.put('/api/users/profile', data),

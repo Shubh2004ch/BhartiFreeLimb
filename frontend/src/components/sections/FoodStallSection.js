@@ -13,11 +13,12 @@ import {
   Fade,
   useTheme,
   useMediaQuery,
-  Button
+  Button,
+  Alert
 } from '@mui/material';
 import { LocationOn, AccessTime, Restaurant, Phone, Directions, Star } from '@mui/icons-material';
-import axios from 'axios';
-import { ENDPOINTS, getImageUrl } from '../../constants';
+import { getImageUrl } from '../../constants';
+import { foodStallService } from '../../services/api';
 
 // Loading Skeleton Component
 const LoadingSkeleton = () => (
@@ -42,6 +43,7 @@ const LoadingSkeleton = () => (
 // Food Stall Card Component
 const FoodStallCard = ({ item, index }) => {
   const theme = useTheme();
+  const [imageError, setImageError] = useState(false);
 
   return (
     <Grid item xs={12} sm={6} md={4} key={item._id}>
@@ -51,7 +53,7 @@ const FoodStallCard = ({ item, index }) => {
             height: '100%',
             display: 'flex',
             flexDirection: 'column',
-            width: '280px',
+            width: { xs: '100%', sm: '280px' },
             mx: 'auto',
             transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
             '&:hover': {
@@ -64,8 +66,9 @@ const FoodStallCard = ({ item, index }) => {
             <CardMedia
               component="img"
               height="160"
-              image={getImageUrl(item.imagePath)}
+              image={imageError ? '/placeholder-food.jpg' : getImageUrl(item.imagePath)}
               alt={item.name}
+              onError={() => setImageError(true)}
               sx={{
                 objectFit: 'cover',
                 position: 'relative',
@@ -101,7 +104,7 @@ const FoodStallCard = ({ item, index }) => {
             >
               <Star sx={{ color: 'warning.main', fontSize: '1rem', mr: 0.5 }} />
               <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                {item.rating}
+                {item.rating || 'N/A'}
               </Typography>
             </Box>
           </Box>
@@ -113,27 +116,27 @@ const FoodStallCard = ({ item, index }) => {
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
               <LocationOn sx={{ color: 'primary.main', fontSize: '1rem', mr: 1 }} />
               <Typography variant="body2" color="text.secondary">
-                {item.location}
+                {item.location || 'Location not specified'}
               </Typography>
             </Box>
 
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
               <Phone sx={{ color: 'primary.main', fontSize: '1rem', mr: 1 }} />
               <Typography variant="body2" color="text.secondary">
-                {item.contactNumber}
+                {item.contactNumber || 'Contact not available'}
               </Typography>
             </Box>
 
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
               <AccessTime sx={{ color: 'primary.main', fontSize: '1rem', mr: 1 }} />
               <Typography variant="body2" color="text.secondary">
-                {item.operatingHours}
+                {item.operatingHours || 'Hours not specified'}
               </Typography>
             </Box>
 
             <Box sx={{ mb: 1 }}>
               <Typography variant="body2" color="text.secondary">
-                {item.reviews} reviews
+                {item.reviews || 0} reviews
               </Typography>
             </Box>
 
@@ -171,7 +174,8 @@ const FoodStallCard = ({ item, index }) => {
                 startIcon={<Phone />}
                 size="small"
                 fullWidth
-                href={`tel:${item.contactNumber}`}
+                href={item.contactNumber ? `tel:${item.contactNumber}` : '#'}
+                disabled={!item.contactNumber}
                 sx={{ py: 0.5 }}
               >
                 Call Now
@@ -181,7 +185,8 @@ const FoodStallCard = ({ item, index }) => {
                 startIcon={<Directions />}
                 size="small"
                 fullWidth
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location)}`}
+                href={item.location ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location)}` : '#'}
+                disabled={!item.location}
                 target="_blank"
                 sx={{ py: 0.5 }}
               >
@@ -199,6 +204,7 @@ const FoodStallCard = ({ item, index }) => {
 const FoodStallSection = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -208,10 +214,12 @@ const FoodStallSection = () => {
 
   const fetchItems = async () => {
     try {
-      const response = await axios.get(ENDPOINTS.FOOD_STALLS);
+      const response = await foodStallService.getFoodStalls();
       setItems(response.data);
+      setError(null);
     } catch (error) {
       console.error('Error fetching food stalls:', error);
+      setError('Failed to load food stalls. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -219,6 +227,26 @@ const FoodStallSection = () => {
 
   if (loading) {
     return <LoadingSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ py: 4, textAlign: 'center' }}>
+        <Alert severity="error" sx={{ maxWidth: 600, mx: 'auto' }}>
+          {error}
+        </Alert>
+      </Box>
+    );
+  }
+
+  if (items.length === 0) {
+    return (
+      <Box sx={{ py: 4, textAlign: 'center' }}>
+        <Alert severity="info" sx={{ maxWidth: 600, mx: 'auto' }}>
+          No food stalls available at the moment. Please check back later.
+        </Alert>
+      </Box>
+    );
   }
 
   return (
@@ -275,7 +303,7 @@ const FoodStallSection = () => {
           },
         }}>
           {items.map((item, index) => (
-            <Box key={item._id} sx={{ minWidth: '280px', flexShrink: 0 }}>
+            <Box key={item._id} sx={{ minWidth: { xs: '100%', sm: '280px' }, flexShrink: 0 }}>
               <FoodStallCard 
                 item={item}
                 index={index}

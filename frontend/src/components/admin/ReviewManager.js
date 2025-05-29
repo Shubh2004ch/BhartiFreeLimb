@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ENDPOINTS, getImageUrl } from '../../constants';
 import { Delete, Edit, Add, Star } from '@mui/icons-material';
+import api from '../../services/api';
 
 const ReviewManager = () => {
   const [reviews, setReviews] = useState([]);
@@ -23,7 +24,7 @@ const ReviewManager = () => {
   const fetchReviews = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(ENDPOINTS.REVIEWS);
+      const response = await api.get(ENDPOINTS.REVIEWS);
       setReviews(response.data);
       setError(null);
     } catch (error) {

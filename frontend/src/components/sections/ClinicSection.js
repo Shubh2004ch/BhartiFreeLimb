@@ -23,8 +23,8 @@ import {
   Pets,
   LocalHospital,
 } from '@mui/icons-material';
-import axios from 'axios';
-import { ENDPOINTS, getImageUrl } from '../../constants';
+import { getImageUrl } from '../../constants';
+import { clinicService } from '../../services/api';
 
 // Loading Skeleton
 const LoadingSkeleton = () => (
@@ -276,16 +276,14 @@ const ClinicSection = () => {
 
   useEffect(() => {
     fetchItems();
-    // eslint-disable-next-line
   }, []);
 
   const fetchItems = async () => {
     try {
-      const response = await axios.get(ENDPOINTS.CLINICS);
+      const response = await clinicService.getClinics();
       setItems(response.data);
     } catch (error) {
-      setItems([]);
-      // Optionally: Show error message to user
+      console.error('Error fetching clinics:', error);
     } finally {
       setLoading(false);
     }

@@ -23,25 +23,55 @@ const app = express();
 
 // CORS configuration
 const allowedOrigins = process.env.NODE_ENV === 'production' 
-  ? ['https://bharti.up.railway.app', 'https://bharti-frontend.up.railway.app'] 
-  : ['http://localhost:3000', 'https://a347-2405-204-320a-9c44-4a0e-effb-429c-e015.ngrok-free.app'];
+  ? [
+      "*",
+      'https://bhartifreelimb-production.up.railway.app',
+      'https://bhartifreelimb.vercel.app',
+      'http://localhost:3000',
+      'http://localhost:33927',
+      'http://localhost:41691'
+    ] 
+  : ['http://localhost:3000', 'http://localhost:33927', /^http:\/\/localhost:\d+$/];
 
 app.use(cors({
   origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
+    
+    // Check if origin matches any allowed origins
+    const isAllowed = allowedOrigins.some(allowedOrigin => {
+      if (allowedOrigin instanceof RegExp) {
+        return allowedOrigin.test(origin);
+      }
+      return allowedOrigin === origin;
+    });
+
+    if (!isAllowed) {
+      console.log('Blocked by CORS:', origin);
       const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
       return callback(new Error(msg), false);
     }
     return callback(null, true);
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    message: 'Something went wrong!',
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+});
+
 console.log("Connecting to MongoDB");
+connectDB();
 
 // Create uploads folder if it doesn't exist
 const uploadsPath = path.join(__dirname, 'uploads');
@@ -83,14 +113,7 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../../frontend/build', 'index.html'));
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.NODE_ENV === 'production' ? (process.env.PORT || 5000) : 5001;
 app.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-});
-connectDB();
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Something broke!');
 });

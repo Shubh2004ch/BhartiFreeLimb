@@ -21,8 +21,8 @@ import {
   ArrowForward,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { ENDPOINTS, getImageUrl } from '../../constants';
+import { shelterService } from '../../services/api';
+import { getImageUrl } from '../../constants';
 
 // Loading Skeleton
 const LoadingSkeleton = () => (
@@ -188,16 +188,14 @@ const ShelterSection = () => {
 
   useEffect(() => {
     fetchItems();
-    // eslint-disable-next-line
   }, []);
 
   const fetchItems = async () => {
     try {
-      const response = await axios.get(ENDPOINTS.SHELTERS);
+      const response = await shelterService.getShelters();
       setItems(response.data);
     } catch (error) {
-      setItems([]);
-      // Optionally: Show error message to user
+      console.error('Error fetching shelters:', error);
     } finally {
       setLoading(false);
     }

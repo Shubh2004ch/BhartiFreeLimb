@@ -25,6 +25,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ENDPOINTS, getImageUrl } from '../constants';
+import api from '../services/api';
 
 // Loading skeleton for beautiful loading state
 const ClinicSkeleton = () => (
@@ -59,7 +60,7 @@ const MedicalClinicsPage = () => {
   useEffect(() => {
     const fetchClinics = async () => {
       try {
-        const response = await axios.get(ENDPOINTS.CLINICS);
+        const response = await api.get(ENDPOINTS.CLINICS);
         setClinics(response.data);
         setLoading(false);
       } catch (error) {

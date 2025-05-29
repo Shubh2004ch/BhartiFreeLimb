@@ -4,25 +4,29 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 // Base URLs
 const PROD_BACKEND_URL = "https://bhartifreelimb-production.up.railway.app";
 const DEV_BACKEND_URL = "http://localhost:5000";
-const S3_BASE_URL = 'https://s3.ap-south-1.amazonaws.com/bhartiallmedia/bhartifreelimb';
+const S3_BASE_URL = 'https://s3.ap-south-1.amazonaws.com/bhartiallmedia';
 
-// Base URLs with proper configuration
+// Base URL configuration
 export const API_BASE_URL = isDevelopment ? DEV_BACKEND_URL : PROD_BACKEND_URL;
-export const STATIC_FILES_URL = S3_BASE_URL;
+
+// Static files URL
+export const STATIC_FILES_URL = isDevelopment 
+  ? `${DEV_BACKEND_URL}/uploads`
+  : `${PROD_BACKEND_URL}/uploads`;
 
 // API Endpoints
 export const ENDPOINTS = {
-  FOOD_STALLS: `${API_BASE_URL}/api/foodstalls`,
-  CLINICS: `${API_BASE_URL}/api/clinics`,
-  SLEEPING_BAGS: `${API_BASE_URL}/api/sleepingbags`,
-  WATER_PONDS: `${API_BASE_URL}/api/waterponds`,
-  CENTERS: `${API_BASE_URL}/api/centers`,
-  PROSTHETIC_CENTERS: `${API_BASE_URL}/api/centers`, // Alias for CENTERS
-  AUTH: `${API_BASE_URL}/api/auth`,
-  UPLOAD: `${API_BASE_URL}/api/upload`,
-  MEDIA: `${API_BASE_URL}/api/media`,
-  REVIEWS: `${API_BASE_URL}/api/reviews`,
-  SHELTERS: `${API_BASE_URL}/api/shelters`,
+  FOOD_STALLS: '/api/foodstalls',
+  CLINICS: '/api/clinics',
+  SLEEPING_BAGS: '/api/sleepingbags',
+  WATER_PONDS: '/api/waterponds',
+  CENTERS: '/api/centers',
+  PROSTHETIC_CENTERS: '/api/centers', // Alias for CENTERS
+  AUTH: '/api/auth',
+  UPLOAD: '/api/upload',
+  MEDIA: '/api/media',
+  REVIEWS: '/api/reviews',
+  SHELTERS: '/api/shelters',
 };
 
 // Helper function to get image URL
@@ -30,7 +34,7 @@ export const getImageUrl = (imagePath) => {
   if (!imagePath) return '';
   // If the path is already a full URL, return it as is
   if (imagePath.startsWith('http')) return imagePath;
-  // If the path is a local upload, prepend the S3 base URL
+  // If the path is a local upload, prepend the static files URL
   return `${STATIC_FILES_URL}/${imagePath}`;
 };
 

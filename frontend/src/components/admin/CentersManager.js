@@ -36,6 +36,7 @@ import {
 } from '@mui/icons-material';
 import axios from 'axios';
 import { ENDPOINTS, getImageUrl } from '../../constants';
+import api from '../../services/api';
 
 // Skeleton loader for loading state
 const CentersSkeleton = () => (
@@ -94,7 +95,7 @@ const CentersManager = () => {
   const fetchCenters = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(ENDPOINTS.CENTERS);
+      const response = await api.get(ENDPOINTS.CENTERS);
       setCenters(response.data);
       setError(null);
     } catch (error) {

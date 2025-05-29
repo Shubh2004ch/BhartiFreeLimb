@@ -34,6 +34,7 @@ import {
 } from '@mui/icons-material';
 import axios from 'axios';
 import { ENDPOINTS, getImageUrl } from '../../constants';
+import api from '../../services/api';
 
 // Skeleton loader for a beautiful loading experience
 const SleepingBagSkeleton = () => (
@@ -88,7 +89,7 @@ const SleepingBagManager = () => {
   const fetchSleepingBags = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(ENDPOINTS.SLEEPING_BAGS);
+      const response = await api.get(ENDPOINTS.SLEEPING_BAGS);
       setSleepingBags(response.data);
     } catch (error) {
       console.error('Error fetching sleeping bags:', error);
