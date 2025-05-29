@@ -2,12 +2,13 @@
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 // Base URLs
+const PROD__BACKEND_URL = "https://bhartifreelimb-production.up.railway.app"
 const NGROK_BACKEND_URL = 'https://3d3a-2405-204-320a-9c44-4a0e-effb-429c-e015.ngrok-free.app';
 const NGROK_FRONTEND_URL = 'https://a347-2405-204-320a-9c44-4a0e-effb-429c-e015.ngrok-free.app';
 const S3_BASE_URL = 'https://s3.ap-south-1.amazonaws.com/bhartiallmedia/bhartifreelimb';
 
 // Base URLs with proper configuration
-export const API_BASE_URL = isDevelopment ? 'http://localhost:5000' : NGROK_BACKEND_URL;
+export const API_BASE_URL = isDevelopment ? 'http://localhost:5000' : PROD__BACKEND_URL;
 export const STATIC_FILES_URL = S3_BASE_URL;
 
 // API Endpoints
