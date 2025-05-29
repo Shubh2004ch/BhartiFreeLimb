@@ -1,21 +1,9 @@
 import axios from 'axios';
 import API_ENDPOINTS from '../utils/constants';
 
-// Get the base URL without the /api suffix
-const getBaseUrl = () => {
-  if (process.env.NODE_ENV === 'production') {
-    return 'https://bhartifreelimb-production.up.railway.app';
-  }
-  // Check if we're using ngrok
-  if (window.location.hostname.includes('ngrok')) {
-    return window.location.origin;
-  }
-  return 'http://localhost:5000';
-};
-
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: getBaseUrl(),
+  baseURL: API_ENDPOINTS.AUTH.LOGIN.split('/api')[0],
   headers: {
     'Content-Type': 'application/json',
   },
