@@ -50,6 +50,19 @@ export const centerService = {
   deleteCenter: (id) => api.delete(API_ENDPOINTS.CENTERS.DELETE(id)),
 };
 
+export const mediaService = {
+  getMedia: () => api.get(API_ENDPOINTS.MEDIA.LIST),
+  uploadMedia: (formData) => {
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    };
+    return api.post(API_ENDPOINTS.MEDIA.UPLOAD, formData, config);
+  },
+  deleteMedia: (id) => api.delete(API_ENDPOINTS.MEDIA.DELETE(id)),
+};
+
 export const reviewService = {
   getReviews: () => api.get(API_ENDPOINTS.REVIEWS.LIST),
   createReview: (data) => api.post(API_ENDPOINTS.REVIEWS.CREATE, data),

@@ -1,6 +1,15 @@
-const API_BASE_URL = process.env.NODE_ENV === 'production'
-  ? 'https://bhartifreelimb-production.up.railway.app/api'
-  : 'http://localhost:5000/api';
+const getBaseUrl = () => {
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://bhartifreelimb-production.up.railway.app/api';
+  }
+  // Check if we're using ngrok
+  if (window.location.hostname.includes('ngrok')) {
+    return `${window.location.origin}/api`;
+  }
+  return 'http://localhost:5000/api';
+};
+
+const API_BASE_URL = getBaseUrl();
 
 export const API_ENDPOINTS = {
   AUTH: {
@@ -14,6 +23,11 @@ export const API_ENDPOINTS = {
     CREATE: `${API_BASE_URL}/centers`,
     UPDATE: (id) => `${API_BASE_URL}/centers/${id}`,
     DELETE: (id) => `${API_BASE_URL}/centers/${id}`,
+  },
+  MEDIA: {
+    LIST: `${API_BASE_URL}/media`,
+    UPLOAD: `${API_BASE_URL}/media/upload`,
+    DELETE: (id) => `${API_BASE_URL}/media/${id}`,
   },
   REVIEWS: {
     LIST: `${API_BASE_URL}/reviews`,
