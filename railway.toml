@@ -5,4 +5,10 @@ buildCommand = "npm install && cd frontend && CI=false npm install && npm run bu
 [deploy]
 startCommand = "cd backend && npm install && npm start"
 healthcheckPath = "/"
-healthcheckTimeout = 100 
+healthcheckTimeout = 100
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10
+
+[env]
+PORT = "5000"
+NODE_ENV = "production" 
