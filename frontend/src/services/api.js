@@ -1,9 +1,9 @@
 import axios from 'axios';
-import API_ENDPOINTS from '../utils/constants';
+import { API_BASE_URL } from '../constants';
 
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: API_ENDPOINTS.AUTH.LOGIN.split('/api')[0],
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },

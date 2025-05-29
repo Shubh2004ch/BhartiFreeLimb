@@ -2,11 +2,12 @@
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 // Base URLs
-const PROD__BACKEND_URL = "https://bhartifreelimb-production.up.railway.app";
+const PROD_BACKEND_URL = "https://bhartifreelimb-production.up.railway.app";
+const DEV_BACKEND_URL = "http://localhost:5000";
 const S3_BASE_URL = 'https://s3.ap-south-1.amazonaws.com/bhartiallmedia/bhartifreelimb';
 
 // Base URLs with proper configuration
-export const API_BASE_URL = isDevelopment ? 'http://localhost:5000' : PROD__BACKEND_URL;
+export const API_BASE_URL = isDevelopment ? DEV_BACKEND_URL : PROD_BACKEND_URL;
 export const STATIC_FILES_URL = S3_BASE_URL;
 
 // API Endpoints
