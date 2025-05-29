@@ -14,8 +14,9 @@ import {
   CardContent,
   CardMedia,
   Alert,
+  Button,
 } from '@mui/material';
-import { Search, ArrowBack, LocationOn } from '@mui/icons-material';
+import { Search, ArrowBack, LocationOn, Phone, Email } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ENDPOINTS, getImageUrl } from '../constants';
@@ -212,7 +213,6 @@ const ProstheticCentersPage = () => {
                       boxShadow: 6,
                     },
                   }}
-                  onClick={() => navigate(`/prosthetic-centers/${center._id}`)}
                 >
                   <CardMedia
                     component="img"
@@ -226,12 +226,13 @@ const ProstheticCentersPage = () => {
                       component="h2"
                       sx={{
                         fontWeight: 700,
-                        mb: 1,
+                        mb: 2,
                         fontSize: '1.25rem',
                       }}
                     >
                       {center.name}
                     </Typography>
+                    
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                       <LocationOn sx={{ color: 'primary.main', mr: 1, fontSize: '1.2rem' }} />
                       <Typography
@@ -248,6 +249,25 @@ const ProstheticCentersPage = () => {
                         {center.address}
                       </Typography>
                     </Box>
+
+                    {center.phone && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        <Phone sx={{ color: 'success.main', mr: 1, fontSize: '1.2rem' }} />
+                        <Typography variant="body2" color="text.secondary">
+                          {center.phone}
+                        </Typography>
+                      </Box>
+                    )}
+
+                    {center.email && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        <Email sx={{ color: 'info.main', mr: 1, fontSize: '1.2rem' }} />
+                        <Typography variant="body2" color="text.secondary">
+                          {center.email}
+                        </Typography>
+                      </Box>
+                    )}
+
                     <Typography
                       variant="body2"
                       color="text.secondary"
@@ -257,10 +277,38 @@ const ProstheticCentersPage = () => {
                         display: '-webkit-box',
                         WebkitLineClamp: 3,
                         WebkitBoxOrient: 'vertical',
+                        mb: 2,
                       }}
                     >
                       {center.description}
                     </Typography>
+
+                    <Box sx={{ display: 'flex', gap: 1, mt: 'auto' }}>
+                      {center.phone && (
+                        <Button
+                          variant="contained"
+                          startIcon={<Phone />}
+                          size="small"
+                          fullWidth
+                          href={`tel:${center.phone}`}
+                          onClick={(e) => e.stopPropagation()}
+                          sx={{
+                            bgcolor: 'success.main',
+                            '&:hover': { bgcolor: 'success.dark' },
+                          }}
+                        >
+                          Call Now
+                        </Button>
+                      )}
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        fullWidth
+                        onClick={() => navigate(`/prosthetic-centers/${center._id}`)}
+                      >
+                        View Details
+                      </Button>
+                    </Box>
                   </CardContent>
                 </Card>
               </Grid>

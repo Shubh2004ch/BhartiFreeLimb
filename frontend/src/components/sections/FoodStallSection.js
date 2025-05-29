@@ -16,9 +16,10 @@ import {
   Button,
   Alert
 } from '@mui/material';
-import { LocationOn, AccessTime, Restaurant, Phone, Directions, Star } from '@mui/icons-material';
+import { LocationOn, AccessTime, Restaurant, Phone, Directions, Star, ArrowForward } from '@mui/icons-material';
 import { getImageUrl } from '../../constants';
 import { foodStallService } from '../../services/api';
+import { useNavigate } from 'react-router-dom';
 
 // Loading Skeleton Component
 const LoadingSkeleton = () => (
@@ -207,6 +208,7 @@ const FoodStallSection = () => {
   const [error, setError] = useState(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchItems();
@@ -252,14 +254,17 @@ const FoodStallSection = () => {
   return (
     <Box 
       sx={{ 
-        py: 4, 
+        py: 6,
         bgcolor: 'background.paper',
         borderBottom: '1px solid',
         borderColor: 'divider'
       }}
     >
       <Container maxWidth="lg">
-        <Box sx={{ textAlign: 'center', mb: 3 }}>
+        <Box sx={{ 
+          textAlign: 'center', 
+          mb: 4
+        }}>
           <Typography 
             variant="h4" 
             component="h2" 
@@ -275,7 +280,7 @@ const FoodStallSection = () => {
           <Typography 
             variant="subtitle2" 
             color="text.secondary"
-            sx={{ maxWidth: '600px', mx: 'auto' }}
+            sx={{ maxWidth: '600px', mx: 'auto', mb: 3 }}
           >
             Find free food stalls and community kitchens. 
             Our network ensures everyone has access to nutritious meals.
@@ -286,7 +291,7 @@ const FoodStallSection = () => {
           display: 'flex', 
           overflowX: 'auto', 
           gap: 2, 
-          pb: 2,
+          pb: 4,
           '&::-webkit-scrollbar': {
             height: '8px',
           },
@@ -302,7 +307,7 @@ const FoodStallSection = () => {
             },
           },
         }}>
-          {items.map((item, index) => (
+          {items.slice(0, 6).map((item, index) => (
             <Box key={item._id} sx={{ minWidth: { xs: '100%', sm: '280px' }, flexShrink: 0 }}>
               <FoodStallCard 
                 item={item}
@@ -310,6 +315,38 @@ const FoodStallSection = () => {
               />
             </Box>
           ))}
+        </Box>
+
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center',
+          mt: 4
+        }}>
+          <Button
+            variant="contained"
+            onClick={() => navigate('/food-stalls')}
+            endIcon={<ArrowForward />}
+            sx={{
+              minWidth: 200,
+              backgroundColor: 'primary.main',
+              color: 'white',
+              '&:hover': {
+                backgroundColor: 'primary.dark',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+              },
+              transition: 'all 0.3s ease',
+              textTransform: 'none',
+              fontSize: '1rem',
+              fontWeight: 600,
+              py: 1.5,
+              px: 4,
+              borderRadius: 2,
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            View All Food Stalls
+          </Button>
         </Box>
       </Container>
     </Box>

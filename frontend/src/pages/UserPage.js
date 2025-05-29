@@ -21,6 +21,9 @@ function UserPage() {
   const scrollRef = useRef(null);
   const storiesRef = useRef(null);
   const mediaRef = useRef(null);
+  const aboutRef = useRef(null);
+  const centersRef = useRef(null);
+  const contactRef = useRef(null);
 
   const [media, setMedia] = useState([]);
   const [reviews, setReviews] = useState([]);
@@ -119,6 +122,19 @@ function UserPage() {
     }
   };
 
+  const scrollToSection = (ref) => {
+    if (ref.current) {
+      const headerOffset = 80; // Height of your fixed navbar
+      const elementPosition = ref.current.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
+    }
+  };
+
   const handleLogin = () => {
     navigate('/login');
   };
@@ -145,38 +161,48 @@ function UserPage() {
       <nav className="fixed top-0 left-0 right-0 bg-white/70 backdrop-blur-lg shadow-lg z-50 border-b border-blue-100">
         <div className="container mx-auto px-4 py-3 flex items-center">
           <h1 className="text-3xl font-black tracking-tight">
-            <span className="text-gradient bg-gradient-to-r from-red-700 via-pink-500 to-blue-700 bg-clip-text text-transparent">BhartiFreeLimbs</span>
+            <span className="text-gradient bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent">BhartiFreeLimbs</span>
             <span className="font-semibold text-blue-700">.Com</span>
           </h1>
           <div className="hidden md:flex space-x-8 ml-auto">
-            <button className="relative text-blue-900 font-semibold group">
+            <button 
+              onClick={() => scrollToSection(aboutRef)} 
+              className="relative text-blue-900 font-semibold group"
+            >
               About
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-blue-600 transition-all duration-300 group-hover:w-full"></span>
             </button>
-            <button className="relative text-blue-900 font-semibold group">
+            <button 
+              onClick={() => scrollToSection(centersRef)}
+              className="relative text-blue-900 font-semibold group"
+            >
               Centers
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-blue-600 transition-all duration-300 group-hover:w-full"></span>
             </button>
-            <button className="relative text-blue-900 font-semibold group">
+            <button 
+              onClick={() => scrollToSection(storiesRef)}
+              className="relative text-blue-900 font-semibold group"
+            >
               Success Stories
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-blue-600 transition-all duration-300 group-hover:w-full"></span>
             </button>
-            <button className="relative text-blue-900 font-semibold group">
+            <button 
+              onClick={() => scrollToSection(contactRef)}
+              className="relative text-blue-900 font-semibold group"
+            >
               Contact
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-pink-500 to-blue-600 transition-all duration-300 group-hover:w-full"></span>
-            </button>
-            <button 
-              onClick={handleLogin}
-              className="bg-gradient-to-r from-pink-500 to-blue-600 text-white px-4 py-1.5 rounded-full text-sm font-semibold hover:shadow-lg hover:scale-105 transition-all duration-200"
-            >
-              Admin Login
             </button>
           </div>
         </div>
       </nav>
 
       {/* HERO BANNER */}
-      <section className="relative pt-20 pb-8 min-h-[45vh] flex flex-col items-center justify-center bg-gradient-to-br from-blue-900 via-blue-700/60 to-pink-300/30 overflow-hidden">
+      <section 
+        ref={aboutRef} 
+        id="about"
+        className="relative pt-24 pb-8 min-h-[45vh] flex flex-col items-center justify-center bg-gradient-to-br from-blue-900 via-blue-700/60 to-pink-300/30 overflow-hidden"
+      >
         <div className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(255,255,255,0.12),rgba(0,0,0,0))]" />
         <div className="container mx-auto relative z-10 text-center">
           <h1 className="text-4xl md:text-5xl font-extrabold text-white drop-shadow-lg mb-3 animate-fade-in-up">
@@ -267,21 +293,20 @@ function UserPage() {
           </div>
         )}
 
-        {/* Add Shelter Section */}
-        <section className="mb-12">
-          <ShelterSection />
-        </section>
-
-        {/* Section Previews */}
-        <div className="space-y-10">
-          <FoodStallsSection />
-
+        {/* CENTERS SECTION */}
+        <div ref={centersRef} id="centers" className="space-y-10 pt-16">
           <SectionPreview
             title="🏥 Free Limb Centers"
             description="Find the nearest prosthetic center for your needs"
             items={centers}
             route="/prosthetic-centers"
           />
+
+          <FoodStallsSection />
+
+          <section className="mb-12">
+            <ShelterSection />
+          </section>
 
           <SectionPreview
             title="🦜 Free Clinics & Shelters For Injured Wildlife"
@@ -291,29 +316,35 @@ function UserPage() {
           />
 
           <SectionPreview
-            title="🛏️ Sleeping Bags"
-            description="Find comfortable accommodation options"
-            items={sleepingBags}
-            route="/sleeping-bags"
-          />
-
-          <SectionPreview
             title="💧 Water Ponds For Wildlife"
             description="Locate water ponds for wildlife"
             items={waterPonds}
             route="/water-ponds"
           />
+
+          <SectionPreview
+            title="🛏️ Sleeping Bags"
+            description="Find comfortable accommodation options"
+            items={sleepingBags}
+            route="/sleeping-bags"
+          />
         </div>
 
-        <SuccessStoriesSection />
+        {/* SUCCESS STORIES SECTION */}
+        <div ref={storiesRef} id="stories" className="pt-16">
+          <SuccessStoriesSection />
+        </div>
       </div>
 
-      {/* Footer */}
-      <footer className="bg-[#0f172a] text-white py-12 mt-12">
+      {/* CONTACT/FOOTER SECTION */}
+      <footer ref={contactRef} id="contact" className="bg-[#0f172a] text-white py-12 mt-12">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
-              <h3 className="text-2xl font-black mb-4 text-slate-100">BhartiFreeLimbs.Com</h3>
+              <h3 className="text-2xl font-black mb-4">
+                <span className="text-gradient bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent">BhartiFreeLimbs</span>
+                <span className="font-semibold text-blue-300">.Com</span>
+              </h3>
               <p className="text-slate-300">
                 Empowering lives through free prosthetic limbs, medical care, food support, shelter, and wildlife assistance. We provide comprehensive care and support services to create a world of hope and independence for all.
               </p>
