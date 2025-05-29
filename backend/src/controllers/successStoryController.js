@@ -19,7 +19,7 @@ exports.createStory = async (req, res) => {
       role,
       quote,
       mediaType,
-      mediaPath: req.file ? req.file.path.replace(/\\/g, '/') : undefined,
+      mediaPath: req.file ? req.file.key : undefined,
       thumbnailPath: req.body.thumbnailPath // for video, optional
     });
     await story.save();

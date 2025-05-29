@@ -3,10 +3,16 @@ const Center = require('../models/Center');
 // Get all centers
 exports.getAllCenters = async (req, res) => {
   try {
-    const centers = await Center.find();
+    console.log('Fetching all centers...');
+    const centers = await Center.find().sort({ createdAt: -1 });
+    console.log(`Found ${centers.length} centers`);
     res.json(centers);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error fetching centers:', error);
+    res.status(500).json({ 
+      message: 'Failed to fetch centers',
+      error: error.message 
+    });
   }
 };
 

@@ -66,7 +66,7 @@ const FoodStallCard = ({ item, index }) => {
             <CardMedia
               component="img"
               height="160"
-              image={imageError ? '/placeholder-food.jpg' : getImageUrl(item.imagePath)}
+              image={getImageUrl(item.imagePath)}
               alt={item.name}
               onError={() => setImageError(true)}
               sx={{

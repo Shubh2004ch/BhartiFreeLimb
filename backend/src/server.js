@@ -73,16 +73,6 @@ app.use((err, req, res, next) => {
 console.log("Connecting to MongoDB");
 connectDB();
 
-// Create uploads folder if it doesn't exist
-const uploadsPath = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsPath)) {
-  fs.mkdirSync(uploadsPath, { recursive: true });
-  console.log('Created uploads folder');
-}
-
-// Serve static files from uploads
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({

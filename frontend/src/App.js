@@ -12,6 +12,7 @@ import SleepingBagsPage from './pages/SleepingBagsPage';
 import WaterPondsPage from './pages/WaterPondsPage';
 import ShelterPage from './pages/ShelterPage';
 import SuccessStoriesPage from './pages/SuccessStoriesPage';
+import { ProstheticCentersSection } from './components/sections/ProstheticCentersSection';
 
 function App() {
   return (

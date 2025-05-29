@@ -1,295 +1,408 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box,
-  TextField,
-  Button,
-  Grid,
+  Container,
   Typography,
-  Card,
-  CardContent,
-  CardMedia,
-  IconButton,
+  Button,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
+  TextField,
+  Grid,
+  Card,
+  CardContent,
+  CardMedia,
+  IconButton,
+  Box,
+  Tooltip,
+  Fade,
   Alert,
-  Snackbar,
-  Tooltip
+  MenuItem,
 } from '@mui/material';
-import { Delete, Edit, Add, LocationOn, LocalPhone, Image as ImageIcon } from '@mui/icons-material';
-import axios from 'axios';
+import {
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  AddCircleOutline,
+  LocationOn,
+  LocalPhone,
+  Info,
+  Opacity,
+  WaterDrop,
+} from '@mui/icons-material';
 import { ENDPOINTS, getImageUrl } from '../../constants';
 import api from '../../services/api';
 
 const WaterPondForm = () => {
   const [waterPonds, setWaterPonds] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [editingPond, setEditingPond] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [selectedPond, setSelectedPond] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     location: '',
-    capacity: '',
-    currentLevel: '',
-    status: 'active',
-    image: null
+    contactNumber: '',
+    image: null,
   });
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [editingId, setEditingId] = useState(null);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   useEffect(() => {
     fetchWaterPonds();
   }, []);
 
   const fetchWaterPonds = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const response = await api.get(ENDPOINTS.WATER_PONDS);
       setWaterPonds(response.data);
-      setError(null);
+      setError('');
     } catch (error) {
-      setError('Failed to fetch water ponds');
       console.error('Error fetching water ponds:', error);
+      setError('Failed to fetch water ponds');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const handleOpen = (pond = null) => {
+    if (pond) {
+      setEditingPond(pond);
+      setFormData({
+        name: pond.name || '',
+        location: pond.location || '',
+        contactNumber: pond.contactNumber || '',
+        image: null,
+      });
+    } else {
+      setEditingPond(null);
+      setFormData({
+        name: '',
+        location: '',
+        contactNumber: '',
+        image: null,
+      });
+    }
+    setOpen(true);
+    setError('');
+    setSuccess('');
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setFormData(prev => ({
-      ...prev,
-      image: file
-    }));
+  const handleClose = () => {
+    setOpen(false);
+    setEditingPond(null);
+    setError('');
+    setSuccess('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const formDataToSend = new FormData();
-      Object.keys(formData).forEach(key => {
-        if (formData[key] !== null) {
-          formDataToSend.append(key, formData[key]);
-        }
-      });
-
-      if (selectedPond) {
-        await axios.put(`${ENDPOINTS.WATER_PONDS}/${selectedPond._id}`, formDataToSend);
-      } else {
-        await axios.post(ENDPOINTS.WATER_PONDS, formDataToSend);
+    const formDataToSend = new FormData();
+    
+    Object.keys(formData).forEach((key) => {
+      if (formData[key] !== null) {
+        formDataToSend.append(key, formData[key]);
       }
-
-      fetchWaterPonds();
-      handleCloseModal();
-    } catch (error) {
-      setError('Failed to save water pond');
-      console.error('Error saving water pond:', error);
-    }
-  };
-
-  const handleEdit = (pond) => {
-    setSelectedPond(pond);
-    setFormData({
-      name: pond.name || '',
-      location: pond.location || '',
-      capacity: pond.capacity || '',
-      currentLevel: pond.currentLevel || '',
-      status: pond.status || 'active',
-      image: null
     });
-    setIsModalOpen(true);
+
+    try {
+      if (editingPond) {
+        await api.put(`${ENDPOINTS.WATER_PONDS}/${editingPond._id}`, formDataToSend);
+        setSuccess('Water pond updated successfully');
+      } else {
+        await api.post(ENDPOINTS.WATER_PONDS, formDataToSend);
+        setSuccess('Water pond added successfully');
+      }
+      fetchWaterPonds();
+      handleClose();
+    } catch (error) {
+      console.error('Error saving water pond:', error);
+      setError(error.response?.data?.message || 'Failed to save water pond');
+    }
   };
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this water pond?')) {
       try {
-        await axios.delete(`${ENDPOINTS.WATER_PONDS}/${id}`);
+        await api.delete(`${ENDPOINTS.WATER_PONDS}/${id}`);
+        setSuccess('Water pond deleted successfully');
         fetchWaterPonds();
       } catch (error) {
-        setError('Failed to delete water pond');
         console.error('Error deleting water pond:', error);
+        setError('Failed to delete water pond');
       }
     }
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedPond(null);
-    setFormData({
-      name: '',
-      location: '',
-      capacity: '',
-      currentLevel: '',
-      status: 'active',
-      image: null
-    });
-  };
-
-  if (loading) {
-    return <div className="text-center py-8">Loading...</div>;
-  }
-
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Water Ponds Management</h2>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors"
+    <Box
+      sx={{
+        bgcolor: 'linear-gradient(120deg,#f0f9ff 0%,#fff7f7 100%)',
+        background: 'linear-gradient(120deg,#e0ecff 0%,#fff6f6 100%)',
+        minHeight: '100vh',
+        py: 6,
+      }}
+    >
+      <Container maxWidth="lg">
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            mb: 4,
+            gap: 2,
+            justifyContent: { xs: 'center', md: 'flex-start' },
+          }}
         >
-          <Add /> Add New Water Pond
-        </button>
-      </div>
-
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {waterPonds.map((pond) => (
-          <div
-            key={pond._id}
-            className="bg-white rounded-lg shadow-md p-6 border border-gray-200"
+          <WaterDrop sx={{ fontSize: 44, color: 'primary.main', mr: 1 }} />
+          <Typography
+            variant="h4"
+            fontWeight={900}
+            sx={{
+              background: 'linear-gradient(90deg, #2563eb 30%, #f472b6 70%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              display: 'inline-block',
+              letterSpacing: 1.2,
+            }}
           >
-            {pond.imagePath && (
-              <img
-                src={getImageUrl(pond.imagePath)}
-                alt={pond.name}
-                className="w-full h-48 object-cover rounded-lg mb-4"
-              />
-            )}
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">{pond.name}</h3>
-            <p className="text-gray-600 mb-2">Location: {pond.location}</p>
-            <p className="text-gray-600 mb-2">Capacity: {pond.capacity} liters</p>
-            <p className="text-gray-600 mb-2">Current Level: {pond.currentLevel}%</p>
-            <p className="text-gray-600 mb-4">Status: {pond.status}</p>
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => handleEdit(pond)}
-                className="text-blue-600 hover:text-blue-800"
-              >
-                <Edit />
-              </button>
-              <button
-                onClick={() => handleDelete(pond._id)}
-                className="text-red-600 hover:text-red-800"
-              >
-                <Delete />
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+            Manage Water Ponds
+          </Typography>
+        </Box>
 
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4">
-              {selectedPond ? 'Edit Water Pond' : 'Add New Water Pond'}
-            </h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Location</label>
-                <input
-                  type="text"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Capacity (liters)</label>
-                <input
-                  type="number"
-                  name="capacity"
-                  value={formData.capacity}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Current Level (%)</label>
-                <input
-                  type="number"
-                  name="currentLevel"
-                  value={formData.currentLevel}
-                  onChange={handleInputChange}
-                  min="0"
-                  max="100"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Status</label>
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddCircleOutline />}
+          onClick={() => handleOpen()}
+          sx={{
+            mb: 5,
+            borderRadius: 99,
+            fontWeight: 700,
+            px: 4,
+            fontSize: '1rem',
+            boxShadow: 3,
+            textTransform: 'none',
+            letterSpacing: 0.5,
+          }}
+        >
+          Add New Water Pond
+        </Button>
+
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
+
+        <Grid container spacing={5}>
+          {waterPonds.map((pond, idx) => (
+            <Grid item xs={12} sm={6} md={4} key={pond._id}>
+              <Fade in timeout={500} style={{ transitionDelay: `${idx * 80}ms` }}>
+                <Card
+                  sx={{
+                    borderRadius: 4,
+                    boxShadow:
+                      '0 6px 22px 0 rgba(59,130,246,0.09), 0 2px 8px 0 rgba(236,72,153,0.09)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                    transition:
+                      'transform 0.22s cubic-bezier(.4,0,.2,1), box-shadow 0.22s cubic-bezier(.4,0,.2,1)',
+                    '&:hover': {
+                      transform: 'translateY(-8px) scale(1.03)',
+                      boxShadow:
+                        '0 12px 36px 0 rgba(59,130,246,0.18), 0 3px 12px 0 rgba(236,72,153,0.16)',
+                    },
+                    bgcolor: 'rgba(255,255,255,0.92)',
+                    backdropFilter: 'blur(3px)',
+                  }}
                 >
-                  <option value="active">Active</option>
-                  <option value="maintenance">Maintenance</option>
-                  <option value="inactive">Inactive</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Image</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="mt-1 block w-full"
-                />
-              </div>
-              <div className="flex justify-end gap-2 mt-6">
-                <button
-                  type="button"
-                  onClick={handleCloseModal}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                  {pond.imagePath && (
+                    <CardMedia
+                      component="img"
+                      height="200"
+                      image={getImageUrl(pond.imagePath)}
+                      alt={pond.name}
+                      sx={{
+                        objectFit: 'cover',
+                        borderTopLeftRadius: 16,
+                        borderTopRightRadius: 16,
+                      }}
+                    />
+                  )}
+                  <CardContent
+                    sx={{
+                      flexGrow: 1,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      position: 'relative',
+                      p: 3,
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      fontWeight="bold"
+                      sx={{
+                        color: 'primary.main',
+                        fontSize: '1.16rem',
+                        letterSpacing: 0.1,
+                        mb: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                      }}
+                    >
+                      <WaterDrop sx={{ fontSize: 24, color: 'primary.main', mr: 1 }} />
+                      {pond.name}
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                      <LocationOn sx={{ color: '#f472b6', fontSize: 20, mr: 1 }} />
+                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                        {pond.location}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                      <LocalPhone sx={{ color: 'success.main', fontSize: 18, mr: 1 }} />
+                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                        {pond.contactNumber}
+                      </Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        mt: 2,
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                        gap: 1,
+                      }}
+                    >
+                      <Tooltip title="Edit" arrow>
+                        <IconButton
+                          onClick={() => handleOpen(pond)}
+                          color="primary"
+                          sx={{ bgcolor: '#f1f7ff', mr: 0.5 }}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete" arrow>
+                        <IconButton
+                          onClick={() => handleDelete(pond._id)}
+                          color="error"
+                          sx={{ bgcolor: '#fff5f5' }}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Fade>
+            </Grid>
+          ))}
+        </Grid>
+
+        <Dialog
+          open={open}
+          onClose={handleClose}
+          maxWidth="sm"
+          fullWidth
+          PaperProps={{
+            sx: { borderRadius: 4, p: 1 },
+          }}
+        >
+          <DialogTitle>
+            <Typography variant="h5" color="primary" fontWeight={700}>
+              {editingPond ? 'Edit Water Pond' : 'Add New Water Pond'}
+            </Typography>
+          </DialogTitle>
+          <DialogContent>
+            <form onSubmit={handleSubmit} id="water-pond-form">
+              <TextField
+                fullWidth
+                label="Name"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+                margin="normal"
+                required
+              />
+              <TextField
+                fullWidth
+                label="Location"
+                value={formData.location}
+                onChange={(e) =>
+                  setFormData({ ...formData, location: e.target.value })
+                }
+                margin="normal"
+                required
+              />
+              <TextField
+                fullWidth
+                label="Contact Number"
+                value={formData.contactNumber}
+                onChange={(e) =>
+                  setFormData({ ...formData, contactNumber: e.target.value })
+                }
+                margin="normal"
+                required
+              />
+              <Box sx={{ mt: 2 }}>
+                <Button
+                  variant="outlined"
+                  component="label"
+                  fullWidth
+                  sx={{
+                    textTransform: 'none',
+                    borderRadius: 2,
+                    borderColor: 'primary.light',
+                  }}
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-                >
-                  {selectedPond ? 'Update' : 'Add'}
-                </button>
-              </div>
+                  Upload Image
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={(e) =>
+                      setFormData({ ...formData, image: e.target.files[0] })
+                    }
+                  />
+                </Button>
+                {editingPond && editingPond.imagePath && (
+                  <Box mt={2} textAlign="center">
+                    <img
+                      src={getImageUrl(editingPond.imagePath)}
+                      alt={editingPond.name}
+                      style={{
+                        maxWidth: 120,
+                        maxHeight: 120,
+                        borderRadius: 12,
+                        boxShadow: '0 2px 12px rgba(59,130,246,0.10)',
+                        margin: 'auto',
+                      }}
+                    />
+                  </Box>
+                )}
+              </Box>
             </form>
-          </div>
-        </div>
-      )}
-    </div>
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 2 }}>
+            <Button onClick={handleClose}>Cancel</Button>
+            <Button
+              form="water-pond-form"
+              onClick={handleSubmit}
+              variant="contained"
+              color="primary"
+              type="submit"
+              sx={{
+                fontWeight: 700,
+                borderRadius: 8,
+                textTransform: 'none',
+                px: 4,
+              }}
+            >
+              {editingPond ? 'Update' : 'Add'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Container>
+    </Box>
   );
 };
 

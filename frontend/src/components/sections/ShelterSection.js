@@ -67,7 +67,7 @@ const ShelterCard = ({ item, index }) => (
     <Card
       sx={{
         height: '100%',
-        width: 320,
+        width: 250,
         mx: 'auto',
         display: 'flex',
         flexDirection: 'column',
@@ -156,23 +156,6 @@ const ShelterCard = ({ item, index }) => (
             {item.description}
           </Typography>
         </Box>
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
-          {item.facilities?.map((facility, idx) => (
-            <Chip
-              key={idx}
-              label={facility}
-              size="small"
-              sx={{
-                bgcolor: 'primary.light',
-                color: 'primary.contrastText',
-                fontSize: '0.75rem',
-                height: '22px',
-                fontWeight: 500,
-                letterSpacing: 0.2,
-              }}
-            />
-          ))}
-        </Box>
       </CardContent>
     </Card>
   </Fade>
@@ -193,7 +176,12 @@ const ShelterSection = () => {
   const fetchItems = async () => {
     try {
       const response = await shelterService.getShelters();
-      setItems(response.data);
+      // Ensure each item has facilities array properly initialized
+      const processedItems = response.data.map(item => ({
+        ...item,
+        facilities: Array.isArray(item.facilities) ? item.facilities.filter(f => f) : []
+      }));
+      setItems(processedItems);
     } catch (error) {
       console.error('Error fetching shelters:', error);
     } finally {

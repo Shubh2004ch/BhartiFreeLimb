@@ -13,6 +13,7 @@ import { ENDPOINTS, getImageUrl, CONTACT_PHONE, CONTACT_ADDRESS } from '../const
 import SectionPreview from '../components/sections/SectionPreview';
 import SuccessStoriesSection from '../components/sections/SuccessStoriesSection';
 import ShelterSection from '../components/sections/ShelterSection';
+import { FoodStallsSection } from '../components/sections/FoodStallsSection';
 import api from '../services/api';
 
 function UserPage() {
@@ -38,8 +39,9 @@ function UserPage() {
   }, []);
 
   const fetchAllData = async () => {
-      try {
-        setLoading(true);
+    try {
+      setLoading(true);
+      console.log('Fetching all data...');
 
       const [
         mediaRes,
@@ -51,15 +53,17 @@ function UserPage() {
         waterPondsRes,
         sheltersRes
       ] = await Promise.all([
+        api.get(ENDPOINTS.MEDIA).catch(() => ({ data: [] })),
         api.get(ENDPOINTS.REVIEWS).catch(() => ({ data: [] })),
         api.get(ENDPOINTS.CENTERS).catch(() => ({ data: [] })),
-        api.get(ENDPOINTS.MEDIA).catch(() => ({ data: [] })),
         api.get(ENDPOINTS.FOOD_STALLS).catch(() => ({ data: [] })),
         api.get(ENDPOINTS.CLINICS).catch(() => ({ data: [] })),
         api.get(ENDPOINTS.SLEEPING_BAGS).catch(() => ({ data: [] })),
         api.get(ENDPOINTS.WATER_PONDS).catch(() => ({ data: [] })),
         api.get(ENDPOINTS.SHELTERS).catch(() => ({ data: [] }))
       ]);
+
+      console.log('Centers response:', centersRes);
 
       setMedia(Array.isArray(mediaRes.data) ? mediaRes.data : []);
       setReviews(Array.isArray(reviewsRes.data) ? reviewsRes.data : []);
@@ -69,15 +73,16 @@ function UserPage() {
       setSleepingBags(Array.isArray(sleepingBagsRes.data) ? sleepingBagsRes.data : []);
       setWaterPonds(Array.isArray(waterPondsRes.data) ? waterPondsRes.data : []);
       setShelters(Array.isArray(sheltersRes.data) ? sheltersRes.data : []);
-        setError(null);
+      setError(null);
     } catch (error) {
-        setError('Failed to load data. Please try again later.');
+      console.error('Error fetching data:', error);
+      setError('Failed to load data. Please try again later.');
       setMedia([]); setReviews([]); setCenters([]); setFoodStalls([]);
       setClinics([]); setSleepingBags([]); setWaterPonds([]); setShelters([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Auto-scroll media
   useEffect(() => {
@@ -269,18 +274,13 @@ function UserPage() {
 
         {/* Section Previews */}
         <div className="space-y-10">
+          <FoodStallsSection />
+
           <SectionPreview
             title="🏥 Free Limb Centers"
             description="Find the nearest prosthetic center for your needs"
             items={centers}
             route="/prosthetic-centers"
-          />
-
-          <SectionPreview
-            title="🍛 Free Food Stalls"
-            description="Discover food stalls near prosthetic centers"
-            items={foodStalls}
-            route="/food-stalls"
           />
 
           <SectionPreview

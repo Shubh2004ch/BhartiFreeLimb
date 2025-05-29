@@ -28,6 +28,7 @@ export const ENDPOINTS = {
   MEDIA: '/api/media',
   REVIEWS: '/api/reviews',
   SHELTERS: '/api/shelters',
+  LOGIN: '/api/auth/login'
 };
 
 // Helper function to get image URL
@@ -37,13 +38,13 @@ export const getImageUrl = (imagePath) => {
   // If the path is already a full URL, return it
   if (imagePath.startsWith('http')) return imagePath;
 
-  // In production, return the image from S3
-  if (!isDevelopment) {
-    return `${S3_BASE_URL}/${imagePath}`;
-  }
+  // Clean the path by removing any system-specific paths
+  const cleanPath = imagePath
+    .replace(/^.*[\\\/]uploads[\\\/]/, '') // Remove everything before and including 'uploads/'
+    .replace(/^\/?(uploads\/)?/, ''); // Remove any remaining 'uploads/' prefix
 
-  // In development, serve from local uploads folder
-  return `${STATIC_FILES_URL}/${imagePath}`;
+  // Return the full S3 URL
+  return `${S3_BASE_URL}/uploads/${cleanPath}`;
 };
 
 

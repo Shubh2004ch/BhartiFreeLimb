@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Star } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { reviewService } from '../../services/api';
+import { getImageUrl } from '../../constants';
 
 const SuccessStoriesSection = () => {
   const [stories, setStories] = useState([]);
@@ -44,7 +45,7 @@ const SuccessStoriesSection = () => {
           >
             {story.imagePath && (
               <img
-                src={story.imagePath}
+                src={getImageUrl(story.imagePath)}
                 alt={story.name}
                 className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
                 draggable={false}

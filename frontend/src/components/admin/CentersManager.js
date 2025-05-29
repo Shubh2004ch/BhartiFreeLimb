@@ -19,6 +19,7 @@ import {
   Skeleton,
   Chip,
   Stack,
+  Alert,
 } from '@mui/material';
 import {
   Delete as DeleteIcon,
@@ -80,13 +81,14 @@ const CentersManager = () => {
     phone: '',
     email: '',
     description: '',
-    heroImage: null,
+    imagePath: null,
     beneficiaryImages: []
   });
   const [previewUrls, setPreviewUrls] = useState({
     heroImage: null,
     beneficiaryImages: []
   });
+  const [success, setSuccess] = useState(null);
 
   useEffect(() => {
     fetchCenters();
@@ -119,7 +121,7 @@ const CentersManager = () => {
     if (file) {
       setFormData(prev => ({
         ...prev,
-        heroImage: file
+        imagePath: file
       }));
       setPreviewUrls(prev => ({
         ...prev,
@@ -163,20 +165,40 @@ const CentersManager = () => {
 
     try {
       const formDataToSend = new FormData();
-      Object.keys(formData).forEach(key => {
-        if (key === 'beneficiaryImages') {
-          formData[key].forEach(file => {
+      
+      // Append basic fields
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('address', formData.address);
+      formDataToSend.append('phone', formData.phone);
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('description', formData.description || '');
+
+      // Handle hero image
+      if (formData.imagePath instanceof File) {
+        formDataToSend.append('heroImage', formData.imagePath);
+      }
+
+      // Handle beneficiary images
+      if (formData.beneficiaryImages && formData.beneficiaryImages.length > 0) {
+        formData.beneficiaryImages.forEach(file => {
+          if (file instanceof File) {
             formDataToSend.append('beneficiaryImages', file);
-          });
-        } else if (formData[key] !== null) {
-          formDataToSend.append(key, formData[key]);
-        }
-      });
+          }
+        });
+      }
+
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      };
 
       if (selectedCenter) {
-        await api.put(`${ENDPOINTS.CENTERS}/${selectedCenter._id}`, formDataToSend);
+        await api.put(`${ENDPOINTS.CENTERS}/${selectedCenter._id}`, formDataToSend, config);
+        setSuccess('Center updated successfully');
       } else {
-        await api.post(ENDPOINTS.CENTERS, formDataToSend);
+        await api.post(ENDPOINTS.CENTERS, formDataToSend, config);
+        setSuccess('Center added successfully');
       }
 
       fetchCenters();
@@ -195,12 +217,13 @@ const CentersManager = () => {
       phone: center.phone || '',
       email: center.email || '',
       description: center.description || '',
-      heroImage: null,
+      imagePath: null,
       beneficiaryImages: []
     });
     setPreviewUrls({
-      heroImage: center.heroImage ? getImageUrl(center.heroImage) : null,
-      beneficiaryImages: center.beneficiaryImages ? center.beneficiaryImages.map(img => getImageUrl(img)) : []
+      heroImage: center.imagePath ? getImageUrl(center.imagePath) : null,
+      beneficiaryImages: center.beneficiaryImages ? 
+                        center.beneficiaryImages.map(img => getImageUrl(img)) : []
     });
     setIsModalOpen(true);
   };
@@ -226,7 +249,7 @@ const CentersManager = () => {
       phone: '',
       email: '',
       description: '',
-      heroImage: null,
+      imagePath: null,
       beneficiaryImages: []
     });
     setPreviewUrls({
@@ -303,6 +326,12 @@ const CentersManager = () => {
           </Box>
         )}
 
+        {success && (
+          <Alert severity="success" sx={{ mb: 4 }}>
+            {success}
+          </Alert>
+        )}
+
         {loading ? (
           <CentersSkeleton />
         ) : (
@@ -320,12 +349,23 @@ const CentersManager = () => {
                     },
                   }}
                 >
-                  <CardMedia
-                    component="img"
-                    height="200"
-                    image={getImageUrl(center.heroImage)}
-                    alt={center.name}
-                  />
+                  {center.imagePath && (
+                    <CardMedia
+                      component="img"
+                      height="200"
+                      image={getImageUrl(center.imagePath)}
+                      alt={center.name}
+                      onError={(e) => {
+                        console.error('Image failed to load:', e.target.src);
+                        e.target.style.display = 'none';
+                      }}
+                      sx={{
+                        objectFit: 'cover',
+                        borderTopLeftRadius: 16,
+                        borderTopRightRadius: 16,
+                      }}
+                    />
+                  )}
                   <CardContent>
                     <Typography variant="h6" gutterBottom fontWeight={700}>
                       {center.name}
@@ -348,6 +388,33 @@ const CentersManager = () => {
                         {center.email}
                       </Typography>
                     </Box>
+                    {center.description && (
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                        {center.description}
+                      </Typography>
+                    )}
+                    {center.beneficiaryImages && center.beneficiaryImages.length > 0 && (
+                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+                        {center.beneficiaryImages.map((img, index) => (
+                          <Box
+                            key={index}
+                            component="img"
+                            src={getImageUrl(img)}
+                            alt={`Beneficiary ${index + 1}`}
+                            onError={(e) => {
+                              console.error('Image failed to load:', e.target.src);
+                              e.target.style.display = 'none';
+                            }}
+                            sx={{
+                              width: 60,
+                              height: 60,
+                              borderRadius: 2,
+                              objectFit: 'cover',
+                            }}
+                          />
+                        ))}
+                      </Box>
+                    )}
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
                       <IconButton
                         onClick={() => handleEdit(center)}

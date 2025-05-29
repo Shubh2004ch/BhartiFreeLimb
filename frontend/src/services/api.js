@@ -61,7 +61,17 @@ export const authService = {
 
 // Center Service
 export const centerService = {
-  getCenters: () => api.get(ENDPOINTS.CENTERS),
+  getCenters: async () => {
+    console.log('Calling getCenters API...');
+    try {
+      const response = await api.get(ENDPOINTS.CENTERS);
+      console.log('getCenters response:', response);
+      return response;
+    } catch (error) {
+      console.error('getCenters error:', error);
+      throw error;
+    }
+  },
   getCenter: (id) => api.get(`${ENDPOINTS.CENTERS}/${id}`),
   createCenter: (data) => api.post(ENDPOINTS.CENTERS, data),
   updateCenter: (id, data) => api.put(`${ENDPOINTS.CENTERS}/${id}`, data),

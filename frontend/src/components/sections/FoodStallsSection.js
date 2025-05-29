@@ -61,7 +61,7 @@ const FoodStallCard = ({ item, index }) => {
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          width: '320px',
+          width: '250px',
           mx: 'auto',
           borderRadius: 3,
           overflow: 'hidden',
@@ -75,12 +75,11 @@ const FoodStallCard = ({ item, index }) => {
         <Box sx={{ position: 'relative' }}>
           <CardMedia
             component="img"
-            height="180"
+            height="200"
             image={getImageUrl(item.imagePath)}
             alt={item.name}
             sx={{
               objectFit: 'cover',
-              position: 'relative',
             }}
           />
           <Box 
@@ -90,7 +89,7 @@ const FoodStallCard = ({ item, index }) => {
               left: 0,
               right: 0,
               bottom: 0,
-              background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.6) 100%)',
+              background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.7) 100%)',
             }}
           />
           <Box 
@@ -103,7 +102,7 @@ const FoodStallCard = ({ item, index }) => {
               px: 2,
               py: 0.5,
               borderRadius: '9999px',
-              fontSize: '0.875rem',
+              fontSize: '0.75rem',
               fontWeight: 'bold',
               display: 'flex',
               alignItems: 'center',
@@ -111,96 +110,50 @@ const FoodStallCard = ({ item, index }) => {
               boxShadow: 2
             }}
           >
-            <EmojiFoodBeverage sx={{ fontSize: '1rem' }} />
-            Free Food
+            <EmojiFoodBeverage sx={{ fontSize: '0.875rem' }} />
+            Free
           </Box>
         </Box>
 
-        <CardContent sx={{ flexGrow: 1, p: 3 }}>
+        <CardContent sx={{ flexGrow: 1, p: 2 }}>
           <Typography variant="h6" component="h3" sx={{ 
             fontWeight: 'bold', 
             mb: 2,
+            fontSize: '1rem',
             color: 'text.primary',
             display: 'flex',
             alignItems: 'center',
             gap: 1
           }}>
-            <Restaurant sx={{ color: 'primary.main' }} />
+            <Restaurant sx={{ color: 'primary.main', fontSize: '1.2rem' }} />
             {item.name}
           </Typography>
           
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-            <LocationOn sx={{ color: 'primary.main', fontSize: '1.2rem', mr: 1 }} />
-            <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
-              {item.address}
-            </Typography>
-          </Box>
-
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-            <Schedule sx={{ color: 'primary.main', fontSize: '1.2rem', mr: 1 }} />
-            <Typography variant="body2" color="text.secondary">
-              {item.timings || 'Open 24/7'}
-            </Typography>
-          </Box>
-
-          {item.specialties && item.specialties.length > 0 && (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 2 }}>
-              {item.specialties.map((specialty, idx) => (
-                <Chip 
-                  key={idx}
-                  icon={<Fastfood />}
-                  label={specialty} 
-                  size="small"
-                  sx={{ 
-                    bgcolor: 'primary.soft',
-                    color: 'primary.dark',
-                    '& .MuiChip-icon': {
-                      color: 'primary.main'
-                    }
-                  }}
-                />
-              ))}
-            </Box>
-          )}
-
-          <Box sx={{ display: 'flex', gap: 1, mt: 'auto' }}>
-            <Button
-              variant="contained"
-              startIcon={<Phone />}
-              size="large"
-              fullWidth
-              href={`tel:${item.contact}`}
-              disabled={!item.contact}
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'flex-start', 
+            gap: 1,
+            bgcolor: 'grey.50',
+            p: 1,
+            borderRadius: 1
+          }}>
+            <LocationOn sx={{ 
+              color: 'primary.main', 
+              fontSize: '1.2rem',
+              flexShrink: 0,
+              mt: 0.2
+            }} />
+            <Typography 
+              variant="body2" 
               sx={{ 
-                py: 1,
-                bgcolor: 'primary.main',
-                '&:hover': {
-                  bgcolor: 'primary.dark'
-                }
+                color: 'text.primary',
+                fontSize: '0.9rem',
+                lineHeight: 1.5,
+                fontWeight: 500
               }}
             >
-              Call Now
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<Directions />}
-              size="large"
-              fullWidth
-              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.address)}`}
-              target="_blank"
-              disabled={!item.address}
-              sx={{ 
-                py: 1,
-                borderColor: 'primary.main',
-                color: 'primary.main',
-                '&:hover': {
-                  borderColor: 'primary.dark',
-                  bgcolor: 'primary.soft'
-                }
-              }}
-            >
-              Directions
-            </Button>
+              {item.location}
+            </Typography>
           </Box>
         </CardContent>
       </Card>
@@ -265,14 +218,14 @@ export const FoodStallsSection = () => {
   return (
     <Box 
       sx={{ 
-        py: 6, 
+        py: 4, 
         bgcolor: 'background.default',
         borderRadius: 4,
         boxShadow: '0 0 40px rgba(0,0,0,0.03)'
       }}
     >
       <Container maxWidth="lg">
-        <Box sx={{ textAlign: 'center', mb: 6 }}>
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
           <Typography 
             variant="h4" 
             component="h2" 
@@ -292,16 +245,16 @@ export const FoodStallsSection = () => {
           <Typography 
             variant="subtitle1" 
             color="text.secondary"
-            sx={{ maxWidth: '600px', mx: 'auto', fontSize: '1.1rem' }}
+            sx={{ maxWidth: '600px', mx: 'auto', fontSize: '1rem' }}
           >
-            Find free food stalls near prosthetic centers providing nutritious meals to those in need
+            Find free food stalls near prosthetic centers providing nutritious meals
           </Typography>
         </Box>
 
         <Box sx={{ 
           display: 'flex', 
           overflowX: 'auto', 
-          gap: 3, 
+          gap: 2, 
           pb: 2,
           px: 1,
           '&::-webkit-scrollbar': {
@@ -320,7 +273,7 @@ export const FoodStallsSection = () => {
           },
         }}>
           {items.map((item, index) => (
-            <Box key={item._id} sx={{ minWidth: '320px', flexShrink: 0 }}>
+            <Box key={item._id} sx={{ minWidth: '250px', flexShrink: 0 }}>
               <FoodStallCard 
                 item={item}
                 index={index}

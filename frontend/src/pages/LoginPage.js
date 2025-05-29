@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL, ENDPOINTS } from '../constants';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', formData);
+      const response = await axios.post(`${API_BASE_URL}${ENDPOINTS.LOGIN}`, formData);
       const { token, admin } = response.data;
       
       localStorage.setItem('token', token);

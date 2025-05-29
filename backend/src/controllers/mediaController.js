@@ -1,17 +1,14 @@
 const Media = require('../models/Media');
 const path = require('path');
-const { hasAwsCredentials } = require('../config/s3');
 
 // List all media
 exports.getAllMedia = async (req, res) => {
   try {
     const media = await Media.find().sort({ uploadDate: -1 });
-    // Transform the media objects to include full URLs
+    // Transform the media objects to include full S3 URLs
     const mediaWithUrls = media.map(item => ({
       ...item.toObject(),
-      url: hasAwsCredentials 
-        ? `https://s3.ap-south-1.amazonaws.com/bhartiallmedia/${item.path}`
-        : `/uploads/${item.path}`
+      url: `https://s3.ap-south-1.amazonaws.com/bhartiallmedia/${item.path}`
     }));
     res.json(mediaWithUrls);
   } catch (error) {
@@ -30,22 +27,17 @@ exports.uploadMedia = async (req, res) => {
       return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    // Get the file path based on storage type
-    const filePath = hasAwsCredentials ? req.file.key : req.file.filename;
-
     const media = new Media({
       title: req.body.title || req.file.originalname,
       type: req.file.mimetype.startsWith('image/') ? 'image' : 'video',
-      path: filePath,
+      path: req.file.key,
     });
     await media.save();
 
-    // Include the full URL in the response
+    // Include the full S3 URL in the response
     const mediaWithUrl = {
       ...media.toObject(),
-      url: hasAwsCredentials 
-        ? `https://s3.ap-south-1.amazonaws.com/bhartiallmedia/${media.path}`
-        : `/uploads/${media.path}`
+      url: `https://s3.ap-south-1.amazonaws.com/bhartiallmedia/${media.path}`
     };
     res.status(201).json(mediaWithUrl);
   } catch (error) {

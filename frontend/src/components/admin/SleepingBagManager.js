@@ -14,63 +14,32 @@ import {
   CardMedia,
   IconButton,
   Box,
-  Switch,
-  FormControlLabel,
   Tooltip,
   Fade,
-  Skeleton,
+  Alert,
+  Switch,
+  FormControlLabel,
 } from '@mui/material';
 import {
   Delete as DeleteIcon,
   Edit as EditIcon,
+  AddCircleOutline,
   LocationOn,
   LocalPhone,
-  Inventory2,
-  CheckCircle,
-  Cancel,
-  AddCircleOutline,
-  Hotel,
   Info,
+  Hotel,
+  CheckCircle,
 } from '@mui/icons-material';
-import axios from 'axios';
 import { ENDPOINTS, getImageUrl } from '../../constants';
 import api from '../../services/api';
-
-// Skeleton loader for a beautiful loading experience
-const SleepingBagSkeleton = () => (
-  <Grid container spacing={4}>
-    {[1, 2, 3].map((i) => (
-      <Grid item key={i} xs={12} sm={6} md={4}>
-        <Card
-          sx={{
-            borderRadius: 4,
-            boxShadow: 4,
-            p: 2,
-            minHeight: 340,
-            bgcolor: 'background.paper',
-          }}
-        >
-          <Skeleton variant="rounded" height={200} sx={{ borderRadius: 2, mb: 2 }} />
-          <Skeleton variant="text" width="70%" height={36} />
-          <Skeleton variant="text" width="60%" />
-          <Skeleton variant="text" width="50%" />
-          <Skeleton
-            variant="rectangular"
-            width="80%"
-            height={30}
-            sx={{ borderRadius: 2, mt: 2 }}
-          />
-        </Card>
-      </Grid>
-    ))}
-  </Grid>
-);
 
 const SleepingBagManager = () => {
   const [sleepingBags, setSleepingBags] = useState([]);
   const [open, setOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     location: '',
@@ -83,7 +52,6 @@ const SleepingBagManager = () => {
 
   useEffect(() => {
     fetchSleepingBags();
-    // eslint-disable-next-line
   }, []);
 
   const fetchSleepingBags = async () => {
@@ -91,8 +59,10 @@ const SleepingBagManager = () => {
     try {
       const response = await api.get(ENDPOINTS.SLEEPING_BAGS);
       setSleepingBags(response.data);
+      setError('');
     } catch (error) {
       console.error('Error fetching sleeping bags:', error);
+      setError('Failed to fetch sleeping bags');
     } finally {
       setLoading(false);
     }
@@ -123,16 +93,21 @@ const SleepingBagManager = () => {
       });
     }
     setOpen(true);
+    setError('');
+    setSuccess('');
   };
 
   const handleClose = () => {
     setOpen(false);
     setEditingItem(null);
+    setError('');
+    setSuccess('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formDataToSend = new FormData();
+    
     Object.keys(formData).forEach((key) => {
       if (formData[key] !== null) {
         formDataToSend.append(key, formData[key]);
@@ -141,28 +116,29 @@ const SleepingBagManager = () => {
 
     try {
       if (editingItem) {
-        await axios.put(`${ENDPOINTS.SLEEPING_BAGS}/${editingItem._id}`, formDataToSend);
+        await api.put(`${ENDPOINTS.SLEEPING_BAGS}/${editingItem._id}`, formDataToSend);
+        setSuccess('Sleeping bag updated successfully');
       } else {
-        await axios.post(ENDPOINTS.SLEEPING_BAGS, formDataToSend);
+        await api.post(ENDPOINTS.SLEEPING_BAGS, formDataToSend);
+        setSuccess('Sleeping bag added successfully');
       }
       fetchSleepingBags();
       handleClose();
     } catch (error) {
       console.error('Error saving sleeping bag:', error);
+      setError(error.response?.data?.message || 'Failed to save sleeping bag');
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this item?')) {
+    if (window.confirm('Are you sure you want to delete this sleeping bag?')) {
       try {
-        const sleepingBag = sleepingBags.find((sb) => sb._id === id);
-        await axios.delete(`${ENDPOINTS.SLEEPING_BAGS}/${id}`);
-        if (sleepingBag?.imagePath) {
-          await axios.delete(`${ENDPOINTS.MEDIA}/${encodeURIComponent(sleepingBag.imagePath)}`);
-        }
+        await api.delete(`${ENDPOINTS.SLEEPING_BAGS}/${id}`);
+        setSuccess('Sleeping bag deleted successfully');
         fetchSleepingBags();
       } catch (error) {
         console.error('Error deleting sleeping bag:', error);
+        setError('Failed to delete sleeping bag');
       }
     }
   };
@@ -177,13 +153,15 @@ const SleepingBagManager = () => {
       }}
     >
       <Container maxWidth="lg">
-        <Box sx={{
-          display: 'flex',
-          alignItems: 'center',
-          mb: 4,
-          gap: 2,
-          justifyContent: { xs: 'center', md: 'flex-start' },
-        }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            mb: 4,
+            gap: 2,
+            justifyContent: { xs: 'center', md: 'flex-start' },
+          }}
+        >
           <Hotel sx={{ fontSize: 44, color: 'primary.main', mr: 1 }} />
           <Typography
             variant="h4"
@@ -199,6 +177,7 @@ const SleepingBagManager = () => {
             Manage Sleeping Bags
           </Typography>
         </Box>
+
         <Button
           variant="contained"
           color="primary"
@@ -218,55 +197,58 @@ const SleepingBagManager = () => {
           Add New Sleeping Bag
         </Button>
 
-        {loading ? (
-          <SleepingBagSkeleton />
-        ) : (
-          <Grid container spacing={5}>
-            {sleepingBags.map((item, idx) => (
-              <Grid item key={item._id} xs={12} sm={6} md={4}>
-                <Fade in timeout={500} style={{ transitionDelay: `${idx * 80}ms` }}>
-                  <Card
-                    sx={{
-                      borderRadius: 4,
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
+
+        <Grid container spacing={5}>
+          {sleepingBags.map((item, idx) => (
+            <Grid item xs={12} sm={6} md={4} key={item._id}>
+              <Fade in timeout={500} style={{ transitionDelay: `${idx * 80}ms` }}>
+                <Card
+                  sx={{
+                    borderRadius: 4,
+                    boxShadow:
+                      '0 6px 22px 0 rgba(59,130,246,0.09), 0 2px 8px 0 rgba(236,72,153,0.09)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                    transition:
+                      'transform 0.22s cubic-bezier(.4,0,.2,1), box-shadow 0.22s cubic-bezier(.4,0,.2,1)',
+                    '&:hover': {
+                      transform: 'translateY(-8px) scale(1.03)',
                       boxShadow:
-                        '0 6px 22px 0 rgba(59,130,246,0.09), 0 2px 8px 0 rgba(236,72,153,0.09)',
+                        '0 12px 36px 0 rgba(59,130,246,0.18), 0 3px 12px 0 rgba(236,72,153,0.16)',
+                    },
+                    bgcolor: 'rgba(255,255,255,0.92)',
+                    backdropFilter: 'blur(3px)',
+                  }}
+                >
+                  {item.imagePath && (
+                    <CardMedia
+                      component="img"
+                      height="200"
+                      image={getImageUrl(item.imagePath)}
+                      alt={item.name}
+                      sx={{
+                        objectFit: 'cover',
+                        borderTopLeftRadius: 16,
+                        borderTopRightRadius: 16,
+                      }}
+                    />
+                  )}
+                  <CardContent
+                    sx={{
+                      flexGrow: 1,
                       display: 'flex',
                       flexDirection: 'column',
-                      overflow: 'hidden',
-                      transition:
-                        'transform 0.22s cubic-bezier(.4,0,.2,1), box-shadow 0.22s cubic-bezier(.4,0,.2,1)',
-                      '&:hover': {
-                        transform: 'translateY(-8px) scale(1.03)',
-                        boxShadow:
-                          '0 12px 36px 0 rgba(59,130,246,0.18), 0 3px 12px 0 rgba(236,72,153,0.16)',
-                      },
-                      bgcolor: 'rgba(255,255,255,0.92)',
-                      backdropFilter: 'blur(3px)',
+                      position: 'relative',
+                      p: 3,
                     }}
                   >
-                    {item.imagePath && (
-                      <CardMedia
-                        component="img"
-                        height="200"
-                        image={getImageUrl(item.imagePath)}
-                        alt={item.name}
-                        sx={{
-                          objectFit: 'cover',
-                          borderTopLeftRadius: 16,
-                          borderTopRightRadius: 16,
-                        }}
-                      />
-                    )}
-                    <CardContent
+                    <Typography
+                      variant="h6"
+                      fontWeight="bold"
                       sx={{
-                        flexGrow: 1,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        position: 'relative',
-                        p: 3,
-                      }}
-                    >
-                      <Typography variant="h6" fontWeight="bold" sx={{
                         color: 'primary.main',
                         fontSize: '1.16rem',
                         letterSpacing: 0.1,
@@ -274,88 +256,81 @@ const SleepingBagManager = () => {
                         display: 'flex',
                         alignItems: 'center',
                         gap: 1,
-                      }}>
-                        <Hotel sx={{ fontSize: 24, color: 'primary.main', mr: 1 }} />
-                        {item.name}
+                      }}
+                    >
+                      <Hotel sx={{ fontSize: 24, color: 'primary.main', mr: 1 }} />
+                      {item.name}
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                      <LocationOn sx={{ color: '#f472b6', fontSize: 20, mr: 1 }} />
+                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                        {item.location}
                       </Typography>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                        <LocationOn sx={{ color: '#f472b6', fontSize: 20, mr: 1 }} />
-                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                          {item.location}
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                        <LocalPhone sx={{ color: 'success.main', fontSize: 18, mr: 1 }} />
-                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                          {item.contactNumber}
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                        <Inventory2 sx={{ color: '#38bdf8', fontSize: 18, mr: 1 }} />
-                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                          Quantity: <b>{item.quantity}</b>
-                        </Typography>
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                        {item.availability ? (
-                          <>
-                            <CheckCircle sx={{ color: 'success.main', fontSize: 19, mr: 1 }} />
-                            <Typography variant="body2" color="success.main" sx={{ fontWeight: 600 }}>
-                              Available
-                            </Typography>
-                          </>
-                        ) : (
-                          <>
-                            <Cancel sx={{ color: 'error.main', fontSize: 19, mr: 1 }} />
-                            <Typography variant="body2" color="error.main" sx={{ fontWeight: 600 }}>
-                              Not Available
-                            </Typography>
-                          </>
-                        )}
-                      </Box>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, gap: 1 }}>
-                        <Info sx={{ color: '#2563eb', fontSize: 18, mr: 1 }} />
-                        <Typography variant="body2" color="text.secondary" sx={{
-                          fontWeight: 500,
-                          fontStyle: 'italic'
-                        }}>
-                          {item.description}
-                        </Typography>
-                      </Box>
-                      <Box
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                      <LocalPhone sx={{ color: 'success.main', fontSize: 18, mr: 1 }} />
+                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                        {item.contactNumber}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                      <CheckCircle 
+                        sx={{ 
+                          color: item.availability ? 'success.main' : 'error.main', 
+                          fontSize: 18, 
+                          mr: 1 
+                        }} 
+                      />
+                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                        {item.availability ? 'Available' : 'Not Available'} ({item.quantity} bags)
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, gap: 1 }}>
+                      <Info sx={{ color: '#2563eb', fontSize: 18, mr: 1 }} />
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
                         sx={{
-                          mt: 2,
-                          display: 'flex',
-                          justifyContent: 'flex-end',
-                          gap: 1,
+                          fontWeight: 500,
+                          fontStyle: 'italic',
                         }}
                       >
-                        <Tooltip title="Edit" arrow>
-                          <IconButton
-                            onClick={() => handleOpen(item)}
-                            color="primary"
-                            sx={{ bgcolor: '#f1f7ff', mr: 0.5 }}
-                          >
-                            <EditIcon />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Delete" arrow>
-                          <IconButton
-                            onClick={() => handleDelete(item._id)}
-                            color="error"
-                            sx={{ bgcolor: '#fff5f5' }}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </Tooltip>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Fade>
-              </Grid>
-            ))}
-          </Grid>
-        )}
+                        {item.description}
+                      </Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        mt: 2,
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                        gap: 1,
+                      }}
+                    >
+                      <Tooltip title="Edit" arrow>
+                        <IconButton
+                          onClick={() => handleOpen(item)}
+                          color="primary"
+                          sx={{ bgcolor: '#f1f7ff', mr: 0.5 }}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete" arrow>
+                        <IconButton
+                          onClick={() => handleDelete(item._id)}
+                          color="error"
+                          sx={{ bgcolor: '#fff5f5' }}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Fade>
+            </Grid>
+          ))}
+        </Grid>
 
         <Dialog
           open={open}

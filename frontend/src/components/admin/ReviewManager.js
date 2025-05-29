@@ -1,20 +1,47 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import {
+  Container,
+  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Grid,
+  Card,
+  CardContent,
+  CardMedia,
+  IconButton,
+  Box,
+  Tooltip,
+  Fade,
+  Alert,
+  Rating,
+} from '@mui/material';
+import {
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  AddCircleOutline,
+  Star,
+  Person,
+  Comment,
+} from '@mui/icons-material';
 import { ENDPOINTS, getImageUrl } from '../../constants';
-import { Delete, Edit, Add, Star } from '@mui/icons-material';
 import api from '../../services/api';
 
 const ReviewManager = () => {
   const [reviews, setReviews] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [editingReview, setEditingReview] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [selectedReview, setSelectedReview] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     text: '',
-    rating: '',
-    image: null
+    rating: 5,
+    image: null,
   });
 
   useEffect(() => {
@@ -22,234 +49,366 @@ const ReviewManager = () => {
   }, []);
 
   const fetchReviews = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const response = await api.get(ENDPOINTS.REVIEWS);
       setReviews(response.data);
-      setError(null);
+      setError('');
     } catch (error) {
-      setError('Failed to fetch reviews');
       console.error('Error fetching reviews:', error);
+      setError('Failed to fetch reviews');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const handleOpen = (review = null) => {
+    if (review) {
+      setEditingReview(review);
+      setFormData({
+        name: review.name || '',
+        text: review.text || '',
+        rating: review.rating || 5,
+        image: null,
+      });
+    } else {
+      setEditingReview(null);
+      setFormData({
+        name: '',
+        text: '',
+        rating: 5,
+        image: null,
+      });
+    }
+    setOpen(true);
+    setError('');
+    setSuccess('');
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setFormData(prev => ({
-      ...prev,
-      image: file
-    }));
+  const handleClose = () => {
+    setOpen(false);
+    setEditingReview(null);
+    setError('');
+    setSuccess('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.text || !formData.rating) {
-      alert('Please fill all required fields!');
-      return;
-    }
+    const formDataToSend = new FormData();
+    
+    Object.keys(formData).forEach((key) => {
+      if (formData[key] !== null) {
+        formDataToSend.append(key, formData[key]);
+      }
+    });
 
     try {
-      const formDataToSend = new FormData();
-      Object.keys(formData).forEach(key => {
-        if (formData[key] !== null) {
-          formDataToSend.append(key, formData[key]);
-        }
-      });
-
-      if (selectedReview) {
-        await axios.put(`${ENDPOINTS.REVIEWS}/${selectedReview._id}`, formDataToSend);
+      if (editingReview) {
+        await api.put(`${ENDPOINTS.REVIEWS}/${editingReview._id}`, formDataToSend);
+        setSuccess('Review updated successfully');
       } else {
-        await axios.post(ENDPOINTS.REVIEWS, formDataToSend);
+        await api.post(ENDPOINTS.REVIEWS, formDataToSend);
+        setSuccess('Review added successfully');
       }
-
       fetchReviews();
-      handleCloseModal();
+      handleClose();
     } catch (error) {
-      setError('Failed to save review');
       console.error('Error saving review:', error);
+      setError(error.response?.data?.message || 'Failed to save review');
     }
-  };
-
-  const handleEdit = (review) => {
-    setSelectedReview(review);
-    setFormData({
-      name: review.name || '',
-      text: review.text || '',
-      rating: review.rating || '',
-      image: null
-    });
-    setIsModalOpen(true);
   };
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this review?')) {
       try {
-        await axios.delete(`${ENDPOINTS.REVIEWS}/${id}`);
+        await api.delete(`${ENDPOINTS.REVIEWS}/${id}`);
+        setSuccess('Review deleted successfully');
         fetchReviews();
       } catch (error) {
-        setError('Failed to delete review');
         console.error('Error deleting review:', error);
+        setError('Failed to delete review');
       }
     }
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedReview(null);
-    setFormData({
-      name: '',
-      text: '',
-      rating: '',
-      image: null
-    });
-  };
-
-  if (loading) {
-    return <div className="text-center py-8">Loading...</div>;
-  }
-
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Customer Reviews</h2>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700 transition-colors"
+    <Box
+      sx={{
+        bgcolor: 'linear-gradient(120deg,#f0f9ff 0%,#fff7f7 100%)',
+        background: 'linear-gradient(120deg,#e0ecff 0%,#fff6f6 100%)',
+        minHeight: '100vh',
+        py: 6,
+      }}
+    >
+      <Container maxWidth="lg">
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            mb: 4,
+            gap: 2,
+            justifyContent: { xs: 'center', md: 'flex-start' },
+          }}
         >
-          <Add /> Add New Review
-        </button>
-      </div>
-
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {reviews.map((review) => (
-          <div
-            key={review._id}
-            className="bg-white rounded-lg shadow-md p-6 border border-gray-200"
+          <Star sx={{ fontSize: 44, color: 'primary.main', mr: 1 }} />
+          <Typography
+            variant="h4"
+            fontWeight={900}
+            sx={{
+              background: 'linear-gradient(90deg, #2563eb 30%, #f472b6 70%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              display: 'inline-block',
+              letterSpacing: 1.2,
+            }}
           >
-            <div className="flex items-center mb-4">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`w-5 h-5 ${
-                    i < review.rating ? 'text-yellow-400' : 'text-gray-300'
-                  }`}
-                />
-              ))}
-            </div>
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">{review.name}</h3>
-            <p className="text-gray-600 mb-4">{review.text}</p>
-            {review.imagePath && (
-              <img
-                src={getImageUrl(review.imagePath)}
-                alt={review.name}
-                className="w-full h-48 object-cover rounded-lg mb-4"
-              />
-            )}
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => handleEdit(review)}
-                className="text-blue-600 hover:text-blue-800"
-              >
-                <Edit />
-              </button>
-              <button
-                onClick={() => handleDelete(review._id)}
-                className="text-red-600 hover:text-red-800"
-              >
-                <Delete />
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+            Manage Reviews
+          </Typography>
+        </Box>
 
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4">
-              {selectedReview ? 'Edit Review' : 'Add New Review'}
-            </h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Review Text</label>
-                <textarea
-                  name="text"
-                  value={formData.text}
-                  onChange={handleInputChange}
-                  rows="3"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Rating</label>
-                <input
-                  type="number"
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddCircleOutline />}
+          onClick={() => handleOpen()}
+          sx={{
+            mb: 5,
+            borderRadius: 99,
+            fontWeight: 700,
+            px: 4,
+            fontSize: '1rem',
+            boxShadow: 3,
+            textTransform: 'none',
+            letterSpacing: 0.5,
+          }}
+        >
+          Add New Review
+        </Button>
+
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
+
+        <Grid container spacing={5}>
+          {reviews.map((review, idx) => (
+            <Grid item xs={12} sm={6} md={4} key={review._id}>
+              <Fade in timeout={500} style={{ transitionDelay: `${idx * 80}ms` }}>
+                <Card
+                  sx={{
+                    borderRadius: 4,
+                    boxShadow:
+                      '0 6px 22px 0 rgba(59,130,246,0.09), 0 2px 8px 0 rgba(236,72,153,0.09)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                    transition:
+                      'transform 0.22s cubic-bezier(.4,0,.2,1), box-shadow 0.22s cubic-bezier(.4,0,.2,1)',
+                    '&:hover': {
+                      transform: 'translateY(-8px) scale(1.03)',
+                      boxShadow:
+                        '0 12px 36px 0 rgba(59,130,246,0.18), 0 3px 12px 0 rgba(236,72,153,0.16)',
+                    },
+                    bgcolor: 'rgba(255,255,255,0.92)',
+                    backdropFilter: 'blur(3px)',
+                  }}
+                >
+                  {review.imagePath && (
+                    <CardMedia
+                      component="img"
+                      height="200"
+                      image={getImageUrl(review.imagePath)}
+                      alt={review.name}
+                      sx={{
+                        objectFit: 'cover',
+                        borderTopLeftRadius: 16,
+                        borderTopRightRadius: 16,
+                      }}
+                    />
+                  )}
+                  <CardContent
+                    sx={{
+                      flexGrow: 1,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      position: 'relative',
+                      p: 3,
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                      <Rating value={review.rating} readOnly precision={0.5} />
+                    </Box>
+                    <Typography
+                      variant="h6"
+                      fontWeight="bold"
+                      sx={{
+                        color: 'primary.main',
+                        fontSize: '1.16rem',
+                        letterSpacing: 0.1,
+                        mb: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                      }}
+                    >
+                      <Person sx={{ fontSize: 24, color: 'primary.main', mr: 1 }} />
+                      {review.name}
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 0.5 }}>
+                      <Comment sx={{ color: '#f472b6', fontSize: 20, mr: 1, mt: 0.5 }} />
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{
+                          fontWeight: 500,
+                          fontStyle: 'italic',
+                          lineHeight: 1.5,
+                        }}
+                      >
+                        {review.text}
+                      </Typography>
+                    </Box>
+                    <Box
+                      sx={{
+                        mt: 2,
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                        gap: 1,
+                      }}
+                    >
+                      <Tooltip title="Edit" arrow>
+                        <IconButton
+                          onClick={() => handleOpen(review)}
+                          color="primary"
+                          sx={{ bgcolor: '#f1f7ff', mr: 0.5 }}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete" arrow>
+                        <IconButton
+                          onClick={() => handleDelete(review._id)}
+                          color="error"
+                          sx={{ bgcolor: '#fff5f5' }}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Fade>
+            </Grid>
+          ))}
+        </Grid>
+
+        <Dialog
+          open={open}
+          onClose={handleClose}
+          maxWidth="sm"
+          fullWidth
+          PaperProps={{
+            sx: { borderRadius: 4, p: 1 },
+          }}
+        >
+          <DialogTitle>
+            <Typography variant="h5" color="primary" fontWeight={700}>
+              {editingReview ? 'Edit Review' : 'Add New Review'}
+            </Typography>
+          </DialogTitle>
+          <DialogContent>
+            <form onSubmit={handleSubmit} id="review-form">
+              <TextField
+                fullWidth
+                label="Name"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+                margin="normal"
+                required
+              />
+              <TextField
+                fullWidth
+                label="Review Text"
+                value={formData.text}
+                onChange={(e) =>
+                  setFormData({ ...formData, text: e.target.value })
+                }
+                margin="normal"
+                required
+                multiline
+                rows={4}
+              />
+              <Box sx={{ mt: 2, mb: 2 }}>
+                <Typography component="legend">Rating</Typography>
+                <Rating
                   name="rating"
                   value={formData.rating}
-                  onChange={handleInputChange}
-                  min="1"
-                  max="5"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  required
+                  onChange={(event, newValue) =>
+                    setFormData({ ...formData, rating: newValue })
+                  }
+                  precision={0.5}
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Image</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="mt-1 block w-full"
-                />
-              </div>
-              <div className="flex justify-end gap-2 mt-6">
-                <button
-                  type="button"
-                  onClick={handleCloseModal}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+              </Box>
+              <Box sx={{ mt: 2 }}>
+                <Button
+                  variant="outlined"
+                  component="label"
+                  fullWidth
+                  sx={{
+                    textTransform: 'none',
+                    borderRadius: 2,
+                    borderColor: 'primary.light',
+                  }}
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-                >
-                  {selectedReview ? 'Update' : 'Add'}
-                </button>
-              </div>
+                  Upload Image
+                  <input
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={(e) =>
+                      setFormData({ ...formData, image: e.target.files[0] })
+                    }
+                  />
+                </Button>
+                {editingReview && editingReview.imagePath && (
+                  <Box mt={2} textAlign="center">
+                    <img
+                      src={getImageUrl(editingReview.imagePath)}
+                      alt={editingReview.name}
+                      style={{
+                        maxWidth: 120,
+                        maxHeight: 120,
+                        borderRadius: 12,
+                        boxShadow: '0 2px 12px rgba(59,130,246,0.10)',
+                        margin: 'auto',
+                      }}
+                    />
+                  </Box>
+                )}
+              </Box>
             </form>
-          </div>
-        </div>
-      )}
-    </div>
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 2 }}>
+            <Button onClick={handleClose}>Cancel</Button>
+            <Button
+              form="review-form"
+              onClick={handleSubmit}
+              variant="contained"
+              color="primary"
+              type="submit"
+              sx={{
+                fontWeight: 700,
+                borderRadius: 8,
+                textTransform: 'none',
+                px: 4,
+              }}
+            >
+              {editingReview ? 'Update' : 'Add'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Container>
+    </Box>
   );
 };
 
