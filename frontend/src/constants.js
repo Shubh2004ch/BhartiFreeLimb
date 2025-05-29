@@ -4,10 +4,11 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 // Base URLs
 const NGROK_BACKEND_URL = 'https://3d3a-2405-204-320a-9c44-4a0e-effb-429c-e015.ngrok-free.app';
 const NGROK_FRONTEND_URL = 'https://a347-2405-204-320a-9c44-4a0e-effb-429c-e015.ngrok-free.app';
+const S3_BASE_URL = 'https://s3.ap-south-1.amazonaws.com/bhartiallmedia/bhartifreelimb';
 
 // Base URLs with proper configuration
 export const API_BASE_URL = isDevelopment ? 'http://localhost:5000' : NGROK_BACKEND_URL;
-export const STATIC_FILES_URL = isDevelopment ? 'http://localhost:5000/uploads' : `${NGROK_BACKEND_URL}/uploads`;
+export const STATIC_FILES_URL = S3_BASE_URL;
 
 // API Endpoints
 export const ENDPOINTS = {
@@ -27,15 +28,10 @@ export const ENDPOINTS = {
 // Helper function to get image URL
 export const getImageUrl = (imagePath) => {
   if (!imagePath) return '';
-  // If the path already contains the full URL, return it as is
+  // If the path is already a full URL, return it as is
   if (imagePath.startsWith('http')) return imagePath;
-  // If the path is an S3 URL, return it as is
-  if (imagePath.includes('amazonaws.com')) return imagePath;
-  // If the path is just the filename, prepend the static files URL
-  if (!imagePath.includes('/')) return `${STATIC_FILES_URL}/${imagePath}`;
-  // If the path is a full path from the backend, extract the filename
-  const filename = imagePath.split('/').pop();
-  return `${STATIC_FILES_URL}/${filename}`;
+  // If the path is a local upload, prepend the S3 base URL
+  return `${STATIC_FILES_URL}/${imagePath}`;
 };
 
 // Contact Information

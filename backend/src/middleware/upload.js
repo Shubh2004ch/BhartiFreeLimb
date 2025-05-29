@@ -1,33 +1,14 @@
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const { upload } = require('../config/s3');
 
-const uploadPath = path.join(__dirname, '../uploads');
+const uploadMiddleware = {
+  // For single image upload (hero image)
+  single: (fieldName) => upload.single(fieldName),
 
-// Ensure the uploads folder exists
-if (!fs.existsSync(uploadPath)) {
-  fs.mkdirSync(uploadPath, { recursive: true });
-  console.log('Created uploads folder from multer');
-}
+  // For multiple images upload (beneficiary images)
+  array: (fieldName, maxCount) => upload.array(fieldName, maxCount),
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadPath);
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
-});
+  // For multiple fields with different image counts
+  fields: (fields) => upload.fields(fields)
+};
 
-const upload = multer({
-  storage: storage,
-  fileFilter: function (req, file, cb) {
-    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only images and videos are allowed!'), false);
-    }
-  }
-});
-
-module.exports = upload;
+module.exports = uploadMiddleware;

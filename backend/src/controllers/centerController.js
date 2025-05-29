@@ -35,9 +35,9 @@ exports.createCenter = async (req, res) => {
       contact,
       features: req.body.features ? JSON.parse(req.body.features) : [],
       rating: isNaN(Number(rating)) ? 0 : Number(rating),
-      imagePath: req.files?.heroImage ? `uploads/${req.files.heroImage[0].filename}` : undefined,
+      imagePath: req.files?.heroImage ? req.files.heroImage[0].location : undefined,
       beneficiaryImages: req.files?.beneficiaryImages ? 
-        req.files.beneficiaryImages.map(file => `uploads/${file.filename}`) : []
+        req.files.beneficiaryImages.map(file => file.location) : []
     });
 
     await center.save();
@@ -54,11 +54,11 @@ exports.updateCenter = async (req, res) => {
     const updateData = { ...req.body };
     
     if (req.files?.heroImage) {
-      updateData.imagePath = `uploads/${req.files.heroImage[0].filename}`;
+      updateData.imagePath = req.files.heroImage[0].location;
     }
     
     if (req.files?.beneficiaryImages) {
-      updateData.beneficiaryImages = req.files.beneficiaryImages.map(file => `uploads/${file.filename}`);
+      updateData.beneficiaryImages = req.files.beneficiaryImages.map(file => file.location);
     }
 
     const center = await Center.findByIdAndUpdate(req.params.id, updateData, { new: true });
