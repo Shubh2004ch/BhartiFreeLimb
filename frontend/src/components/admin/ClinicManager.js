@@ -30,6 +30,7 @@ import {
   Info,
 } from '@mui/icons-material';
 import axios from 'axios';
+import { getImageUrl } from '../../constants';
 
 const ClinicSkeleton = () => (
   <Grid container spacing={4}>
@@ -461,7 +462,7 @@ const ClinicManager = () => {
                 {editingClinic && editingClinic.imagePath && (
                   <Box mt={2} textAlign="center">
                     <img
-                      src={`http://localhost:5000/${editingClinic.imagePath}`}
+                      image={getImageUrl(editingClinic.imagePath)}
                       alt={editingClinic.name}
                       style={{
                         maxWidth: 120,

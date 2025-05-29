@@ -174,9 +174,9 @@ const CentersManager = () => {
       });
 
       if (selectedCenter) {
-        await axios.put(`${ENDPOINTS.CENTERS}/${selectedCenter._id}`, formDataToSend);
+        await api.put(`${ENDPOINTS.CENTERS}/${selectedCenter._id}`, formDataToSend);
       } else {
-        await axios.post(ENDPOINTS.CENTERS, formDataToSend);
+        await api.post(ENDPOINTS.CENTERS, formDataToSend);
       }
 
       fetchCenters();
@@ -208,7 +208,7 @@ const CentersManager = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this center?')) {
       try {
-        await axios.delete(`${ENDPOINTS.CENTERS}/${id}`);
+        await api.delete(`${ENDPOINTS.CENTERS}/${id}`);
         fetchCenters();
       } catch (error) {
         setError('Failed to delete center');

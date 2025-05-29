@@ -63,9 +63,9 @@ const MediaManager = () => {
       });
 
       if (selectedMedia) {
-        await axios.put(`${ENDPOINTS.MEDIA}/${selectedMedia._id}`, formDataToSend);
+        await api.put(`${ENDPOINTS.MEDIA}/${selectedMedia._id}`, formDataToSend);
       } else {
-        await axios.post(ENDPOINTS.MEDIA, formDataToSend);
+        await api.post(ENDPOINTS.MEDIA, formDataToSend);
       }
 
       fetchMedia();
@@ -90,7 +90,7 @@ const MediaManager = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this media?')) {
       try {
-        await axios.delete(`${ENDPOINTS.MEDIA}/${id}`);
+        await api.delete(`${ENDPOINTS.MEDIA}/${id}`);
         fetchMedia();
       } catch (error) {
         setError('Failed to delete media');

@@ -4,15 +4,16 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 // Base URLs
 const PROD_BACKEND_URL = "https://bhartifreelimb-production.up.railway.app";
 const DEV_BACKEND_URL = "http://localhost:5000";
-const S3_BASE_URL = 'https://s3.ap-south-1.amazonaws.com/bhartiallmedia';
+const S3_BASE_URL = 'https://bhartiallmedia.s3.ap-south-1.amazonaws.com';
+const S3_UPLOAD = "s3://bhartiallmedia"
 
 // Base URL configuration
 export const API_BASE_URL = isDevelopment ? DEV_BACKEND_URL : PROD_BACKEND_URL;
 
 // Static files URL
 export const STATIC_FILES_URL = isDevelopment 
-  ? `${DEV_BACKEND_URL}/uploads`
-  : `${PROD_BACKEND_URL}/uploads`;
+  ? `${DEV_BACKEND_URL}`
+  : `${S3_BASE_URL}`;
 
 // API Endpoints
 export const ENDPOINTS = {
@@ -32,11 +33,19 @@ export const ENDPOINTS = {
 // Helper function to get image URL
 export const getImageUrl = (imagePath) => {
   if (!imagePath) return '';
-  // If the path is already a full URL, return it as is
+
+  // If the path is already a full URL, return it
   if (imagePath.startsWith('http')) return imagePath;
-  // If the path is a local upload, prepend the static files URL
+
+  // In production, return the image from S3
+  if (!isDevelopment) {
+    return `${S3_BASE_URL}/${imagePath}`;
+  }
+
+  // In development, serve from local uploads folder
   return `${STATIC_FILES_URL}/${imagePath}`;
 };
+
 
 // Contact Information
 export const CONTACT_PHONE = '+1 (800) 555-1234';

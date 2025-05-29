@@ -436,7 +436,7 @@ const ShelterManager = () => {
                     {previewUrls.map((url, index) => (
                       <Box key={index} sx={{ position: 'relative' }}>
                         <img
-                          src={url}
+                          src={getImageUrl(url)}
                           alt={`Preview ${index + 1}`}
                           style={{ width: 100, height: 100, objectFit: 'cover' }}
                         />
