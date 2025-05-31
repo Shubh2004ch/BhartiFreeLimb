@@ -95,13 +95,13 @@ const MediaManager = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formDataToSend = new FormData();
+      const formDataToSend = new FormData();
     
     Object.keys(formData).forEach((key) => {
-      if (formData[key] !== null) {
-        formDataToSend.append(key, formData[key]);
-      }
-    });
+        if (formData[key] !== null) {
+          formDataToSend.append(key, formData[key]);
+        }
+      });
 
     try {
       if (editingMedia) {
@@ -213,19 +213,19 @@ const MediaManager = () => {
                   }}
                 >
                   <Box sx={{ position: 'relative' }}>
-                    {item.type === 'image' ? (
+              {item.type === 'image' ? (
                       <CardMedia
                         component="img"
                         height="200"
                         image={getImageUrl(item.path)}
-                        alt={item.title}
+                  alt={item.title}
                         sx={{
                           objectFit: 'cover',
                           borderTopLeftRadius: 16,
                           borderTopRightRadius: 16,
                         }}
-                      />
-                    ) : (
+                />
+              ) : (
                       <Box sx={{ position: 'relative' }}>
                         <CardMedia
                           component="video"
@@ -236,8 +236,8 @@ const MediaManager = () => {
                             borderTopLeftRadius: 16,
                             borderTopRightRadius: 16,
                           }}
-                          controls
-                        />
+                    controls
+                  />
                         <PlayCircle
                           sx={{
                             position: 'absolute',
@@ -251,7 +251,7 @@ const MediaManager = () => {
                           }}
                         />
                       </Box>
-                    )}
+              )}
                   </Box>
                   <CardContent
                     sx={{
@@ -309,16 +309,16 @@ const MediaManager = () => {
                           onClick={() => handleOpen(item)}
                           color="primary"
                           sx={{ bgcolor: '#f1f7ff', mr: 0.5 }}
-                        >
+              >
                           <EditIcon />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Delete" arrow>
                         <IconButton
-                          onClick={() => handleDelete(item._id)}
+                onClick={() => handleDelete(item._id)}
                           color="error"
                           sx={{ bgcolor: '#fff5f5' }}
-                        >
+              >
                           <DeleteIcon />
                         </IconButton>
                       </Tooltip>
@@ -327,7 +327,7 @@ const MediaManager = () => {
                 </Card>
               </Fade>
             </Grid>
-          ))}
+        ))}
         </Grid>
 
         <Dialog
@@ -349,17 +349,17 @@ const MediaManager = () => {
               <TextField
                 fullWidth
                 label="Title"
-                value={formData.title}
+                  value={formData.title}
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
                 }
                 margin="normal"
-                required
-              />
+                  required
+                />
               <TextField
                 fullWidth
                 label="Description"
-                value={formData.description}
+                  value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
@@ -367,18 +367,18 @@ const MediaManager = () => {
                 required
                 multiline
                 rows={4}
-              />
+                />
               <TextField
                 fullWidth
                 select
                 label="Media Type"
-                value={formData.type}
+                  value={formData.type}
                 onChange={(e) =>
                   setFormData({ ...formData, type: e.target.value })
                 }
                 margin="normal"
                 required
-              >
+                >
                 <MenuItem value="image">Image</MenuItem>
                 <MenuItem value="video">Video</MenuItem>
               </TextField>
@@ -394,14 +394,14 @@ const MediaManager = () => {
                   }}
                 >
                   Upload File
-                  <input
-                    type="file"
-                    accept={formData.type === 'video' ? 'video/*' : 'image/*'}
+                <input
+                  type="file"
+                  accept={formData.type === 'video' ? 'video/*' : 'image/*'}
                     hidden
                     onChange={(e) =>
                       setFormData({ ...formData, file: e.target.files[0] })
                     }
-                  />
+                />
                 </Button>
                 {editingMedia && editingMedia.path && (
                   <Box mt={2} textAlign="center">

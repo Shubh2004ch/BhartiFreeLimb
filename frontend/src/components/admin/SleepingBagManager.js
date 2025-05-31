@@ -155,11 +155,11 @@ const SleepingBagManager = () => {
       <Container maxWidth="lg">
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            mb: 4,
-            gap: 2,
-            justifyContent: { xs: 'center', md: 'flex-start' },
+          display: 'flex',
+          alignItems: 'center',
+          mb: 4,
+          gap: 2,
+          justifyContent: { xs: 'center', md: 'flex-start' },
           }}
         >
           <Hotel sx={{ fontSize: 44, color: 'primary.main', mr: 1 }} />
@@ -200,51 +200,51 @@ const SleepingBagManager = () => {
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
 
-        <Grid container spacing={5}>
-          {sleepingBags.map((item, idx) => (
+          <Grid container spacing={5}>
+            {sleepingBags.map((item, idx) => (
             <Grid item xs={12} sm={6} md={4} key={item._id}>
-              <Fade in timeout={500} style={{ transitionDelay: `${idx * 80}ms` }}>
-                <Card
-                  sx={{
-                    borderRadius: 4,
-                    boxShadow:
-                      '0 6px 22px 0 rgba(59,130,246,0.09), 0 2px 8px 0 rgba(236,72,153,0.09)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    overflow: 'hidden',
-                    transition:
-                      'transform 0.22s cubic-bezier(.4,0,.2,1), box-shadow 0.22s cubic-bezier(.4,0,.2,1)',
-                    '&:hover': {
-                      transform: 'translateY(-8px) scale(1.03)',
-                      boxShadow:
-                        '0 12px 36px 0 rgba(59,130,246,0.18), 0 3px 12px 0 rgba(236,72,153,0.16)',
-                    },
-                    bgcolor: 'rgba(255,255,255,0.92)',
-                    backdropFilter: 'blur(3px)',
-                  }}
-                >
-                  {item.imagePath && (
-                    <CardMedia
-                      component="img"
-                      height="200"
-                      image={getImageUrl(item.imagePath)}
-                      alt={item.name}
-                      sx={{
-                        objectFit: 'cover',
-                        borderTopLeftRadius: 16,
-                        borderTopRightRadius: 16,
-                      }}
-                    />
-                  )}
-                  <CardContent
+                <Fade in timeout={500} style={{ transitionDelay: `${idx * 80}ms` }}>
+                  <Card
                     sx={{
-                      flexGrow: 1,
+                      borderRadius: 4,
+                      boxShadow:
+                        '0 6px 22px 0 rgba(59,130,246,0.09), 0 2px 8px 0 rgba(236,72,153,0.09)',
                       display: 'flex',
                       flexDirection: 'column',
-                      position: 'relative',
-                      p: 3,
+                      overflow: 'hidden',
+                      transition:
+                        'transform 0.22s cubic-bezier(.4,0,.2,1), box-shadow 0.22s cubic-bezier(.4,0,.2,1)',
+                      '&:hover': {
+                        transform: 'translateY(-8px) scale(1.03)',
+                        boxShadow:
+                          '0 12px 36px 0 rgba(59,130,246,0.18), 0 3px 12px 0 rgba(236,72,153,0.16)',
+                      },
+                      bgcolor: 'rgba(255,255,255,0.92)',
+                      backdropFilter: 'blur(3px)',
                     }}
                   >
+                    {item.imagePath && (
+                      <CardMedia
+                        component="img"
+                        height="200"
+                        image={getImageUrl(item.imagePath)}
+                        alt={item.name}
+                        sx={{
+                          objectFit: 'cover',
+                          borderTopLeftRadius: 16,
+                          borderTopRightRadius: 16,
+                        }}
+                      />
+                    )}
+                    <CardContent
+                      sx={{
+                        flexGrow: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        position: 'relative',
+                        p: 3,
+                      }}
+                    >
                     <Typography
                       variant="h6"
                       fontWeight="bold"
@@ -258,22 +258,22 @@ const SleepingBagManager = () => {
                         gap: 1,
                       }}
                     >
-                      <Hotel sx={{ fontSize: 24, color: 'primary.main', mr: 1 }} />
-                      {item.name}
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                      <LocationOn sx={{ color: '#f472b6', fontSize: 20, mr: 1 }} />
-                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                        {item.location}
+                        <Hotel sx={{ fontSize: 24, color: 'primary.main', mr: 1 }} />
+                        {item.name}
                       </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                      <LocalPhone sx={{ color: 'success.main', fontSize: 18, mr: 1 }} />
-                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                        {item.contactNumber}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                        <LocationOn sx={{ color: '#f472b6', fontSize: 20, mr: 1 }} />
+                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                          {item.location}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                        <LocalPhone sx={{ color: 'success.main', fontSize: 18, mr: 1 }} />
+                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                          {item.contactNumber}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
                       <CheckCircle 
                         sx={{ 
                           color: item.availability ? 'success.main' : 'error.main', 
@@ -281,12 +281,12 @@ const SleepingBagManager = () => {
                           mr: 1 
                         }} 
                       />
-                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
                         {item.availability ? 'Available' : 'Not Available'} ({item.quantity} bags)
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, gap: 1 }}>
-                      <Info sx={{ color: '#2563eb', fontSize: 18, mr: 1 }} />
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, gap: 1 }}>
+                        <Info sx={{ color: '#2563eb', fontSize: 18, mr: 1 }} />
                       <Typography
                         variant="body2"
                         color="text.secondary"
@@ -295,42 +295,42 @@ const SleepingBagManager = () => {
                           fontStyle: 'italic',
                         }}
                       >
-                        {item.description}
-                      </Typography>
-                    </Box>
-                    <Box
-                      sx={{
-                        mt: 2,
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        gap: 1,
-                      }}
-                    >
-                      <Tooltip title="Edit" arrow>
-                        <IconButton
-                          onClick={() => handleOpen(item)}
-                          color="primary"
-                          sx={{ bgcolor: '#f1f7ff', mr: 0.5 }}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete" arrow>
-                        <IconButton
-                          onClick={() => handleDelete(item._id)}
-                          color="error"
-                          sx={{ bgcolor: '#fff5f5' }}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Fade>
-            </Grid>
-          ))}
-        </Grid>
+                          {item.description}
+                        </Typography>
+                      </Box>
+                      <Box
+                        sx={{
+                          mt: 2,
+                          display: 'flex',
+                          justifyContent: 'flex-end',
+                          gap: 1,
+                        }}
+                      >
+                        <Tooltip title="Edit" arrow>
+                          <IconButton
+                            onClick={() => handleOpen(item)}
+                            color="primary"
+                            sx={{ bgcolor: '#f1f7ff', mr: 0.5 }}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete" arrow>
+                          <IconButton
+                            onClick={() => handleDelete(item._id)}
+                            color="error"
+                            sx={{ bgcolor: '#fff5f5' }}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Fade>
+              </Grid>
+            ))}
+          </Grid>
 
         <Dialog
           open={open}

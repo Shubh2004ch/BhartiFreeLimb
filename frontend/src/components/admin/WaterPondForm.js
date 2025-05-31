@@ -96,13 +96,13 @@ const WaterPondForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formDataToSend = new FormData();
+      const formDataToSend = new FormData();
     
     Object.keys(formData).forEach((key) => {
-      if (formData[key] !== null) {
-        formDataToSend.append(key, formData[key]);
-      }
-    });
+        if (formData[key] !== null) {
+          formDataToSend.append(key, formData[key]);
+        }
+      });
 
     try {
       if (editingPond) {
@@ -129,7 +129,7 @@ const WaterPondForm = () => {
       } catch (error) {
         console.error('Error deleting water pond:', error);
         setError('Failed to delete water pond');
-      }
+  }
     }
   };
 
@@ -212,20 +212,20 @@ const WaterPondForm = () => {
                     bgcolor: 'rgba(255,255,255,0.92)',
                     backdropFilter: 'blur(3px)',
                   }}
-                >
-                  {pond.imagePath && (
+          >
+            {pond.imagePath && (
                     <CardMedia
                       component="img"
                       height="200"
                       image={getImageUrl(pond.imagePath)}
-                      alt={pond.name}
+                alt={pond.name}
                       sx={{
                         objectFit: 'cover',
                         borderTopLeftRadius: 16,
                         borderTopRightRadius: 16,
                       }}
-                    />
-                  )}
+              />
+            )}
                   <CardContent
                     sx={{
                       flexGrow: 1,
@@ -276,16 +276,16 @@ const WaterPondForm = () => {
                           onClick={() => handleOpen(pond)}
                           color="primary"
                           sx={{ bgcolor: '#f1f7ff', mr: 0.5 }}
-                        >
+              >
                           <EditIcon />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Delete" arrow>
                         <IconButton
-                          onClick={() => handleDelete(pond._id)}
+                onClick={() => handleDelete(pond._id)}
                           color="error"
                           sx={{ bgcolor: '#fff5f5' }}
-                        >
+              >
                           <DeleteIcon />
                         </IconButton>
                       </Tooltip>
@@ -294,7 +294,7 @@ const WaterPondForm = () => {
                 </Card>
               </Fade>
             </Grid>
-          ))}
+        ))}
         </Grid>
 
         <Dialog
@@ -316,23 +316,23 @@ const WaterPondForm = () => {
               <TextField
                 fullWidth
                 label="Name"
-                value={formData.name}
+                  value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
                 margin="normal"
-                required
-              />
+                  required
+                />
               <TextField
                 fullWidth
                 label="Location"
-                value={formData.location}
+                  value={formData.location}
                 onChange={(e) =>
                   setFormData({ ...formData, location: e.target.value })
                 }
                 margin="normal"
-                required
-              />
+                  required
+                />
               <TextField
                 fullWidth
                 label="Contact Number"
@@ -341,8 +341,8 @@ const WaterPondForm = () => {
                   setFormData({ ...formData, contactNumber: e.target.value })
                 }
                 margin="normal"
-                required
-              />
+                  required
+                />
               <Box sx={{ mt: 2 }}>
                 <Button
                   variant="outlined"
@@ -355,9 +355,9 @@ const WaterPondForm = () => {
                   }}
                 >
                   Upload Image
-                  <input
-                    type="file"
-                    accept="image/*"
+                <input
+                  type="file"
+                  accept="image/*"
                     hidden
                     onChange={(e) =>
                       setFormData({ ...formData, image: e.target.files[0] })

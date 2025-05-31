@@ -95,12 +95,12 @@ const ReviewManager = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formDataToSend = new FormData();
-    
+
     Object.keys(formData).forEach((key) => {
-      if (formData[key] !== null) {
-        formDataToSend.append(key, formData[key]);
-      }
-    });
+        if (formData[key] !== null) {
+          formDataToSend.append(key, formData[key]);
+        }
+      });
 
     try {
       if (editingReview) {
@@ -211,12 +211,12 @@ const ReviewManager = () => {
                     backdropFilter: 'blur(3px)',
                   }}
                 >
-                  {review.imagePath && (
+            {review.imagePath && (
                     <CardMedia
                       component="img"
                       height="200"
                       image={getImageUrl(review.imagePath)}
-                      alt={review.name}
+                alt={review.name}
                       sx={{
                         objectFit: 'cover',
                         borderTopLeftRadius: 16,
@@ -279,16 +279,16 @@ const ReviewManager = () => {
                           onClick={() => handleOpen(review)}
                           color="primary"
                           sx={{ bgcolor: '#f1f7ff', mr: 0.5 }}
-                        >
+              >
                           <EditIcon />
                         </IconButton>
                       </Tooltip>
                       <Tooltip title="Delete" arrow>
                         <IconButton
-                          onClick={() => handleDelete(review._id)}
+                onClick={() => handleDelete(review._id)}
                           color="error"
                           sx={{ bgcolor: '#fff5f5' }}
-                        >
+              >
                           <DeleteIcon />
                         </IconButton>
                       </Tooltip>
@@ -297,7 +297,7 @@ const ReviewManager = () => {
                 </Card>
               </Fade>
             </Grid>
-          ))}
+        ))}
         </Grid>
 
         <Dialog
@@ -319,25 +319,25 @@ const ReviewManager = () => {
               <TextField
                 fullWidth
                 label="Name"
-                value={formData.name}
+                  value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
                 margin="normal"
-                required
-              />
+                  required
+                />
               <TextField
                 fullWidth
                 label="Review Text"
-                value={formData.text}
+                  value={formData.text}
                 onChange={(e) =>
                   setFormData({ ...formData, text: e.target.value })
                 }
                 margin="normal"
-                required
+                  required
                 multiline
                 rows={4}
-              />
+                />
               <Box sx={{ mt: 2, mb: 2 }}>
                 <Typography component="legend">Rating</Typography>
                 <Rating
@@ -361,14 +361,14 @@ const ReviewManager = () => {
                   }}
                 >
                   Upload Image
-                  <input
-                    type="file"
-                    accept="image/*"
+                <input
+                  type="file"
+                  accept="image/*"
                     hidden
                     onChange={(e) =>
                       setFormData({ ...formData, image: e.target.files[0] })
                     }
-                  />
+                />
                 </Button>
                 {editingReview && editingReview.imagePath && (
                   <Box mt={2} textAlign="center">

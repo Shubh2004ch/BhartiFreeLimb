@@ -205,98 +205,98 @@ const ClinicManager = () => {
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
 
-        <Grid container spacing={5}>
-          {clinics.map((clinic, idx) => (
+          <Grid container spacing={5}>
+            {clinics.map((clinic, idx) => (
             <Grid item xs={12} sm={6} md={4} key={clinic._id}>
-              <Fade in timeout={500} style={{ transitionDelay: `${idx * 80}ms` }}>
-                <Card
-                  sx={{
-                    borderRadius: 4,
-                    boxShadow:
-                      '0 6px 22px 0 rgba(59,130,246,0.09), 0 2px 8px 0 rgba(236,72,153,0.09)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    overflow: 'hidden',
-                    transition:
-                      'transform 0.22s cubic-bezier(.4,0,.2,1), box-shadow 0.22s cubic-bezier(.4,0,.2,1)',
-                    '&:hover': {
-                      transform: 'translateY(-8px) scale(1.03)',
-                      boxShadow:
-                        '0 12px 36px 0 rgba(59,130,246,0.18), 0 3px 12px 0 rgba(236,72,153,0.16)',
-                    },
-                    bgcolor: 'rgba(255,255,255,0.92)',
-                    backdropFilter: 'blur(3px)',
-                  }}
-                >
-                  {clinic.imagePath && (
-                    <CardMedia
-                      component="img"
-                      height="200"
-                      image={getImageUrl(clinic.imagePath)}
-                      alt={clinic.name}
-                      sx={{
-                        objectFit: 'cover',
-                        borderTopLeftRadius: 16,
-                        borderTopRightRadius: 16,
-                      }}
-                    />
-                  )}
-                  <CardContent
+                <Fade in timeout={500} style={{ transitionDelay: `${idx * 80}ms` }}>
+                  <Card
                     sx={{
-                      flexGrow: 1,
+                      borderRadius: 4,
+                      boxShadow:
+                        '0 6px 22px 0 rgba(59,130,246,0.09), 0 2px 8px 0 rgba(236,72,153,0.09)',
                       display: 'flex',
                       flexDirection: 'column',
-                      position: 'relative',
-                      p: 3,
+                      overflow: 'hidden',
+                      transition:
+                        'transform 0.22s cubic-bezier(.4,0,.2,1), box-shadow 0.22s cubic-bezier(.4,0,.2,1)',
+                      '&:hover': {
+                        transform: 'translateY(-8px) scale(1.03)',
+                        boxShadow:
+                          '0 12px 36px 0 rgba(59,130,246,0.18), 0 3px 12px 0 rgba(236,72,153,0.16)',
+                      },
+                      bgcolor: 'rgba(255,255,255,0.92)',
+                      backdropFilter: 'blur(3px)',
                     }}
                   >
-                    <Typography
-                      variant="h6"
-                      fontWeight="bold"
+                    {clinic.imagePath && (
+                      <CardMedia
+                        component="img"
+                        height="200"
+                      image={getImageUrl(clinic.imagePath)}
+                        alt={clinic.name}
+                        sx={{
+                          objectFit: 'cover',
+                          borderTopLeftRadius: 16,
+                          borderTopRightRadius: 16,
+                        }}
+                      />
+                    )}
+                    <CardContent
                       sx={{
-                        color: 'primary.main',
-                        fontSize: '1.16rem',
-                        letterSpacing: 0.1,
-                        mb: 1,
+                        flexGrow: 1,
                         display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
+                        flexDirection: 'column',
+                        position: 'relative',
+                        p: 3,
                       }}
                     >
-                      <LocalHospital sx={{ fontSize: 24, color: 'primary.main', mr: 1 }} />
-                      {clinic.name}
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                      <LocationOn sx={{ color: '#f472b6', fontSize: 20, mr: 1 }} />
-                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                        {clinic.location}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                      <LocalPhone sx={{ color: 'success.main', fontSize: 18, mr: 1 }} />
-                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                        {clinic.contactNumber}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                      <AccessTime sx={{ color: '#38bdf8', fontSize: 18, mr: 1 }} />
-                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                        {clinic.operatingHours}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, gap: 1 }}>
-                      <Info sx={{ color: '#2563eb', fontSize: 18, mr: 1 }} />
                       <Typography
-                        variant="body2"
-                        color="text.secondary"
+                        variant="h6"
+                        fontWeight="bold"
                         sx={{
-                          fontWeight: 500,
-                          fontStyle: 'italic',
+                          color: 'primary.main',
+                          fontSize: '1.16rem',
+                          letterSpacing: 0.1,
+                          mb: 1,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
                         }}
                       >
-                        {clinic.description}
+                        <LocalHospital sx={{ fontSize: 24, color: 'primary.main', mr: 1 }} />
+                        {clinic.name}
                       </Typography>
-                    </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                        <LocationOn sx={{ color: '#f472b6', fontSize: 20, mr: 1 }} />
+                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                          {clinic.location}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                        <LocalPhone sx={{ color: 'success.main', fontSize: 18, mr: 1 }} />
+                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                          {clinic.contactNumber}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                        <AccessTime sx={{ color: '#38bdf8', fontSize: 18, mr: 1 }} />
+                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                          {clinic.operatingHours}
+                        </Typography>
+                      </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, gap: 1 }}>
+                        <Info sx={{ color: '#2563eb', fontSize: 18, mr: 1 }} />
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{
+                            fontWeight: 500,
+                            fontStyle: 'italic',
+                          }}
+                        >
+                          {clinic.description}
+                        </Typography>
+                      </Box>
                     {clinic.services && clinic.services.length > 0 && (
                       <Box sx={{ mt: 1.2, mb: 1, display: 'flex', flexWrap: 'wrap', gap: 0.7 }}>
                         {clinic.services.map((service, index) => (
@@ -320,42 +320,42 @@ const ClinicManager = () => {
                               {service}
                             </Box>
                           </Tooltip>
-                        ))}
+                          ))}
                       </Box>
                     )}
-                    <Box
-                      sx={{
-                        mt: 2,
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        gap: 1,
-                      }}
-                    >
-                      <Tooltip title="Edit" arrow>
-                        <IconButton
-                          onClick={() => handleOpen(clinic)}
-                          color="primary"
-                          sx={{ bgcolor: '#f1f7ff', mr: 0.5 }}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete" arrow>
-                        <IconButton
-                          onClick={() => handleDelete(clinic._id)}
-                          color="error"
-                          sx={{ bgcolor: '#fff5f5' }}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Fade>
-            </Grid>
-          ))}
-        </Grid>
+                      <Box
+                        sx={{
+                          mt: 2,
+                          display: 'flex',
+                          justifyContent: 'flex-end',
+                          gap: 1,
+                        }}
+                      >
+                        <Tooltip title="Edit" arrow>
+                          <IconButton
+                            onClick={() => handleOpen(clinic)}
+                            color="primary"
+                            sx={{ bgcolor: '#f1f7ff', mr: 0.5 }}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete" arrow>
+                          <IconButton
+                            onClick={() => handleDelete(clinic._id)}
+                            color="error"
+                            sx={{ bgcolor: '#fff5f5' }}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Fade>
+              </Grid>
+            ))}
+          </Grid>
 
         <Dialog
           open={open}

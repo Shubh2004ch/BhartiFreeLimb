@@ -184,7 +184,7 @@ const CentersManager = () => {
           if (file instanceof File) {
             formDataToSend.append('beneficiaryImages', file);
           }
-        });
+          });
       }
 
       const config = {
@@ -350,11 +350,11 @@ const CentersManager = () => {
                   }}
                 >
                   {center.imagePath && (
-                    <CardMedia
-                      component="img"
-                      height="200"
+                  <CardMedia
+                    component="img"
+                    height="200"
                       image={getImageUrl(center.imagePath)}
-                      alt={center.name}
+                    alt={center.name}
                       onError={(e) => {
                         console.error('Image failed to load:', e.target.src);
                         e.target.style.display = 'none';
@@ -364,7 +364,7 @@ const CentersManager = () => {
                         borderTopLeftRadius: 16,
                         borderTopRightRadius: 16,
                       }}
-                    />
+                  />
                   )}
                   <CardContent>
                     <Typography variant="h6" gutterBottom fontWeight={700}>

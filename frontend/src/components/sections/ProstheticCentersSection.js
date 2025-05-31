@@ -85,11 +85,11 @@ const FoodStallCard = ({ item, index }) => {
           />
           <Box 
             sx={{ 
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
               background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.6) 100%)',
             }}
           />
@@ -146,21 +146,21 @@ const FoodStallCard = ({ item, index }) => {
           {item.specialties && item.specialties.length > 0 && (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 2 }}>
               {item.specialties.map((specialty, idx) => (
-                <Chip 
-                  key={idx}
+              <Chip 
+                key={idx}
                   icon={<Fastfood />}
                   label={specialty} 
-                  size="small"
-                  sx={{ 
+                size="small"
+                sx={{ 
                     bgcolor: 'primary.soft',
                     color: 'primary.dark',
                     '& .MuiChip-icon': {
                       color: 'primary.main'
                     }
-                  }}
-                />
-              ))}
-            </Box>
+                }}
+              />
+            ))}
+          </Box>
           )}
 
           <Box sx={{ display: 'flex', gap: 1, mt: 'auto' }}>
@@ -331,4 +331,4 @@ export const FoodStallsSection = () => {
       </Container>
     </Box>
   );
-}; 
+};

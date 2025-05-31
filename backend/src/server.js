@@ -6,10 +6,6 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
-const helmet = require('helmet');
-const compression = require('compression');
-const rateLimit = require('express-rate-limit');
-const mongoSanitize = require('express-mongo-sanitize');
 
 const centerRoutes = require('./routes/centerRoutes');
 const mediaRoutes = require('./routes/mediaRoutes');
@@ -25,32 +21,17 @@ const connectDB = require('./config/database');
 
 const app = express();
 
-// Production security headers
-if (process.env.NODE_ENV === 'production') {
-  app.use(helmet());
-  app.use(compression());
-  
-  // Rate limiting
-  const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100 // limit each IP to 100 requests per windowMs
-  });
-  app.use('/api/', limiter);
-  
-  // Prevent NoSQL injection
-  app.use(mongoSanitize());
-}
-
 // CORS configuration
-const allowedOrigins = [
-  'https://www.bharti-freelimbs.com',
-  'https://bharti-freelimbs.com',
-  'https://bhartifreelimb-production.up.railway.app',
-  'https://bhartifreelimb.vercel.app',
-  'http://localhost:3000',
-  'http://localhost:33927',
-  /^http:\/\/localhost:\d+$/
-];
+const allowedOrigins = process.env.NODE_ENV === 'production' 
+  ? [
+      "*",
+      'https://bhartifreelimb-production.up.railway.app',
+      'https://bhartifreelimb.vercel.app',
+      'http://localhost:3000',
+      'http://localhost:33927',
+      'http://localhost:41691'
+    ] 
+  : ['http://localhost:3000', 'http://localhost:33927', /^http:\/\/localhost:\d+$/];
 
 app.use(cors({
   origin: function(origin, callback) {
@@ -77,17 +58,15 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Body parsing
-const bodyParserLimit = '10mb';
-app.use(express.json({ limit: bodyParserLimit }));
-app.use(express.urlencoded({ extended: true, limit: bodyParserLimit }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
     message: 'Something went wrong!',
-    error: process.env.NODE_ENV === 'development' ? err.message : 'Internal Server Error'
+    error: process.env.NODE_ENV === 'development' ? err.message : undefined
   });
 });
 
@@ -116,21 +95,15 @@ app.use('/api/waterponds', waterPondRoutes);
 app.use('/api/shelters', shelterRoutes);
 app.use('/api/auth', authRoutes);
 
-// Production static file serving
-if (process.env.NODE_ENV === 'production') {
-  // Serve static files from the frontend build directory
-  app.use(express.static(path.join(__dirname, '../../frontend/build'), {
-    maxAge: '1y',
-    etag: true
-  }));
+// Serve static files from the frontend build directory
+app.use(express.static(path.join(__dirname, '../../frontend/build')));
 
-  // Handle React routing, return all requests to React app
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../../frontend/build', 'index.html'));
-  });
-}
+// Handle React routing, return all requests to React app
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../frontend/build', 'index.html'));
+});
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.NODE_ENV === 'production' ? (process.env.PORT || 5000) : 5001;
 app.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
 });

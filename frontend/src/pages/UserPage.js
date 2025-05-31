@@ -42,8 +42,8 @@ function UserPage() {
   }, []);
 
   const fetchAllData = async () => {
-    try {
-      setLoading(true);
+      try {
+        setLoading(true);
       console.log('Fetching all data...');
 
       const [
@@ -76,16 +76,16 @@ function UserPage() {
       setSleepingBags(Array.isArray(sleepingBagsRes.data) ? sleepingBagsRes.data : []);
       setWaterPonds(Array.isArray(waterPondsRes.data) ? waterPondsRes.data : []);
       setShelters(Array.isArray(sheltersRes.data) ? sheltersRes.data : []);
-      setError(null);
+        setError(null);
     } catch (error) {
       console.error('Error fetching data:', error);
-      setError('Failed to load data. Please try again later.');
+        setError('Failed to load data. Please try again later.');
       setMedia([]); setReviews([]); setCenters([]); setFoodStalls([]);
       setClinics([]); setSleepingBags([]); setWaterPonds([]); setShelters([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+      } finally {
+        setLoading(false);
+      }
+    };
 
   // Auto-scroll media
   useEffect(() => {
@@ -332,7 +332,7 @@ function UserPage() {
 
         {/* SUCCESS STORIES SECTION */}
         <div ref={storiesRef} id="stories" className="pt-16">
-          <SuccessStoriesSection />
+        <SuccessStoriesSection />
         </div>
       </div>
 
