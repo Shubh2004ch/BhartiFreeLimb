@@ -2,17 +2,27 @@
 const isDevelopment = process.env.NODE_ENV === 'development';
 
 // Base URLs
-const PROD_BACKEND_URL = "https://bhartifreelimb-production.up.railway.app";
-const DEV_BACKEND_URL = "http://localhost:5000";
+const getBaseUrl = () => {
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://www.bharti-freelimbs.com';
+  }
+  // Check if we're using ngrok
+  if (window.location.hostname.includes('ngrok')) {
+    return window.location.origin;
+  }
+  return 'http://localhost:5000';
+};
+
+// S3 Configuration
 const S3_BASE_URL = 'https://bhartiallmedia.s3.ap-south-1.amazonaws.com';
-const S3_UPLOAD = "s3://bhartiallmedia"
+const S3_UPLOAD = "s3://bhartiallmedia";
 
 // Base URL configuration
-export const API_BASE_URL = isDevelopment ? DEV_BACKEND_URL : PROD_BACKEND_URL;
+export const API_BASE_URL = getBaseUrl();
 
 // Static files URL
 export const STATIC_FILES_URL = isDevelopment 
-  ? `${DEV_BACKEND_URL}`
+  ? `${API_BASE_URL}`
   : `${S3_BASE_URL}`;
 
 // API Endpoints
@@ -46,7 +56,6 @@ export const getImageUrl = (imagePath) => {
   // Return the full S3 URL
   return `${S3_BASE_URL}/uploads/${cleanPath}`;
 };
-
 
 // Contact Information
 export const CONTACT_PHONE = '+1 (800) 555-1234';
