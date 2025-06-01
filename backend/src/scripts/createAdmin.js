@@ -11,7 +11,7 @@ const createAdmin = async () => {
 
     // Check if admin already exists
     console.log('Checking for existing admin user...');
-    const existingAdmin = await Admin.findOne({ username: 'admin' });
+    const existingAdmin = await Admin.findOne({ username: 'bharti' });
     if (existingAdmin) {
       console.log('Admin user already exists with username:', existingAdmin.username);
       console.log('Email:', existingAdmin.email);
@@ -23,10 +23,10 @@ const createAdmin = async () => {
     // Create new admin
     const hashedPassword = await bcrypt.hash('admin123', 10);
     const admin = new Admin({
-      username: 'admin',
+      username: 'bharti',
       password: hashedPassword,
-      name: 'Admin User',
-      email: 'admin@bhartifreelimbs.com',
+      name: 'Bharti Admin',
+      email: 'bharti@bhartifreelimbs.com',
       role: 'super_admin'
     });
 
