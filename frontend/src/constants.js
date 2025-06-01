@@ -4,7 +4,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 // Base URLs
 const getBaseUrl = () => {
   if (process.env.NODE_ENV === 'production') {
-    return 'https://www.bharti-freelimbs.com';
+    return 'https://bhartifreelimb-production.up.railway.app';
   }
   // Check if we're using ngrok
   if (window.location.hostname.includes('ngrok')) {
