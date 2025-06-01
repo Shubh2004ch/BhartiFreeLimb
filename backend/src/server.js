@@ -25,6 +25,8 @@ const app = express();
 const allowedOrigins = process.env.NODE_ENV === 'production' 
   ? [
       "*",
+      'https://www.bharti-freelimbs.com',
+      'https://bharti-freelimbs.com',
       'https://bhartifreelimb-production.up.railway.app',
       'https://bhartifreelimb.vercel.app',
       'http://localhost:3000',
@@ -43,6 +45,7 @@ app.use(cors({
       if (allowedOrigin instanceof RegExp) {
         return allowedOrigin.test(origin);
       }
+      if (allowedOrigin === '*') return true;
       return allowedOrigin === origin;
     });
 
