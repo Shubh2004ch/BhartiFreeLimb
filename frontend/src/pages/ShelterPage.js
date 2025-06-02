@@ -10,12 +10,16 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material';
-import { Search, ArrowBack } from '@mui/icons-material';
+import { Search, ArrowBack, Phone } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ENDPOINTS } from '../constants';
 import ShelterCard from '../components/sections/ShelterSection';
 import api from '../services/api';
+
+const PhoneIcon = () => {
+  return <Phone sx={{ color: 'success.main', fontSize: 18, mr: 1 }} />;
+};
 
 const ShelterPage = () => {
   const [shelters, setShelters] = useState([]);
@@ -119,7 +123,32 @@ const ShelterPage = () => {
         <Grid container spacing={4}>
           {filteredShelters.map((shelter, index) => (
             <Grid item xs={12} sm={6} md={4} key={shelter._id}>
-              <ShelterCard item={shelter} index={index} />
+              <ShelterCard item={shelter} index={index}>
+                {shelter.phone && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <PhoneIcon />
+                    <Typography variant="body2" sx={{ color: '#475569' }}>
+                      {shelter.phone}
+                    </Typography>
+                  </Box>
+                )}
+                {shelter.contactNumber && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <PhoneIcon />
+                    <Typography variant="body2" sx={{ color: '#475569' }}>
+                      {shelter.contactNumber}
+                    </Typography>
+                  </Box>
+                )}
+                {shelter.email && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <PhoneIcon />
+                    <Typography variant="body2" sx={{ color: '#475569' }}>
+                      {shelter.email}
+                    </Typography>
+                  </Box>
+                )}
+              </ShelterCard>
             </Grid>
           ))}
         </Grid>

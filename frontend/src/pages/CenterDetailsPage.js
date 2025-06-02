@@ -208,14 +208,50 @@ const CenterDetailsPage = () => {
                 <LocationOn sx={{ color: 'primary.main', mr: 1 }} />
                 <Typography>{center.address}</Typography>
               </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Phone sx={{ color: 'primary.main', mr: 1 }} />
-                <Typography>{center.phone}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Email sx={{ color: 'primary.main', mr: 1 }} />
-                <Typography>{center.email}</Typography>
-              </Box>
+              {center.contact && (
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Phone sx={{ color: 'primary.main', mr: 1 }} />
+                  <Typography>{center.contact}</Typography>
+                </Box>
+              )}
+              {center.phone && (
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Phone sx={{ color: 'primary.main', mr: 1 }} />
+                  <Typography>{center.phone}</Typography>
+                </Box>
+              )}
+              {center.email && (
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Email sx={{ color: 'primary.main', mr: 1 }} />
+                  <Typography>{center.email}</Typography>
+                </Box>
+              )}
+              {center.features && center.features.length > 0 && (
+                <Box sx={{ mt: 3 }}>
+                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
+                    Features
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {center.features.map((feature, index) => (
+                      <Paper
+                        key={index}
+                        elevation={1}
+                        sx={{
+                          px: 1.5,
+                          py: 0.75,
+                          bgcolor: 'primary.light',
+                          color: 'primary.main',
+                          borderRadius: 2,
+                        }}
+                      >
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          {feature}
+                        </Typography>
+                      </Paper>
+                    ))}
+                  </Box>
+                </Box>
+              )}
             </Paper>
           </Grid>
 

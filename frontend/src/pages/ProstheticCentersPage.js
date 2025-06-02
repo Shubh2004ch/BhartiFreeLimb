@@ -259,12 +259,56 @@ const ProstheticCentersPage = () => {
                       </Box>
                     )}
 
+                    {center.contact && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        <Phone sx={{ color: 'success.main', mr: 1, fontSize: '1.2rem' }} />
+                        <Typography variant="body2" color="text.secondary">
+                          {center.contact}
+                        </Typography>
+                      </Box>
+                    )}
+
+                    {center.contactNumber && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        <Phone sx={{ color: 'success.main', mr: 1, fontSize: '1.2rem' }} />
+                        <Typography variant="body2" color="text.secondary">
+                          {center.contactNumber}
+                        </Typography>
+                      </Box>
+                    )}
+
                     {center.email && (
                       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                        <Email sx={{ color: 'info.main', mr: 1, fontSize: '1.2rem' }} />
+                        <Email sx={{ color: 'primary.main', mr: 1, fontSize: '1.2rem' }} />
                         <Typography variant="body2" color="text.secondary">
                           {center.email}
                         </Typography>
+                      </Box>
+                    )}
+
+                    {center.features && center.features.length > 0 && (
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="subtitle2" color="primary" sx={{ mb: 1, fontWeight: 600 }}>
+                          Features:
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                          {center.features.map((feature, index) => (
+                            <Typography
+                              key={index}
+                              variant="body2"
+                              sx={{
+                                bgcolor: 'primary.light',
+                                color: 'primary.main',
+                                px: 1,
+                                py: 0.5,
+                                borderRadius: 1,
+                                fontSize: '0.75rem',
+                              }}
+                            >
+                              {feature}
+                            </Typography>
+                          ))}
+                        </Box>
                       </Box>
                     )}
 

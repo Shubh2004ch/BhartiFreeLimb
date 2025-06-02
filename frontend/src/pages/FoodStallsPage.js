@@ -205,6 +205,14 @@ const FoodStallsPage = () => {
                           </Typography>
                         </Box>
                       )}
+                      {stall.contactNumber && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                          <PhoneIcon sx={{ color: 'success.main', fontSize: 18, mr: 1 }} />
+                          <Typography variant="body2" sx={{ color: '#475569' }}>
+                            {stall.contactNumber}
+                          </Typography>
+                        </Box>
+                      )}
                       {stall.email && (
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                           <EmailIcon sx={{ color: 'info.main', fontSize: 18, mr: 1 }} />
