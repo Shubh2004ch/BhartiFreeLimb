@@ -7,6 +7,12 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 
+// Set default JWT_SECRET if not set
+if (!process.env.JWT_SECRET) {
+  console.warn('JWT_SECRET not found in environment, using default secret. Please set JWT_SECRET in production.');
+  process.env.JWT_SECRET = 'bharti_freelimbs_jwt_secret_2024';
+}
+
 const centerRoutes = require('./routes/centerRoutes');
 const mediaRoutes = require('./routes/mediaRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
