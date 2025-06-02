@@ -107,6 +107,17 @@ app.use('/api/auth', authRoutes);
 // Serve static files from the frontend build directory
 app.use(express.static(path.join(__dirname, '../../frontend/build')));
 
+// Special handling for sitemap.xml and robots.txt
+app.get('/sitemap.xml', (req, res) => {
+  res.header('Content-Type', 'application/xml');
+  res.sendFile(path.join(__dirname, '../../frontend/build/sitemap.xml'));
+});
+
+app.get('/robots.txt', (req, res) => {
+  res.header('Content-Type', 'text/plain');
+  res.sendFile(path.join(__dirname, '../../frontend/build/robots.txt'));
+});
+
 // Handle React routing, return all requests to React app
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../../frontend/build', 'index.html'));
