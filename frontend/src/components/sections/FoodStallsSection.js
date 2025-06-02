@@ -24,10 +24,12 @@ import {
   LocalDining,
   Schedule,
   Fastfood,
-  EmojiFoodBeverage
+  EmojiFoodBeverage,
+  ArrowForward
 } from '@mui/icons-material';
 import { ENDPOINTS, getImageUrl } from '../../constants';
 import { foodStallService } from '../../services/api';
+import { useNavigate } from 'react-router-dom';
 
 // Loading Skeleton Component
 const LoadingSkeleton = () => (
@@ -168,6 +170,7 @@ export const FoodStallsSection = () => {
   const [error, setError] = useState(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchItems();
@@ -280,6 +283,38 @@ export const FoodStallsSection = () => {
               />
             </Box>
           ))}
+        </Box>
+
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center',
+          mt: 4
+        }}>
+          <Button
+            variant="contained"
+            onClick={() => navigate('/food-stalls')}
+            endIcon={<ArrowForward />}
+            sx={{
+              minWidth: 200,
+              backgroundColor: 'primary.main',
+              color: 'white',
+              '&:hover': {
+                backgroundColor: 'primary.dark',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+              },
+              transition: 'all 0.3s ease',
+              textTransform: 'none',
+              fontSize: '1rem',
+              fontWeight: 600,
+              py: 1.5,
+              px: 4,
+              borderRadius: 2,
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            View All Food Stalls
+          </Button>
         </Box>
       </Container>
     </Box>
