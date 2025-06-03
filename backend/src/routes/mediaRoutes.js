@@ -1,32 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const mediaController = require('../controllers/mediaController');
-const { upload, handleMulterError } = require('../config/s3');
+const uploadMiddleware = require('../middleware/upload');
 
-// Upload media (both at /upload and root path)
-router.post('/', 
-  (req, res, next) => {
-    upload.single('file')(req, res, (err) => {
-      if (err) {
-        console.error('File upload error:', err);
-        return handleMulterError(err, req, res, next);
-      }
-      next();
-    });
-  },
-  mediaController.uploadMedia
-);
-
+// Upload media - using single file upload with proper middleware chain
 router.post('/upload', 
-  (req, res, next) => {
-    upload.single('media')(req, res, (err) => {
-      if (err) {
-        console.error('File upload error:', err);
-        return handleMulterError(err, req, res, next);
-      }
-      next();
-    });
-  },
+  uploadMiddleware.single('file'), // Changed from 'media' to 'file' to match frontend
   mediaController.uploadMedia
 );
 
