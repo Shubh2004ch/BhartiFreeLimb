@@ -1,11 +1,12 @@
 [phases.setup]
-nixPkgs = ["nodejs"]
+nixPkgs = ["nodejs-18_x"]
 aptPkgs = ["git"]
 
 [phases.install]
 cmds = [
-    "npm install -g npm@latest",
-    "npm install"
+    "npm install -g npm@9.8.1",
+    "npm config set engine-strict false",
+    "npm install --legacy-peer-deps"
 ]
 
 [phases.build]
@@ -16,4 +17,5 @@ cmd = "npm start"
 
 [variables]
 NODE_ENV = "production"
+NODE_VERSION = "18.x"
 NPM_CONFIG_PRODUCTION = "false" 

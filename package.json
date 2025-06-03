@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "description": "Full stack application with React frontend and Node.js backend",
   "engines": {
-    "node": "18.x"
+    "node": "18.x",
+    "npm": ">=9.8.1"
   },
   "scripts": {
-    "postinstall": "cd backend && npm install && cd ../frontend && npm install",
+    "postinstall": "cd backend && npm install --legacy-peer-deps && cd ../frontend && npm install --legacy-peer-deps",
     "build": "cd frontend && npm run build && cd ../backend && npm run build",
     "start": "cd backend && npm start",
     "dev": "cd backend && npm run dev"
