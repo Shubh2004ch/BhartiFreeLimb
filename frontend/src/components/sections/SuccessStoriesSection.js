@@ -36,12 +36,12 @@ const SuccessStoriesSection = () => {
         Read about the lives transformed by our prosthetics and support services
       </p>
 
-      {/* 5-column grid, full-size image, overlay content */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 md:gap-10 mb-0">
-        {stories.map((story) => (
+      {/* Single row grid with horizontal scroll */}
+      <div className="flex overflow-x-auto gap-8 md:gap-10 pb-4 mb-0 snap-x snap-mandatory">
+        {stories.slice(0, 4).map((story) => (
           <div
             key={story._id}
-            className="relative rounded-3xl shadow-2xl overflow-hidden flex flex-col group h-96 min-h-[380px] hover:shadow-pink-200/70 transition-shadow border border-pink-100"
+            className="relative rounded-3xl shadow-2xl overflow-hidden flex-shrink-0 w-[300px] h-96 min-h-[380px] hover:shadow-pink-200/70 transition-shadow border border-pink-100 snap-center"
           >
             {story.imagePath && (
               <img

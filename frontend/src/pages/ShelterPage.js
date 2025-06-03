@@ -9,16 +9,216 @@ import {
   IconButton,
   useTheme,
   useMediaQuery,
+  Card,
+  CardContent,
+  CardMedia,
+  Chip,
+  Button,
+  Fade,
 } from '@mui/material';
-import { Search, ArrowBack, Phone } from '@mui/icons-material';
+import {
+  Search,
+  ArrowBack,
+  Phone,
+  LocationOn,
+  People,
+  Home,
+  Email,
+  Directions,
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { ENDPOINTS } from '../constants';
-import ShelterCard from '../components/sections/ShelterSection';
+import { ENDPOINTS, getImageUrl } from '../constants';
 import api from '../services/api';
 
-const PhoneIcon = () => {
-  return <Phone sx={{ color: 'success.main', fontSize: 18, mr: 1 }} />;
+// Shelter Card Component
+const ShelterCard = ({ shelter, index }) => {
+  const theme = useTheme();
+  
+  return (
+    <Fade in timeout={500} style={{ transitionDelay: `${index * 100}ms` }}>
+      <Card
+        sx={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          borderRadius: 4,
+          boxShadow: '0 6px 32px 0 rgba(56, 189, 248, 0.10), 0 1.5px 4px 0 rgba(0,0,0,0.06)',
+          backdropFilter: 'blur(3.5px)',
+          background: 'linear-gradient(120deg,rgba(236, 254, 255, 0.75) 80%,rgba(236, 254, 255, 0.93) 100%)',
+          overflow: 'hidden',
+          position: 'relative',
+          transition: 'transform 0.25s cubic-bezier(.4,0,.2,1), box-shadow 0.25s cubic-bezier(.4,0,.2,1)',
+          '&:hover': {
+            transform: 'translateY(-10px) scale(1.03)',
+            boxShadow: '0 10px 32px 0 rgba(59,130,246,0.18), 0 2px 8px 0 rgba(0,0,0,0.10)',
+          },
+        }}
+      >
+        <Box sx={{ position: 'relative', overflow: 'hidden' }}>
+          {shelter.images?.[0] && (
+            <CardMedia
+              component="img"
+              height="200"
+              image={getImageUrl(shelter.images[0])}
+              alt={shelter.name}
+              sx={{
+                objectFit: 'cover',
+                filter: 'brightness(0.97)',
+                borderTopLeftRadius: 18,
+                borderTopRightRadius: 18,
+                transition: 'filter 0.3s',
+                '&:hover': { filter: 'brightness(0.92)' },
+              }}
+            />
+          )}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 10,
+              right: 10,
+              bgcolor: 'rgba(255,255,255,0.94)',
+              px: 1.5,
+              py: 0.5,
+              borderRadius: '9999px',
+              display: 'flex',
+              alignItems: 'center',
+              boxShadow: '0 2px 8px 0 rgba(59,130,246,0.07)',
+            }}
+          >
+            <People sx={{ color: 'primary.main', fontSize: '1.1rem', mr: 0.5 }} />
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              {shelter.currentOccupancy}/{shelter.capacity}
+            </Typography>
+          </Box>
+          <Home
+            sx={{
+              position: 'absolute',
+              left: 10,
+              top: 10,
+              color: '#2563eb',
+              fontSize: 30,
+              opacity: 0.85,
+            }}
+          />
+        </Box>
+        <CardContent sx={{ flexGrow: 1, p: 3, display: 'flex', flexDirection: 'column' }}>
+          <Typography
+            variant="h6"
+            component="h3"
+            sx={{
+              fontWeight: 'bold',
+              mb: 2,
+              color: 'primary.main',
+              fontSize: '1.17rem',
+              letterSpacing: 0.1,
+            }}
+          >
+            {shelter.name}
+          </Typography>
+          
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+            <LocationOn sx={{ color: 'info.main', fontSize: '1.15rem', mr: 0.7 }} />
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.97rem' }}>
+              {shelter.address}, {shelter.city}, {shelter.state}
+            </Typography>
+          </Box>
+
+          {shelter.contactNumber && (
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+              <Phone sx={{ color: 'success.main', fontSize: '1.15rem', mr: 0.7 }} />
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.97rem' }}>
+                {shelter.contactNumber}
+              </Typography>
+            </Box>
+          )}
+
+          {shelter.email && (
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+              <Email sx={{ color: 'warning.main', fontSize: '1.15rem', mr: 0.7 }} />
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.97rem' }}>
+                {shelter.email}
+              </Typography>
+            </Box>
+          )}
+
+          {shelter.description && (
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mb: 2, fontSize: '0.97rem', fontStyle: 'italic' }}
+            >
+              {shelter.description}
+            </Typography>
+          )}
+
+          {shelter.facilities && shelter.facilities.length > 0 && (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8, mb: 2 }}>
+              {shelter.facilities.map((facility, idx) => (
+                <Chip
+                  key={idx}
+                  label={facility}
+                  size="small"
+                  sx={{
+                    bgcolor: 'primary.light',
+                    color: 'primary.contrastText',
+                    fontSize: '0.75rem',
+                    height: '24px',
+                    fontWeight: 500,
+                  }}
+                />
+              ))}
+            </Box>
+          )}
+
+          <Box sx={{ display: 'flex', gap: 1, mt: 'auto' }}>
+            {shelter.contactNumber && (
+              <Button
+                variant="contained"
+                startIcon={<Phone />}
+                size="small"
+                fullWidth
+                href={`tel:${shelter.contactNumber}`}
+                sx={{
+                  bgcolor: 'success.main',
+                  color: 'white',
+                  fontWeight: 600,
+                  letterSpacing: 0.5,
+                  py: 0.8,
+                  '&:hover': { bgcolor: 'success.dark' },
+                }}
+              >
+                Call
+              </Button>
+            )}
+            <Button
+              variant="outlined"
+              startIcon={<Directions />}
+              size="small"
+              fullWidth
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                `${shelter.address}, ${shelter.city}, ${shelter.state}`
+              )}`}
+              target="_blank"
+              sx={{
+                borderColor: 'info.light',
+                color: 'info.main',
+                fontWeight: 600,
+                letterSpacing: 0.5,
+                py: 0.8,
+                '&:hover': {
+                  bgcolor: 'info.light',
+                  borderColor: 'info.main',
+                  color: 'white',
+                },
+              }}
+            >
+              Directions
+            </Button>
+          </Box>
+        </CardContent>
+      </Card>
+    </Fade>
+  );
 };
 
 const ShelterPage = () => {
@@ -47,10 +247,10 @@ const ShelterPage = () => {
   const filteredShelters = shelters.filter(shelter => {
     const searchLower = searchQuery.toLowerCase();
     return (
-      shelter.name.toLowerCase().includes(searchLower) ||
-      shelter.address.toLowerCase().includes(searchLower) ||
-      shelter.city.toLowerCase().includes(searchLower) ||
-      shelter.state.toLowerCase().includes(searchLower)
+      shelter.name?.toLowerCase().includes(searchLower) ||
+      shelter.address?.toLowerCase().includes(searchLower) ||
+      shelter.city?.toLowerCase().includes(searchLower) ||
+      shelter.state?.toLowerCase().includes(searchLower)
     );
   });
 
@@ -90,7 +290,7 @@ const ShelterPage = () => {
               WebkitTextFillColor: 'transparent',
             }}
           >
-            All Shelters
+            Free Homeless Shelters
           </Typography>
           <TextField
             fullWidth
@@ -123,32 +323,7 @@ const ShelterPage = () => {
         <Grid container spacing={4}>
           {filteredShelters.map((shelter, index) => (
             <Grid item xs={12} sm={6} md={4} key={shelter._id}>
-              <ShelterCard item={shelter} index={index}>
-                {shelter.phone && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <PhoneIcon />
-                    <Typography variant="body2" sx={{ color: '#475569' }}>
-                      {shelter.phone}
-                    </Typography>
-                  </Box>
-                )}
-                {shelter.contactNumber && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <PhoneIcon />
-                    <Typography variant="body2" sx={{ color: '#475569' }}>
-                      {shelter.contactNumber}
-                    </Typography>
-                  </Box>
-                )}
-                {shelter.email && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <PhoneIcon />
-                    <Typography variant="body2" sx={{ color: '#475569' }}>
-                      {shelter.email}
-                    </Typography>
-                  </Box>
-                )}
-              </ShelterCard>
+              <ShelterCard shelter={shelter} index={index} />
             </Grid>
           ))}
         </Grid>

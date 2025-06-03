@@ -287,35 +287,19 @@ const FoodStallSection = () => {
           </Typography>
         </Box>
 
-        <Box sx={{ 
-          display: 'flex', 
-          overflowX: 'auto', 
-          gap: 2, 
-          pb: 4,
-          '&::-webkit-scrollbar': {
-            height: '8px',
-          },
-          '&::-webkit-scrollbar-track': {
-            background: '#f1f1f1',
-            borderRadius: '4px',
-          },
-          '&::-webkit-scrollbar-thumb': {
-            background: '#888',
-            borderRadius: '4px',
-            '&:hover': {
-              background: '#555',
-            },
-          },
-        }}>
-          {items.slice(0, 6).map((item, index) => (
-            <Box key={item._id} sx={{ minWidth: { xs: '100%', sm: '280px' }, flexShrink: 0 }}>
-              <FoodStallCard 
-                item={item}
-                index={index}
-              />
-            </Box>
+        <Grid
+          container
+          spacing={5}
+          justifyContent="center"
+          alignItems="stretch"
+          sx={{ overflowX: 'auto', flexWrap: 'nowrap', pb: 2 }}
+        >
+          {items.slice(0, 3).map((item, index) => (
+            <Grid item key={item._id} sx={{ minWidth: 320 }}>
+              <FoodStallCard item={item} index={index} />
+            </Grid>
           ))}
-        </Box>
+        </Grid>
 
         <Box sx={{ 
           display: 'flex', 

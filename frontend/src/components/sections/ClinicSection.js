@@ -337,9 +337,10 @@ const ClinicSection = () => {
           spacing={5}
           justifyContent="center"
           alignItems="stretch"
+          sx={{ overflowX: 'auto', flexWrap: 'nowrap', pb: 2 }}
         >
-          {items.map((item, index) => (
-            <Grid item xs={12} sm={6} md={4} key={item._id}>
+          {items.slice(0, 3).map((item, index) => (
+            <Grid item key={item._id} sx={{ minWidth: 320 }}>
               <ClinicCard item={item} index={index} />
             </Grid>
           ))}
