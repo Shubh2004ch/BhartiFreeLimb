@@ -95,20 +95,33 @@ const MediaManager = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-      const formDataToSend = new FormData();
+    const formDataToSend = new FormData();
     
-    Object.keys(formData).forEach((key) => {
-        if (formData[key] !== null) {
-          formDataToSend.append(key, formData[key]);
-        }
-      });
+    // Add title and description
+    formDataToSend.append('title', formData.title);
+    formDataToSend.append('description', formData.description);
+    formDataToSend.append('type', formData.type);
+
+    // Add file if present
+    if (formData.file) {
+      formDataToSend.append('file', formData.file);
+    }
 
     try {
       if (editingMedia) {
-        await api.put(`${ENDPOINTS.MEDIA}/${editingMedia._id}`, formDataToSend);
+        await api.put(`${ENDPOINTS.MEDIA}/${editingMedia._id}`, formDataToSend, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
         setSuccess('Media updated successfully');
       } else {
-        await api.post(ENDPOINTS.MEDIA, formDataToSend);
+        const response = await api.post(ENDPOINTS.MEDIA, formDataToSend, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        console.log('Upload response:', response);
         setSuccess('Media added successfully');
       }
       fetchMedia();

@@ -4,13 +4,14 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 // Base URLs
 const getBaseUrl = () => {
   if (process.env.NODE_ENV === 'production') {
-    return 'https://www.bharti-freelimbs.com';
+    // Use the current origin in production
+    return window.location.origin;
   }
   // Check if we're using ngrok
   if (window.location.hostname.includes('ngrok')) {
     return window.location.origin;
   }
-  return 'http://localhost:5000';
+  return 'http://localhost:5001'; // Updated port to match backend
 };
 
 // S3 Configuration
