@@ -4,14 +4,13 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 // Base URLs
 const getBaseUrl = () => {
   if (process.env.NODE_ENV === 'production') {
-    // Use the current origin in production
-    return window.location.origin;
+    return 'https://www.bharti-freelimbs.com';
   }
   // Check if we're using ngrok
   if (window.location.hostname.includes('ngrok')) {
     return window.location.origin;
   }
-  return 'http://localhost:5001'; // Updated port to match backend
+  return 'http://localhost:5000';
 };
 
 // S3 Configuration
@@ -59,5 +58,5 @@ export const getImageUrl = (imagePath) => {
 };
 
 // Contact Information
-export const CONTACT_PHONE = '+1 (800) 555-1234';
-export const CONTACT_ADDRESS = '123 Freedom Avenue, Mobility City'; 
+export const CONTACT_PHONE = '8273851800';
+export const CONTACT_ADDRESS = 'shubh2004ch@gmail.com'; 

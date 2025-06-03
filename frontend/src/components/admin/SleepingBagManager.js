@@ -108,18 +108,38 @@ const SleepingBagManager = () => {
     e.preventDefault();
     const formDataToSend = new FormData();
     
-    Object.keys(formData).forEach((key) => {
-      if (formData[key] !== null) {
-        formDataToSend.append(key, formData[key]);
-      }
-    });
+    // Add all form fields to FormData
+    formDataToSend.append('name', formData.name);
+    formDataToSend.append('location', formData.location);
+    formDataToSend.append('description', formData.description);
+    formDataToSend.append('contactNumber', formData.contactNumber);
+    formDataToSend.append('availability', formData.availability);
+    formDataToSend.append('quantity', formData.quantity);
+
+    // Add image only if a new one is selected
+    if (formData.image) {
+      formDataToSend.append('image', formData.image);
+    }
 
     try {
+      console.log('Submitting form data:', {
+        ...formData,
+        image: formData.image ? 'File present' : 'No file'
+      });
+
       if (editingItem) {
-        await api.put(`${ENDPOINTS.SLEEPING_BAGS}/${editingItem._id}`, formDataToSend);
+        await api.put(`${ENDPOINTS.SLEEPING_BAGS}/${editingItem._id}`, formDataToSend, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
         setSuccess('Sleeping bag updated successfully');
       } else {
-        await api.post(ENDPOINTS.SLEEPING_BAGS, formDataToSend);
+        await api.post(ENDPOINTS.SLEEPING_BAGS, formDataToSend, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
         setSuccess('Sleeping bag added successfully');
       }
       fetchSleepingBags();

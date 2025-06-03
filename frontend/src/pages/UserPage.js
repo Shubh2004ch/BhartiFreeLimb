@@ -5,7 +5,8 @@ import {
   LocationOn,
   Phone,
   Star,
-  PlayCircle
+  PlayCircle,
+  Email
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -374,7 +375,7 @@ function UserPage() {
                     {CONTACT_PHONE}
                   </p>
                   <p className="flex items-center text-slate-300">
-                    <LocationOn className="mr-2" />
+                    <Email className="mr-2" />
                     {CONTACT_ADDRESS}
                   </p>
                 </div>
