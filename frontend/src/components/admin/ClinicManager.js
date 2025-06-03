@@ -31,6 +31,7 @@ import {
 } from '@mui/icons-material';
 import { ENDPOINTS, getImageUrl } from '../../constants';
 import api from '../../services/api';
+import { clinicService } from '../../services/api';
 
 const ClinicManager = () => {
   const [clinics, setClinics] = useState([]);
@@ -56,7 +57,7 @@ const ClinicManager = () => {
   const fetchClinics = async () => {
     setLoading(true);
     try {
-      const response = await api.get(ENDPOINTS.CLINICS);
+      const response = await clinicService.getClinics();
       setClinics(response.data);
       setError('');
     } catch (error) {
@@ -114,17 +115,19 @@ const ClinicManager = () => {
           .map(service => service.trim())
           .filter(service => service);
         formDataToSend.append(key, JSON.stringify(servicesArray));
-      } else if (formData[key] !== null) {
+      } else if (key === 'image' && formData[key]) {
+        formDataToSend.append('image', formData[key]);
+      } else if (formData[key] !== null && key !== 'image') {
         formDataToSend.append(key, formData[key]);
       }
     });
 
     try {
       if (editingClinic) {
-        await api.put(`${ENDPOINTS.CLINICS}/${editingClinic._id}`, formDataToSend);
+        await clinicService.updateClinic(editingClinic._id, formDataToSend);
         setSuccess('Clinic updated successfully');
       } else {
-        await api.post(ENDPOINTS.CLINICS, formDataToSend);
+        await clinicService.createClinic(formDataToSend);
         setSuccess('Clinic added successfully');
       }
       fetchClinics();
@@ -138,7 +141,7 @@ const ClinicManager = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this clinic?')) {
       try {
-        await api.delete(`${ENDPOINTS.CLINICS}/${id}`);
+        await clinicService.deleteClinic(id);
         setSuccess('Clinic deleted successfully');
         fetchClinics();
       } catch (error) {

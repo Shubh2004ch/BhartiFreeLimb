@@ -17,18 +17,26 @@ const upload = multer({
   storage: multerS3({
         s3: s3Client,
         bucket: process.env.AWS_BUCKET_NAME || 'bhartiallmedia',
+        acl: 'public-read',
         contentType: multerS3.AUTO_CONTENT_TYPE,
         metadata: function (req, file, cb) {
+          console.log('Processing file:', file.originalname);
           cb(null, { fieldName: file.fieldname });
         },
         key: function (req, file, cb) {
-      // Clean the original filename to remove any path information
-      const originalname = path.basename(file.originalname);
-          const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-      const safeFileName = originalname.replace(/\s+/g, '_');
-      const fullPath = `uploads/${uniqueSuffix}-${safeFileName}`;
-          cb(null, fullPath);
-        },
+      try {
+        // Clean the original filename to remove any path information
+        const originalname = path.basename(file.originalname);
+        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+        const safeFileName = originalname.replace(/\s+/g, '_');
+        const fullPath = `uploads/${uniqueSuffix}-${safeFileName}`;
+        console.log('Generated S3 key:', fullPath);
+        cb(null, fullPath);
+      } catch (error) {
+        console.error('Error generating S3 key:', error);
+        cb(error);
+      }
+    },
   }),
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB limit

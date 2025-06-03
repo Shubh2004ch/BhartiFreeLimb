@@ -1,6 +1,4 @@
 const Shelter = require('../models/Shelter');
-const path = require('path');
-const fs = require('fs');
 
 // Get all shelters
 exports.getAllShelters = async (req, res) => {
@@ -32,22 +30,14 @@ exports.createShelter = async (req, res) => {
     
     // Handle uploaded files
     if (req.files && req.files.length > 0) {
-      shelterData.images = req.files.map(file => `/uploads/${file.filename}`);
+      shelterData.images = req.files.map(file => file.location); // Using location instead of path for S3
     }
 
     const shelter = new Shelter(shelterData);
     const newShelter = await shelter.save();
     res.status(201).json(newShelter);
   } catch (error) {
-    // If there's an error, delete any uploaded files
-    if (req.files) {
-      req.files.forEach(file => {
-        const filePath = path.join(__dirname, '..', 'uploads', file.filename);
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
-      });
-    }
+    console.error('Error creating shelter:', error);
     res.status(400).json({ message: error.message });
   }
 };
@@ -66,20 +56,8 @@ exports.updateShelter = async (req, res) => {
     if (req.files && req.files.length > 0) {
       // Keep existing images if not being replaced
       const existingImages = updateData.keepImages ? updateData.keepImages.split(',') : [];
-      const newImages = req.files.map(file => `/uploads/${file.filename}`);
+      const newImages = req.files.map(file => file.location); // Using location instead of path for S3
       updateData.images = [...existingImages, ...newImages];
-
-      // Delete old images that are being replaced
-      if (shelter.images) {
-        shelter.images.forEach(imagePath => {
-          if (!existingImages.includes(imagePath)) {
-            const fullPath = path.join(__dirname, '..', imagePath);
-            if (fs.existsSync(fullPath)) {
-              fs.unlinkSync(fullPath);
-            }
-          }
-        });
-      }
     }
 
     Object.assign(shelter, updateData);
@@ -88,15 +66,7 @@ exports.updateShelter = async (req, res) => {
     const updatedShelter = await shelter.save();
     res.json(updatedShelter);
   } catch (error) {
-    // If there's an error, delete any uploaded files
-    if (req.files) {
-      req.files.forEach(file => {
-        const filePath = path.join(__dirname, '..', 'uploads', file.filename);
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
-      });
-    }
+    console.error('Error updating shelter:', error);
     res.status(400).json({ message: error.message });
   }
 };
@@ -107,16 +77,6 @@ exports.deleteShelter = async (req, res) => {
     const shelter = await Shelter.findById(req.params.id);
     if (!shelter) {
       return res.status(404).json({ message: 'Shelter not found' });
-    }
-
-    // Delete associated images
-    if (shelter.images && shelter.images.length > 0) {
-      shelter.images.forEach(imagePath => {
-        const fullPath = path.join(__dirname, '..', imagePath);
-        if (fs.existsSync(fullPath)) {
-          fs.unlinkSync(fullPath);
-        }
-      });
     }
 
     await shelter.deleteOne();

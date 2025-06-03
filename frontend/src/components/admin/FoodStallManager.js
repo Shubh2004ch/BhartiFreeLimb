@@ -31,6 +31,7 @@ import {
 import axios from 'axios';
 import { ENDPOINTS, getImageUrl } from '../../constants';
 import api from '../../services/api';
+import { foodStallService } from '../../services/api';
 
 // Skeleton loader for nicely animated loading state
 const FoodStallSkeleton = () => (
@@ -126,32 +127,55 @@ const FoodStallManager = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formDataToSend = new FormData();
-    Object.keys(formData).forEach((key) => {
-      if (formData[key] !== null) {
-        formDataToSend.append(key, formData[key]);
+    
+    // Add all text fields
+    const textFields = ['name', 'location', 'description', 'contactNumber', 'operatingHours'];
+    textFields.forEach(field => {
+      if (formData[field]) {
+        formDataToSend.append(field, formData[field]);
       }
     });
 
+    // Add image file with the correct field name 'image'
+    if (formData.image) {
+      console.log('Image file being added:', formData.image);
+      formDataToSend.append('image', formData.image);
+    } else {
+      console.log('No image file found in form data');
+    }
+
+    // Log the FormData contents
+    console.log('FormData entries:');
+    for (let pair of formDataToSend.entries()) {
+      console.log(pair[0] + ': ' + pair[1]);
+    }
+
     try {
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      };
+
       if (editingStall) {
-        await axios.put(
-          `${ENDPOINTS.FOOD_STALLS}/${editingStall._id}`,
-          formDataToSend
-        );
+        console.log('Updating food stall with ID:', editingStall._id);
+        await foodStallService.updateFoodStall(editingStall._id, formDataToSend);
       } else {
-        await axios.post(ENDPOINTS.FOOD_STALLS, formDataToSend);
+        console.log('Creating new food stall');
+        await foodStallService.createFoodStall(formDataToSend);
       }
       fetchFoodStalls();
       handleClose();
     } catch (error) {
       console.error('Error saving food stall:', error);
+      console.error('Error details:', error.response?.data);
     }
   };
 
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this food stall?')) {
       try {
-        await axios.delete(`${ENDPOINTS.FOOD_STALLS}/${id}`);
+        await foodStallService.deleteFoodStall(id);
         fetchFoodStalls();
       } catch (error) {
         console.error('Error deleting food stall:', error);

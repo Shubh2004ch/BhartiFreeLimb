@@ -21,11 +21,12 @@ exports.createClinic = async (req, res) => {
       contactNumber,
       operatingHours,
       services: services ? services.split(',').map(service => service.trim()) : [],
-      imagePath: req.file ? req.file.path.replace(/\\/g, '/') : undefined
+      imagePath: req.file ? req.file.location : undefined,
     });
     const savedClinic = await clinic.save();
     res.status(201).json(savedClinic);
   } catch (error) {
+    console.error('Error creating clinic:', error);
     res.status(400).json({ message: error.message });
   }
 };
@@ -43,7 +44,7 @@ exports.updateClinic = async (req, res) => {
       services: services ? services.split(',').map(service => service.trim()) : []
     };
     if (req.file) {
-      updateData.imagePath = req.file.path.replace(/\\/g, '/');
+      updateData.imagePath = req.file.location;
     }
     const clinic = await Clinic.findByIdAndUpdate(
       req.params.id,
@@ -55,6 +56,7 @@ exports.updateClinic = async (req, res) => {
     }
     res.json(clinic);
   } catch (error) {
+    console.error('Error updating clinic:', error);
     res.status(400).json({ message: error.message });
   }
 };

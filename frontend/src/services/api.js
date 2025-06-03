@@ -95,8 +95,22 @@ export const mediaService = {
 // Review Service
 export const reviewService = {
   getReviews: () => api.get(ENDPOINTS.REVIEWS),
-  createReview: (data) => api.post(ENDPOINTS.REVIEWS, data),
-  updateReview: (id, data) => api.put(`${ENDPOINTS.REVIEWS}/${id}`, data),
+  createReview: (data) => {
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    };
+    return api.post(ENDPOINTS.REVIEWS, data, config);
+  },
+  updateReview: (id, data) => {
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    };
+    return api.put(`${ENDPOINTS.REVIEWS}/${id}`, data, config);
+  },
   deleteReview: (id) => api.delete(`${ENDPOINTS.REVIEWS}/${id}`),
 };
 
@@ -104,8 +118,22 @@ export const reviewService = {
 export const foodStallService = {
   getFoodStalls: () => api.get(ENDPOINTS.FOOD_STALLS),
   getFoodStall: (id) => api.get(`${ENDPOINTS.FOOD_STALLS}/${id}`),
-  createFoodStall: (data) => api.post(ENDPOINTS.FOOD_STALLS, data),
-  updateFoodStall: (id, data) => api.put(`${ENDPOINTS.FOOD_STALLS}/${id}`, data),
+  createFoodStall: (data) => {
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    };
+    return api.post(ENDPOINTS.FOOD_STALLS, data, config);
+  },
+  updateFoodStall: (id, data) => {
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    };
+    return api.put(`${ENDPOINTS.FOOD_STALLS}/${id}`, data, config);
+  },
   deleteFoodStall: (id) => api.delete(`${ENDPOINTS.FOOD_STALLS}/${id}`),
 };
 
@@ -113,8 +141,22 @@ export const foodStallService = {
 export const clinicService = {
   getClinics: () => api.get(ENDPOINTS.CLINICS),
   getClinic: (id) => api.get(`${ENDPOINTS.CLINICS}/${id}`),
-  createClinic: (data) => api.post(ENDPOINTS.CLINICS, data),
-  updateClinic: (id, data) => api.put(`${ENDPOINTS.CLINICS}/${id}`, data),
+  createClinic: (data) => {
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    };
+    return api.post(ENDPOINTS.CLINICS, data, config);
+  },
+  updateClinic: (id, data) => {
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    };
+    return api.put(`${ENDPOINTS.CLINICS}/${id}`, data, config);
+  },
   deleteClinic: (id) => api.delete(`${ENDPOINTS.CLINICS}/${id}`),
 };
 
@@ -131,8 +173,22 @@ export const sleepingBagService = {
 export const waterPondService = {
   getWaterPonds: () => api.get(ENDPOINTS.WATER_PONDS),
   getWaterPond: (id) => api.get(`${ENDPOINTS.WATER_PONDS}/${id}`),
-  createWaterPond: (data) => api.post(ENDPOINTS.WATER_PONDS, data),
-  updateWaterPond: (id, data) => api.put(`${ENDPOINTS.WATER_PONDS}/${id}`, data),
+  createWaterPond: (data) => {
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    };
+    return api.post(ENDPOINTS.WATER_PONDS, data, config);
+  },
+  updateWaterPond: (id, data) => {
+    const config = {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    };
+    return api.put(`${ENDPOINTS.WATER_PONDS}/${id}`, data, config);
+  },
   deleteWaterPond: (id) => api.delete(`${ENDPOINTS.WATER_PONDS}/${id}`),
 };
 

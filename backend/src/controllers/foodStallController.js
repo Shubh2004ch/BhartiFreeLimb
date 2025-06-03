@@ -20,11 +20,12 @@ exports.createFoodStall = async (req, res) => {
       description,
       contactNumber,
       operatingHours,
-      imagePath: req.file ? req.file.path.replace(/\\/g, '/') : undefined
+      imagePath: req.file ? req.file.location : undefined
     });
     const savedFoodStall = await foodStall.save();
     res.status(201).json(savedFoodStall);
   } catch (error) {
+    console.error('Error creating food stall:', error);
     res.status(400).json({ message: error.message });
   }
 };
@@ -41,7 +42,7 @@ exports.updateFoodStall = async (req, res) => {
       operatingHours
     };
     if (req.file) {
-      updateData.imagePath = req.file.path.replace(/\\/g, '/');
+      updateData.imagePath = req.file.location;
     }
     const foodStall = await FoodStall.findByIdAndUpdate(
       req.params.id,
@@ -53,6 +54,7 @@ exports.updateFoodStall = async (req, res) => {
     }
     res.json(foodStall);
   } catch (error) {
+    console.error('Error updating food stall:', error);
     res.status(400).json({ message: error.message });
   }
 };

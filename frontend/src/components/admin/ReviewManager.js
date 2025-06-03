@@ -28,7 +28,7 @@ import {
   Comment,
 } from '@mui/icons-material';
 import { ENDPOINTS, getImageUrl } from '../../constants';
-import api from '../../services/api';
+import { reviewService } from '../../services/api';
 
 const ReviewManager = () => {
   const [reviews, setReviews] = useState([]);
@@ -51,7 +51,7 @@ const ReviewManager = () => {
   const fetchReviews = async () => {
     setLoading(true);
     try {
-      const response = await api.get(ENDPOINTS.REVIEWS);
+      const response = await reviewService.getReviews();
       setReviews(response.data);
       setError('');
     } catch (error) {
@@ -94,20 +94,27 @@ const ReviewManager = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formDataToSend = new FormData();
+    
+    if (!formData.name || !formData.text || !formData.rating) {
+      setError('Please fill in all required fields');
+      return;
+    }
 
-    Object.keys(formData).forEach((key) => {
-        if (formData[key] !== null) {
-          formDataToSend.append(key, formData[key]);
-        }
-      });
+    const formDataToSend = new FormData();
+    formDataToSend.append('name', formData.name);
+    formDataToSend.append('text', formData.text);
+    formDataToSend.append('rating', formData.rating);
+    
+    if (formData.image) {
+      formDataToSend.append('image', formData.image);
+    }
 
     try {
       if (editingReview) {
-        await api.put(`${ENDPOINTS.REVIEWS}/${editingReview._id}`, formDataToSend);
+        await reviewService.updateReview(editingReview._id, formDataToSend);
         setSuccess('Review updated successfully');
       } else {
-        await api.post(ENDPOINTS.REVIEWS, formDataToSend);
+        await reviewService.createReview(formDataToSend);
         setSuccess('Review added successfully');
       }
       fetchReviews();
@@ -121,7 +128,7 @@ const ReviewManager = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this review?')) {
       try {
-        await api.delete(`${ENDPOINTS.REVIEWS}/${id}`);
+        await reviewService.deleteReview(id);
         setSuccess('Review deleted successfully');
         fetchReviews();
       } catch (error) {

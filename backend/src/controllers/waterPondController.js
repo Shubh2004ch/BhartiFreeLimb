@@ -30,12 +30,13 @@ exports.createWaterPond = async (req, res) => {
       name: req.body.name,
       location: req.body.location,
       contactNumber: req.body.contactNumber,
-      imagePath: req.file ? req.file.path : ''
+      imagePath: req.file ? req.file.location : undefined, // Using location instead of path for S3
     });
 
     const newWaterPond = await waterPond.save();
     res.status(201).json(newWaterPond);
   } catch (error) {
+    console.error('Error creating water pond:', error);
     res.status(400).json({ message: error.message });
   }
 };
@@ -53,18 +54,13 @@ exports.updateWaterPond = async (req, res) => {
     waterPond.contactNumber = req.body.contactNumber || waterPond.contactNumber;
     
     if (req.file) {
-      // Optional: Delete old image if it exists
-      // if (waterPond.imagePath) {
-      //   fs.unlink(path.join(__dirname, '..', waterPond.imagePath), (err) => {
-      //     if (err) console.error('Error deleting old image:', err);
-      //   });
-      // }
-      waterPond.imagePath = req.file.path;
+      waterPond.imagePath = req.file.location; // Using location instead of path for S3
     }
 
     const updatedWaterPond = await waterPond.save();
     res.json(updatedWaterPond);
   } catch (error) {
+    console.error('Error updating water pond:', error);
     res.status(400).json({ message: error.message });
   }
 };

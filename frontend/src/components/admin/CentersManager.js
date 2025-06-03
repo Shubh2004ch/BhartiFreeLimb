@@ -78,7 +78,7 @@ const CentersManager = () => {
   const [formData, setFormData] = useState({
     name: '',
     address: '',
-    phone: '',
+    contact: '',
     email: '',
     description: '',
     imagePath: null,
@@ -158,7 +158,7 @@ const CentersManager = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.address || !formData.phone || !formData.email) {
+    if (!formData.name || !formData.address || !formData.contact || !formData.email) {
       alert('Please fill all required fields!');
       return;
     }
@@ -169,7 +169,7 @@ const CentersManager = () => {
       // Append basic fields
       formDataToSend.append('name', formData.name);
       formDataToSend.append('address', formData.address);
-      formDataToSend.append('phone', formData.phone);
+      formDataToSend.append('contact', formData.contact);
       formDataToSend.append('email', formData.email);
       formDataToSend.append('description', formData.description || '');
 
@@ -184,7 +184,7 @@ const CentersManager = () => {
           if (file instanceof File) {
             formDataToSend.append('beneficiaryImages', file);
           }
-          });
+        });
       }
 
       const config = {
@@ -214,7 +214,7 @@ const CentersManager = () => {
     setFormData({
       name: center.name || '',
       address: center.address || '',
-      phone: center.phone || '',
+      contact: center.contact || '',
       email: center.email || '',
       description: center.description || '',
       imagePath: null,
@@ -246,7 +246,7 @@ const CentersManager = () => {
     setFormData({
       name: '',
       address: '',
-      phone: '',
+      contact: '',
       email: '',
       description: '',
       imagePath: null,
@@ -379,7 +379,7 @@ const CentersManager = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                       <Phone sx={{ color: 'primary.main', mr: 1, fontSize: '1.2rem' }} />
                       <Typography variant="body2" color="text.secondary">
-                        {center.phone}
+                        {center.contact}
                       </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -484,11 +484,13 @@ const CentersManager = () => {
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="Phone"
-                  name="phone"
-                  value={formData.phone}
+                  label="Contact"
+                  name="contact"
+                  value={formData.contact}
                   onChange={handleInputChange}
                   required
+                  margin="normal"
+                  helperText="Enter contact number"
                 />
               </Grid>
               <Grid item xs={12} sm={6}>

@@ -21,11 +21,12 @@ exports.createSleepingBag = async (req, res) => {
       contactNumber,
       availability,
       quantity,
-      imagePath: req.file ? req.file.path.replace(/\\/g, '/') : undefined
+      imagePath: req.file ? req.file.location : undefined,
     });
     const savedSleepingBag = await sleepingBag.save();
     res.status(201).json(savedSleepingBag);
   } catch (error) {
+    console.error('Error creating sleeping bag:', error);
     res.status(400).json({ message: error.message });
   }
 };
@@ -43,7 +44,7 @@ exports.updateSleepingBag = async (req, res) => {
       quantity
     };
     if (req.file) {
-      updateData.imagePath = req.file.path.replace(/\\/g, '/');
+      updateData.imagePath = req.file.location;
     }
     const sleepingBag = await SleepingBag.findByIdAndUpdate(
       req.params.id,
@@ -55,6 +56,7 @@ exports.updateSleepingBag = async (req, res) => {
     }
     res.json(sleepingBag);
   } catch (error) {
+    console.error('Error updating sleeping bag:', error);
     res.status(400).json({ message: error.message });
   }
 };

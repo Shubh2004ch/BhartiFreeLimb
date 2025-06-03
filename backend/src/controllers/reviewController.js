@@ -13,22 +13,18 @@ exports.getAllReviews = async (req, res) => {
 // Create review (with optional image upload)
 exports.createReview = async (req, res) => {
   try {
-    
-    console.log('BODY:', req.body);
-    console.log('FILE:', req.file);
-    console.log(req);
     const { name, text, rating } = req.body;
 
-    console.log(req.body);
     const review = new Review({
       name,
       text,
       rating: Number(rating),
-      imagePath: req.file ? `uploads/${req.file.filename}` : undefined
+      imagePath: req.file ? req.file.location : undefined // Using location instead of path for S3
     });
     await review.save();
     res.status(201).json(review);
   } catch (error) {
+    console.error('Error creating review:', error);
     res.status(400).json({ message: error.message });
   }
 };

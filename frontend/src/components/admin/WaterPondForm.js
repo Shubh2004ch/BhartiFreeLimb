@@ -31,6 +31,7 @@ import {
 } from '@mui/icons-material';
 import { ENDPOINTS, getImageUrl } from '../../constants';
 import api from '../../services/api';
+import { waterPondService } from '../../services/api';
 
 const WaterPondForm = () => {
   const [waterPonds, setWaterPonds] = useState([]);
@@ -53,7 +54,7 @@ const WaterPondForm = () => {
   const fetchWaterPonds = async () => {
     setLoading(true);
     try {
-      const response = await api.get(ENDPOINTS.WATER_PONDS);
+      const response = await waterPondService.getWaterPonds();
       setWaterPonds(response.data);
       setError('');
     } catch (error) {
@@ -96,20 +97,23 @@ const WaterPondForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-      const formDataToSend = new FormData();
+    const formDataToSend = new FormData();
     
+    // Append all form fields
     Object.keys(formData).forEach((key) => {
-        if (formData[key] !== null) {
-          formDataToSend.append(key, formData[key]);
-        }
-      });
+      if (key === 'image' && formData[key]) {
+        formDataToSend.append('image', formData[key]);
+      } else if (formData[key] !== null && key !== 'image') {
+        formDataToSend.append(key, formData[key]);
+      }
+    });
 
     try {
       if (editingPond) {
-        await api.put(`${ENDPOINTS.WATER_PONDS}/${editingPond._id}`, formDataToSend);
+        await waterPondService.updateWaterPond(editingPond._id, formDataToSend);
         setSuccess('Water pond updated successfully');
       } else {
-        await api.post(ENDPOINTS.WATER_PONDS, formDataToSend);
+        await waterPondService.createWaterPond(formDataToSend);
         setSuccess('Water pond added successfully');
       }
       fetchWaterPonds();
@@ -123,13 +127,13 @@ const WaterPondForm = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this water pond?')) {
       try {
-        await api.delete(`${ENDPOINTS.WATER_PONDS}/${id}`);
+        await waterPondService.deleteWaterPond(id);
         setSuccess('Water pond deleted successfully');
         fetchWaterPonds();
       } catch (error) {
         console.error('Error deleting water pond:', error);
         setError('Failed to delete water pond');
-  }
+      }
     }
   };
 
