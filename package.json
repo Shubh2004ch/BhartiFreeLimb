@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "description": "Full stack application with React frontend and Node.js backend",
   "engines": {
-    "node": ">=16.0.0",
-    "npm": ">=8.0.0"
+    "node": "18.x"
   },
   "scripts": {
     "postinstall": "cd backend && npm install && cd ../frontend && npm install",
