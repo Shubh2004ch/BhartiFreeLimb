@@ -116,37 +116,39 @@ const SleepingBagManager = () => {
     formDataToSend.append('availability', formData.availability);
     formDataToSend.append('quantity', formData.quantity);
 
-    // Add image only if a new one is selected
+    // Add image with the correct field name 'file'
     if (formData.image) {
-      formDataToSend.append('image', formData.image);
+      formDataToSend.append('file', formData.image);
     }
 
     try {
       console.log('Submitting form data:', {
         ...formData,
-        image: formData.image ? 'File present' : 'No file'
+        file: formData.image ? 'File present' : 'No file'
       });
 
       if (editingItem) {
-        await api.put(`${ENDPOINTS.SLEEPING_BAGS}/${editingItem._id}`, formDataToSend, {
+        const response = await api.put(`${ENDPOINTS.SLEEPING_BAGS}/${editingItem._id}`, formDataToSend, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         });
+        console.log('Update response:', response);
         setSuccess('Sleeping bag updated successfully');
       } else {
-        await api.post(ENDPOINTS.SLEEPING_BAGS, formDataToSend, {
+        const response = await api.post(ENDPOINTS.SLEEPING_BAGS, formDataToSend, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         });
+        console.log('Create response:', response);
         setSuccess('Sleeping bag added successfully');
       }
       fetchSleepingBags();
       handleClose();
     } catch (error) {
-      console.error('Error saving sleeping bag:', error);
-      setError(error.response?.data?.message || 'Failed to save sleeping bag');
+      console.error('Error saving sleeping bag:', error.response || error);
+      setError(error.response?.data?.message || error.message || 'Failed to save sleeping bag');
     }
   };
 
