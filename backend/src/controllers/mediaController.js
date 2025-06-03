@@ -25,33 +25,26 @@ exports.uploadMedia = async (req, res) => {
   try {
     // Log the request for debugging
     console.log('Upload request body:', req.body);
-    console.log('Upload request file:', req.file);
+    console.log('Upload request files:', req.files);
 
-    // Validate file presence
-    if (!req.file) {
+    // Get the file from either 'media' or 'file' field
+    const uploadedFile = req.files?.media?.[0] || req.files?.file?.[0];
+
+    if (!uploadedFile) {
       return res.status(400).json({ 
         message: 'No file uploaded',
-        details: 'Please ensure you are sending a file in the request'
-      });
-    }
-
-    // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/quicktime'];
-    if (!allowedTypes.includes(req.file.mimetype)) {
-      return res.status(400).json({ 
-        message: 'Invalid file type',
-        details: `Allowed types are: ${allowedTypes.join(', ')}`
+        details: 'Please ensure you are sending a file with field name "media" or "file"'
       });
     }
 
     // Create media document
     const media = new Media({
-      title: req.body.title || req.file.originalname,
+      title: req.body.title || uploadedFile.originalname,
       description: req.body.description || '',
-      type: req.file.mimetype.startsWith('image/') ? 'image' : 'video',
-      path: req.file.key,
-      size: req.file.size,
-      mimeType: req.file.mimetype
+      type: uploadedFile.mimetype.startsWith('image/') ? 'image' : 'video',
+      path: uploadedFile.key,
+      size: uploadedFile.size,
+      mimeType: uploadedFile.mimetype
     });
 
     // Save to database
