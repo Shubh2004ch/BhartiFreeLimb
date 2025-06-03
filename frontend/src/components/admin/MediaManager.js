@@ -28,8 +28,9 @@ import {
   Movie,
   Info,
 } from '@mui/icons-material';
-import { ENDPOINTS, getImageUrl } from '../../constants';
+import { ENDPOINTS, getImageUrl, API_BASE_URL } from '../../constants';
 import api from '../../services/api';
+import { mediaService } from '../../services/api';
 
 const MediaManager = () => {
   const [media, setMedia] = useState([]);
@@ -46,13 +47,28 @@ const MediaManager = () => {
   });
 
   useEffect(() => {
+    checkApiHealth();
     fetchMedia();
   }, []);
+
+  const checkApiHealth = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/health`);
+      const data = await response.json();
+      console.log('API Health Check:', data);
+      if (!data.status === 'ok') {
+        setError('API is not healthy. Please try again later.');
+      }
+    } catch (error) {
+      console.error('API Health Check Error:', error);
+      setError('Unable to connect to the API. Please check your connection.');
+    }
+  };
 
   const fetchMedia = async () => {
     setLoading(true);
     try {
-      const response = await api.get(ENDPOINTS.MEDIA);
+      const response = await mediaService.getMedia();
       setMedia(response.data);
       setError('');
     } catch (error) {
@@ -108,6 +124,13 @@ const MediaManager = () => {
     }
 
     try {
+      console.log('Submitting media with formData:', {
+        title: formData.title,
+        description: formData.description,
+        type: formData.type,
+        hasFile: !!formData.file
+      });
+
       if (editingMedia) {
         await api.put(`${ENDPOINTS.MEDIA}/${editingMedia._id}`, formDataToSend, {
           headers: {
@@ -116,19 +139,15 @@ const MediaManager = () => {
         });
         setSuccess('Media updated successfully');
       } else {
-        const response = await api.post(ENDPOINTS.MEDIA, formDataToSend, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
+        const response = await mediaService.uploadMedia(formDataToSend);
         console.log('Upload response:', response);
         setSuccess('Media added successfully');
       }
       fetchMedia();
       handleClose();
     } catch (error) {
-      console.error('Error saving media:', error);
-      setError(error.response?.data?.message || 'Failed to save media');
+      console.error('Error saving media:', error.response || error);
+      setError(error.response?.data?.message || error.message || 'Failed to save media');
     }
   };
 

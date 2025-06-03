@@ -82,12 +82,13 @@ export const centerService = {
 export const mediaService = {
   getMedia: () => api.get(ENDPOINTS.MEDIA),
   uploadMedia: (formData) => {
+    console.log('Uploading media with formData:', formData);
     const config = {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     };
-    return api.post(ENDPOINTS.MEDIA + '/upload', formData, config);
+    return api.post(ENDPOINTS.MEDIA, formData, config);
   },
   deleteMedia: (id) => api.delete(`${ENDPOINTS.MEDIA}/${id}`),
 };
