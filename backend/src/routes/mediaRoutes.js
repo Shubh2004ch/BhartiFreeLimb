@@ -3,11 +3,15 @@ const router = express.Router();
 const mediaController = require('../controllers/mediaController');
 const upload = require('../middleware/upload');
 
-// Upload media - supporting both 'media' and 'file' field names
-router.post('/upload', upload.fields([
+// Configure upload middleware
+const uploadMiddleware = upload.fields([
   { name: 'media', maxCount: 1 },
   { name: 'file', maxCount: 1 }
-]), mediaController.uploadMedia);
+]);
+
+// Upload media - support both paths
+router.post('/', uploadMiddleware, mediaController.uploadMedia);
+router.post('/upload', uploadMiddleware, mediaController.uploadMedia);
 
 // Get all media
 router.get('/', mediaController.getAllMedia);
