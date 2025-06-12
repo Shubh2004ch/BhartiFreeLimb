@@ -154,7 +154,9 @@ const WaterPondsPage = () => {
                       },
                       bgcolor: 'rgba(255,255,255,0.93)',
                       backdropFilter: 'blur(3px)',
+                      cursor: 'pointer'
                     }}
+                    onClick={() => navigate(`/water-ponds/${pond._id}`)}
                   >
                     {pond.imagePath && (
                       <CardMedia

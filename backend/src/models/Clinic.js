@@ -8,6 +8,7 @@ const clinicSchema = new mongoose.Schema({
   contactNumber: String,
   operatingHours: String,
   services: [String],
+  images: [String],
   createdAt: { type: Date, default: Date.now }
 });
 

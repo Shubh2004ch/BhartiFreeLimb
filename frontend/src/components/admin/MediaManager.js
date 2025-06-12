@@ -28,7 +28,7 @@ import {
   Movie,
   Info,
 } from '@mui/icons-material';
-import { ENDPOINTS, getImageUrl, API_BASE_URL } from '../../constants';
+import { ENDPOINTS, getImageUrl, API_BASE_URL } from '../../config/constants';
 import api from '../../services/api';
 import { mediaService } from '../../services/api';
 

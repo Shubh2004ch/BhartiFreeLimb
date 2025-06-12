@@ -1,35 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Container,
-  Typography,
-  Box,
-  Card,
-  CardContent,
-  CardMedia,
-  Chip,
-  Skeleton,
-  Fade,
-  useTheme,
-  useMediaQuery,
-  Button,
-  Alert,
-  Rating
-} from '@mui/material';
-import {
-  LocationOn,
-  AccessTime,
-  Phone,
-  Directions,
-  Restaurant,
-  LocalDining,
-  Schedule,
-  Fastfood,
-  EmojiFoodBeverage,
-  ArrowForward
-} from '@mui/icons-material';
+import { Container, Typography, Box, Skeleton, Fade, useTheme, useMediaQuery, Alert, Button } from '@mui/material';
+import { LocalDining, ArrowForward } from '@mui/icons-material';
 import { ENDPOINTS, getImageUrl } from '../../constants';
 import { foodStallService } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
+import MainCard from '../MainCard';
 
 // Loading Skeleton Component
 const LoadingSkeleton = () => (
@@ -51,117 +26,6 @@ const LoadingSkeleton = () => (
     </Container>
   </Box>
 );
-
-// Food Stall Card Component
-const FoodStallCard = ({ item, index }) => {
-  const theme = useTheme();
-
-  return (
-    <Fade in timeout={500} style={{ transitionDelay: `${index * 100}ms` }}>
-      <Card 
-        sx={{ 
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          width: '250px',
-          mx: 'auto',
-          borderRadius: 3,
-          overflow: 'hidden',
-          transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-          '&:hover': {
-            transform: 'translateY(-8px)',
-            boxShadow: theme.shadows[8]
-          }
-        }}
-      >
-        <Box sx={{ position: 'relative' }}>
-          <CardMedia
-            component="img"
-            height="200"
-            image={getImageUrl(item.imagePath)}
-            alt={item.name}
-            sx={{
-              objectFit: 'cover',
-            }}
-          />
-          <Box 
-            sx={{ 
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.7) 100%)',
-            }}
-          />
-          <Box 
-            sx={{ 
-              position: 'absolute', 
-              top: 12, 
-              right: 12,
-              bgcolor: 'success.main',
-              color: 'white',
-              px: 2,
-              py: 0.5,
-              borderRadius: '9999px',
-              fontSize: '0.75rem',
-              fontWeight: 'bold',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.5,
-              boxShadow: 2
-            }}
-          >
-            <EmojiFoodBeverage sx={{ fontSize: '0.875rem' }} />
-            Free
-          </Box>
-        </Box>
-
-        <CardContent sx={{ flexGrow: 1, p: 2 }}>
-          <Typography variant="h6" component="h3" sx={{ 
-            fontWeight: 'bold', 
-            mb: 2,
-            fontSize: '1rem',
-            color: 'text.primary',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1
-          }}>
-            <Restaurant sx={{ color: 'primary.main', fontSize: '1.2rem' }} />
-            {item.name}
-          </Typography>
-          
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'flex-start', 
-            gap: 1,
-            bgcolor: 'grey.50',
-            p: 1,
-            borderRadius: 1
-          }}>
-            <LocationOn sx={{ 
-              color: 'primary.main', 
-              fontSize: '1.2rem',
-              flexShrink: 0,
-              mt: 0.2
-            }} />
-            <Typography 
-              variant="body2" 
-              sx={{ 
-                color: 'text.primary',
-                fontSize: '0.9rem',
-                lineHeight: 1.5,
-                fontWeight: 500
-              }}
-            >
-              {item.location}
-            </Typography>
-          </Box>
-        </CardContent>
-      </Card>
-    </Fade>
-  );
-};
 
 // Main Component
 export const FoodStallsSection = () => {
@@ -221,14 +85,14 @@ export const FoodStallsSection = () => {
   return (
     <Box 
       sx={{ 
-        py: 4, 
+        py: 6, 
         bgcolor: 'background.default',
         borderRadius: 4,
         boxShadow: '0 0 40px rgba(0,0,0,0.03)'
       }}
     >
       <Container maxWidth="lg">
-        <Box sx={{ textAlign: 'center', mb: 4 }}>
+        <Box sx={{ textAlign: 'center', mb: 6 }}>
           <Typography 
             variant="h4" 
             component="h2" 
@@ -248,16 +112,16 @@ export const FoodStallsSection = () => {
           <Typography 
             variant="subtitle1" 
             color="text.secondary"
-            sx={{ maxWidth: '600px', mx: 'auto', fontSize: '1rem' }}
+            sx={{ maxWidth: '600px', mx: 'auto', fontSize: '1.1rem' }}
           >
-            Find free food stalls near prosthetic centers providing nutritious meals
+            Find free food stalls providing nutritious meals to those in need
           </Typography>
         </Box>
 
         <Box sx={{ 
           display: 'flex', 
           overflowX: 'auto', 
-          gap: 2, 
+          gap: 3, 
           pb: 2,
           px: 1,
           '&::-webkit-scrollbar': {
@@ -276,20 +140,23 @@ export const FoodStallsSection = () => {
           },
         }}>
           {items.map((item, index) => (
-            <Box key={item._id} sx={{ minWidth: '250px', flexShrink: 0 }}>
-              <FoodStallCard 
-                item={item}
-                index={index}
-              />
+            <Box key={item._id} sx={{ minWidth: '320px', flexShrink: 0 }}>
+              <Fade in timeout={500} style={{ transitionDelay: `${index * 100}ms` }}>
+                <div>
+                  <MainCard
+                    image={getImageUrl(item.imagePath)}
+                    name={item.name}
+                    address={item.location}
+                    phone={item.contactNumber}
+                    onClick={() => navigate(`/food-stalls/${item._id}`)}
+                    className="h-full"
+                  />
+                </div>
+              </Fade>
             </Box>
           ))}
         </Box>
-
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'center',
-          mt: 4
-        }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
           <Button
             variant="contained"
             onClick={() => navigate('/food-stalls')}

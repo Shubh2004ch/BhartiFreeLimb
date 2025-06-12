@@ -48,6 +48,10 @@ const shelterSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  imagePath: {
+    type: String,
+    trim: true
+  },
   images: [{
     type: String,
     trim: true

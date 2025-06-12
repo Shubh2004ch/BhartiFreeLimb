@@ -27,7 +27,7 @@ import {
   Person,
   Comment,
 } from '@mui/icons-material';
-import { ENDPOINTS, getImageUrl } from '../../constants';
+import { ENDPOINTS, getImageUrl } from '../../config/constants';
 import { reviewService } from '../../services/api';
 
 const ReviewManager = () => {

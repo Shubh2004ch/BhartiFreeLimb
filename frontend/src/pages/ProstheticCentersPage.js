@@ -15,6 +15,7 @@ import {
   CardMedia,
   Alert,
   Button,
+  Fade,
 } from '@mui/material';
 import { Search, ArrowBack, LocationOn, Phone, Email } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
@@ -133,7 +134,7 @@ const ProstheticCentersPage = () => {
               WebkitTextFillColor: 'transparent',
             }}
           >
-            Prosthetic Centers
+            Prosthetic Centers are here to help you
           </Typography>
           <TextField
             fullWidth
@@ -199,42 +200,120 @@ const ProstheticCentersPage = () => {
           <Grid container spacing={4}>
             {filteredCenters.map((center) => (
               <Grid item xs={12} sm={6} md={4} key={center._id}>
-                <Card
-                  sx={{
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    borderRadius: 3,
-                    overflow: 'hidden',
-                    transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-                    cursor: 'pointer',
-                    '&:hover': {
-                      transform: 'translateY(-8px)',
-                      boxShadow: 6,
-                    },
-                  }}
-                >
-                  <CardMedia
-                    component="img"
-                    height="200"
-                    image={getImageUrl(center.imagePath)}
-                    alt={center.name}
-                  />
-                  <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                    <Typography
-                      variant="h6"
-                      component="h2"
-                      sx={{
-                        fontWeight: 700,
-                        mb: 2,
-                        fontSize: '1.25rem',
-                      }}
-                    >
-                      {center.name}
-                    </Typography>
-                    
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                      <LocationOn sx={{ color: 'primary.main', mr: 1, fontSize: '1.2rem' }} />
+                <Fade in={true} timeout={1000}>
+                  <Card
+                    sx={{
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      borderRadius: 3,
+                      overflow: 'hidden',
+                      transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        transform: 'translateY(-8px)',
+                        boxShadow: 6,
+                      },
+                    }}
+                  >
+                    <CardMedia
+                      component="img"
+                      height="200"
+                      image={getImageUrl(center.imagePath)}
+                      alt={center.name}
+                    />
+                    <CardContent sx={{ flexGrow: 1, p: 3 }}>
+                      <Typography
+                        variant="h6"
+                        component="h2"
+                        sx={{
+                          fontWeight: 700,
+                          mb: 2,
+                          fontSize: '1.25rem',
+                        }}
+                      >
+                        {center.name}
+                      </Typography>
+                      
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        <LocationOn sx={{ color: 'primary.main', mr: 1, fontSize: '1.2rem' }} />
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                          }}
+                        >
+                          {center.address}
+                        </Typography>
+                      </Box>
+
+                      {center.phone && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                          <Phone sx={{ color: 'success.main', mr: 1, fontSize: '1.2rem' }} />
+                          <Typography variant="body2" color="text.secondary">
+                            {center.phone}
+                          </Typography>
+                        </Box>
+                      )}
+
+                      {center.contact && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                          <Phone sx={{ color: 'success.main', mr: 1, fontSize: '1.2rem' }} />
+                          <Typography variant="body2" color="text.secondary">
+                            {center.contact}
+                          </Typography>
+                        </Box>
+                      )}
+
+                      {center.contactNumber && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                          <Phone sx={{ color: 'primary.main', fontSize: '1rem', mr: 1 }} />
+                          <Typography variant="body2" color="text.secondary">
+                            {center.contactNumber || 'Contact not available'}
+                          </Typography>
+                        </Box>
+                      )}
+
+                      {center.email && (
+                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                          <Email sx={{ color: 'primary.main', mr: 1, fontSize: '1.2rem' }} />
+                          <Typography variant="body2" color="text.secondary">
+                            {center.email}
+                          </Typography>
+                        </Box>
+                      )}
+
+                      {center.features && center.features.length > 0 && (
+                        <Box sx={{ mb: 2 }}>
+                          <Typography variant="subtitle2" color="primary" sx={{ mb: 1, fontWeight: 600 }}>
+                            Features:
+                          </Typography>
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                            {center.features.map((feature, index) => (
+                              <Typography
+                                key={index}
+                                variant="body2"
+                                sx={{
+                                  bgcolor: 'primary.light',
+                                  color: 'primary.main',
+                                  px: 1,
+                                  py: 0.5,
+                                  borderRadius: 1,
+                                  fontSize: '0.75rem',
+                                }}
+                              >
+                                {feature}
+                              </Typography>
+                            ))}
+                          </Box>
+                        </Box>
+                      )}
+
                       <Typography
                         variant="body2"
                         color="text.secondary"
@@ -242,119 +321,43 @@ const ProstheticCentersPage = () => {
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
                           display: '-webkit-box',
-                          WebkitLineClamp: 2,
+                          WebkitLineClamp: 3,
                           WebkitBoxOrient: 'vertical',
+                          mb: 2,
                         }}
                       >
-                        {center.address}
+                        {center.description}
                       </Typography>
-                    </Box>
 
-                    {center.phone && (
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                        <Phone sx={{ color: 'success.main', mr: 1, fontSize: '1.2rem' }} />
-                        <Typography variant="body2" color="text.secondary">
-                          {center.phone}
-                        </Typography>
-                      </Box>
-                    )}
-
-                    {center.contact && (
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                        <Phone sx={{ color: 'success.main', mr: 1, fontSize: '1.2rem' }} />
-                        <Typography variant="body2" color="text.secondary">
-                          {center.contact}
-                        </Typography>
-                      </Box>
-                    )}
-
-                    {center.contactNumber && (
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                        <Phone sx={{ color: 'success.main', mr: 1, fontSize: '1.2rem' }} />
-                        <Typography variant="body2" color="text.secondary">
-                          {center.contactNumber}
-                        </Typography>
-                      </Box>
-                    )}
-
-                    {center.email && (
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                        <Email sx={{ color: 'primary.main', mr: 1, fontSize: '1.2rem' }} />
-                        <Typography variant="body2" color="text.secondary">
-                          {center.email}
-                        </Typography>
-                      </Box>
-                    )}
-
-                    {center.features && center.features.length > 0 && (
-                      <Box sx={{ mb: 2 }}>
-                        <Typography variant="subtitle2" color="primary" sx={{ mb: 1, fontWeight: 600 }}>
-                          Features:
-                        </Typography>
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                          {center.features.map((feature, index) => (
-                            <Typography
-                              key={index}
-                              variant="body2"
-                              sx={{
-                                bgcolor: 'primary.light',
-                                color: 'primary.main',
-                                px: 1,
-                                py: 0.5,
-                                borderRadius: 1,
-                                fontSize: '0.75rem',
-                              }}
-                            >
-                              {feature}
-                            </Typography>
-                          ))}
-                        </Box>
-                      </Box>
-                    )}
-
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: 'vertical',
-                        mb: 2,
-                      }}
-                    >
-                      {center.description}
-                    </Typography>
-
-                    <Box sx={{ display: 'flex', gap: 1, mt: 'auto' }}>
-                      {center.phone && (
+                      <Box sx={{ display: 'flex', gap: 1, mt: 'auto' }}>
+                        {center.phone && (
+                          <Button
+                            variant="contained"
+                            startIcon={<Phone />}
+                            size="small"
+                            fullWidth
+                            href={`tel:${center.phone}`}
+                            onClick={(e) => e.stopPropagation()}
+                            sx={{
+                              bgcolor: 'success.main',
+                              '&:hover': { bgcolor: 'success.dark' },
+                            }}
+                          >
+                            Call Now
+                          </Button>
+                        )}
                         <Button
-                          variant="contained"
-                          startIcon={<Phone />}
+                          variant="outlined"
                           size="small"
                           fullWidth
-                          href={`tel:${center.phone}`}
-                          onClick={(e) => e.stopPropagation()}
-                          sx={{
-                            bgcolor: 'success.main',
-                            '&:hover': { bgcolor: 'success.dark' },
-                          }}
+                          onClick={() => navigate(`/prosthetic-centers/${center._id}`)}
                         >
-                          Call Now
+                          View Details
                         </Button>
-                      )}
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        fullWidth
-                        onClick={() => navigate(`/prosthetic-centers/${center._id}`)}
-                      >
-                        View Details
-                      </Button>
-                    </Box>
-                  </CardContent>
-                </Card>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Fade>
               </Grid>
             ))}
           </Grid>

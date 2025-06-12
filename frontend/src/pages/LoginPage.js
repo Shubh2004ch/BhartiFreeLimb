@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ENDPOINTS } from '../constants';
+import { ENDPOINTS } from '../config/constants';
 import api from '../services/api';
 
 const LoginPage = () => {

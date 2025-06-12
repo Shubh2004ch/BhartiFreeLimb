@@ -43,14 +43,14 @@ console.log('AWS Configuration:', {
 
 const centerRoutes = require('./routes/centerRoutes');
 const mediaRoutes = require('./routes/mediaRoutes');
-const reviewRoutes = require('./routes/reviewRoutes');
-const successStoryRoutes = require('./routes/successStoryRoutes');
+const reviewRoutes = require('./routes/public/reviewRoutes');
+const successStoryRoutes = require('./routes/public/successStoryRoutes');
 const foodStallRoutes = require('./routes/foodStallRoutes');
 const clinicRoutes = require('./routes/clinicRoutes');
 const sleepingBagRoutes = require('./routes/sleepingBagRoutes');
-const waterPondRoutes = require('./routes/waterPonds');
+const waterPonds = require('./routes/public/waterPonds');
 const shelterRoutes = require('./routes/shelters');
-const authRoutes = require('./routes/auth');
+const authRoutes = require('./routes/public/auth');
 const connectDB = require('./config/database');
 
 const app = express();
@@ -160,7 +160,7 @@ app.use('/api/success-stories', successStoryRoutes);
 app.use('/api/foodstalls', foodStallRoutes);
 app.use('/api/clinics', clinicRoutes);
 app.use('/api/sleepingbags', sleepingBagRoutes);
-app.use('/api/waterponds', waterPondRoutes);
+app.use('/api/waterponds', waterPonds);
 app.use('/api/shelters', shelterRoutes);
 app.use('/api/auth', authRoutes);
 

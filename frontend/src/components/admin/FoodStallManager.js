@@ -17,6 +17,12 @@ import {
   Tooltip,
   Fade,
   Skeleton,
+  Alert,
+  Switch,
+  FormControlLabel,
+  Checkbox,
+  ImageList,
+  ImageListItem,
 } from '@mui/material';
 import {
   Delete as DeleteIcon,
@@ -27,11 +33,13 @@ import {
   LocalPhone,
   AccessTime,
   Info,
+  CheckCircle,
 } from '@mui/icons-material';
 import axios from 'axios';
 import { ENDPOINTS, getImageUrl } from '../../constants';
 import api from '../../services/api';
 import { foodStallService } from '../../services/api';
+import ImageUploadButton from '../common/ImageUploadButton';
 
 // Skeleton loader for nicely animated loading state
 const FoodStallSkeleton = () => (
@@ -68,13 +76,16 @@ const FoodStallManager = () => {
   const [open, setOpen] = useState(false);
   const [editingStall, setEditingStall] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [selectedImages, setSelectedImages] = useState({});
   const [formData, setFormData] = useState({
     name: '',
     location: '',
     description: '',
     contactNumber: '',
     operatingHours: '',
-    image: null,
+    cuisine: '',
   });
 
   useEffect(() => {
@@ -103,7 +114,7 @@ const FoodStallManager = () => {
         description: stall.description,
         contactNumber: stall.contactNumber,
         operatingHours: stall.operatingHours,
-        image: null,
+        cuisine: stall.cuisine,
       });
     } else {
       setEditingStall(null);
@@ -113,7 +124,7 @@ const FoodStallManager = () => {
         description: '',
         contactNumber: '',
         operatingHours: '',
-        image: null,
+        cuisine: '',
       });
     }
     setOpen(true);
@@ -129,7 +140,7 @@ const FoodStallManager = () => {
     const formDataToSend = new FormData();
     
     // Add all text fields
-    const textFields = ['name', 'location', 'description', 'contactNumber', 'operatingHours'];
+    const textFields = ['name', 'location', 'description', 'contactNumber', 'operatingHours', 'cuisine'];
     textFields.forEach(field => {
       if (formData[field]) {
         formDataToSend.append(field, formData[field]);
@@ -179,6 +190,77 @@ const FoodStallManager = () => {
         fetchFoodStalls();
       } catch (error) {
         console.error('Error deleting food stall:', error);
+      }
+    }
+  };
+
+  const handleImageUploadSuccess = (response) => {
+    setSuccess('Images uploaded successfully');
+    fetchFoodStalls();
+  };
+
+  const handleImageUploadError = (error) => {
+    setError(error.response?.data?.message || 'Failed to upload images');
+  };
+
+  const handleImageSelect = (stallId, imageUrl) => {
+    setSelectedImages(prev => ({
+      ...prev,
+      [stallId]: {
+        ...prev[stallId],
+        [imageUrl]: !prev[stallId]?.[imageUrl]
+      }
+    }));
+  };
+
+  const handleDeleteSelectedImages = async (stallId) => {
+    const selectedUrls = Object.entries(selectedImages[stallId] || {})
+      .filter(([_, selected]) => selected)
+      .map(([url]) => url);
+
+    if (selectedUrls.length === 0) {
+      setError('Please select images to delete');
+      return;
+    }
+
+    if (window.confirm(`Are you sure you want to delete ${selectedUrls.length} selected images?`)) {
+      try {
+        // Get the current stall
+        const stall = foodStalls.find(s => s._id === stallId);
+        if (!stall) {
+          throw new Error('Food stall not found');
+        }
+
+        // Filter out the selected images from the images array
+        const updatedImages = stall.images.filter(img => !selectedUrls.includes(img));
+        
+        // Create FormData for the update
+        const formData = new FormData();
+        formData.append('name', stall.name);
+        formData.append('location', stall.location || '');
+        formData.append('description', stall.description || '');
+        formData.append('contactNumber', stall.contactNumber || '');
+        formData.append('operatingHours', stall.operatingHours || '');
+        formData.append('cuisine', stall.cuisine || '');
+        formData.append('images', JSON.stringify(updatedImages));
+        
+        // Update the stall with the filtered images
+        await api.put(`${ENDPOINTS.FOOD_STALLS}/${stallId}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        setSuccess('Selected images deleted successfully');
+        setSelectedImages(prev => ({
+          ...prev,
+          [stallId]: {}
+        }));
+        fetchFoodStalls();
+      } catch (error) {
+        console.error('Error deleting images:', error);
+        setError(error.response?.data?.message || 'Failed to delete images');
       }
     }
   };
@@ -284,22 +366,90 @@ const FoodStallManager = () => {
                         p: 3,
                       }}
                     >
-                      <Typography
-                        variant="h6"
-                        fontWeight="bold"
-                        sx={{
-                          color: 'primary.main',
-                          fontSize: '1.16rem',
-                          letterSpacing: 0.1,
-                          mb: 1,
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 1,
-                        }}
-                      >
-                        <RestaurantMenu sx={{ fontSize: 24, color: 'primary.main', mr: 1 }} />
-                        {stall.name}
-                      </Typography>
+                      <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography
+                          variant="h6"
+                          fontWeight="bold"
+                          sx={{
+                            color: 'primary.main',
+                            fontSize: '1.16rem',
+                            letterSpacing: 0.1,
+                            mb: 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                          }}
+                        >
+                          <RestaurantMenu sx={{ fontSize: 24, color: 'primary.main', mr: 1 }} />
+                          {stall.name}
+                        </Typography>
+                        <Box>
+                          <ImageUploadButton
+                            itemId={stall._id}
+                            itemType="food-stalls"
+                            multiple={true}
+                            maxFiles={Infinity}
+                            onUploadSuccess={handleImageUploadSuccess}
+                            onUploadError={handleImageUploadError}
+                          />
+                          <IconButton
+                            onClick={() => handleOpen(stall)}
+                            sx={{ color: 'primary.main' }}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                          <IconButton
+                            onClick={() => handleDelete(stall._id)}
+                            sx={{ color: 'error.main' }}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Box>
+                      </Box>
+
+                      {/* Images Section */}
+                      {stall.images && stall.images.length > 0 && (
+                        <Box sx={{ mt: 3, borderTop: '1px solid', borderColor: 'divider', pt: 2 }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                            <Typography variant="subtitle2" color="text.secondary">
+                              Images
+                            </Typography>
+                            {Object.values(selectedImages[stall._id] || {}).some(selected => selected) && (
+                              <Button
+                                size="small"
+                                color="error"
+                                onClick={() => handleDeleteSelectedImages(stall._id)}
+                                startIcon={<DeleteIcon />}
+                              >
+                                Delete Selected
+                              </Button>
+                            )}
+                          </Box>
+                          <ImageList sx={{ width: '100%', height: 200 }} cols={2} rowHeight={100}>
+                            {stall.images.map((imageUrl, index) => (
+                              <ImageListItem key={index} sx={{ position: 'relative' }}>
+                                <img
+                                  src={imageUrl}
+                                  alt={`${stall.name} image ${index + 1}`}
+                                  loading="lazy"
+                                  style={{ height: '100%', objectFit: 'cover' }}
+                                />
+                                <Checkbox
+                                  checked={!!selectedImages[stall._id]?.[imageUrl]}
+                                  onChange={() => handleImageSelect(stall._id, imageUrl)}
+                                  sx={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    right: 0,
+                                    bgcolor: 'rgba(255, 255, 255, 0.8)',
+                                  }}
+                                />
+                              </ImageListItem>
+                            ))}
+                          </ImageList>
+                        </Box>
+                      )}
+
                       <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
                         <LocationOn sx={{ color: '#f472b6', fontSize: 20, mr: 1 }} />
                         <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
@@ -330,33 +480,6 @@ const FoodStallManager = () => {
                         >
                           {stall.description}
                         </Typography>
-                      </Box>
-                      <Box
-                        sx={{
-                          mt: 2,
-                          display: 'flex',
-                          justifyContent: 'flex-end',
-                          gap: 1,
-                        }}
-                      >
-                        <Tooltip title="Edit" arrow>
-                          <IconButton
-                            onClick={() => handleOpen(stall)}
-                            color="primary"
-                            sx={{ bgcolor: '#f1f7ff', mr: 0.5 }}
-                          >
-                            <EditIcon />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Delete" arrow>
-                          <IconButton
-                            onClick={() => handleDelete(stall._id)}
-                            color="error"
-                            sx={{ bgcolor: '#fff5f5' }}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </Tooltip>
                       </Box>
                     </CardContent>
                   </Card>
@@ -429,6 +552,15 @@ const FoodStallManager = () => {
                 value={formData.operatingHours}
                 onChange={(e) =>
                   setFormData({ ...formData, operatingHours: e.target.value })
+                }
+                margin="normal"
+              />
+              <TextField
+                fullWidth
+                label="Cuisine"
+                value={formData.cuisine}
+                onChange={(e) =>
+                  setFormData({ ...formData, cuisine: e.target.value })
                 }
                 margin="normal"
               />

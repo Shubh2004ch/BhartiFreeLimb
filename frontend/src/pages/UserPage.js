@@ -11,12 +11,16 @@ import {
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ENDPOINTS, getImageUrl, CONTACT_PHONE, CONTACT_ADDRESS } from '../constants';
-import SectionPreview from '../components/sections/SectionPreview';
-import SuccessStoriesSection from '../components/sections/SuccessStoriesSection';
-import ShelterSection from '../components/sections/ShelterSection';
+import { SuccessStoriesSection } from '../components/sections/SuccessStoriesSection';
+import { ShelterSection } from '../components/sections/ShelterSection';
+import { ProstheticCentersSection } from '../components/sections/ProstheticCentersSection';
+import { ClinicSection } from '../components/sections/ClinicSection';
+import { WaterPondSection } from '../components/sections/WaterPondSection';
+import { SleepingBagSection } from '../components/sections/SleepingBagSection';
 import { FoodStallsSection } from '../components/sections/FoodStallsSection';
 import api from '../services/api';
 import SEO from '../components/SEO';
+
 
 function UserPage() {
   const navigate = useNavigate();
@@ -313,39 +317,14 @@ function UserPage() {
 
           {/* CENTERS SECTION */}
           <div ref={centersRef} id="centers" className="space-y-10 pt-16">
-            <SectionPreview
-              title="🏥 Free Limb Centers"
-              description="Find the nearest prosthetic center for your needs"
-              items={centers}
-              route="/prosthetic-centers"
-            />
-
+            <ProstheticCentersSection />
             <FoodStallsSection />
-
             <section className="mb-12">
               <ShelterSection />
             </section>
-
-            <SectionPreview
-              title="🦜 Free Clinics & Shelters For Injured Wildlife"
-              description="Access medical care and support services"
-              items={clinics}
-              route="/medical-clinics"
-            />
-
-            <SectionPreview
-              title="💧 Water Ponds For Wildlife"
-              description="Locate water ponds for wildlife"
-              items={waterPonds}
-              route="/water-ponds"
-            />
-
-            <SectionPreview
-              title="🛏️ Sleeping Bags"
-              description="Find comfortable accommodation options"
-              items={sleepingBags}
-              route="/sleeping-bags"
-            />
+            <ClinicSection />
+            <WaterPondSection />
+            <SleepingBagSection />
           </div>
 
           {/* SUCCESS STORIES SECTION */}

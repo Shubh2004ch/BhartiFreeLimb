@@ -1,4 +1,4 @@
-const Center = require('../models/Center');
+const Center = require('../../models/Center');
 
 // Get all centers
 exports.getAllCenters = async (req, res) => {
@@ -157,6 +157,39 @@ exports.deleteCenter = async (req, res) => {
     console.error('Center deletion failed:', error);
     res.status(500).json({ 
       message: 'Failed to delete center',
+      error: error.message 
+    });
+  }
+};
+
+// Upload multiple images to center
+exports.uploadImages = async (req, res) => {
+  try {
+    console.log('Uploading images to center:', req.params.id);
+    console.log('Files:', req.files);
+
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: 'No files uploaded' });
+    }
+
+    const center = await Center.findById(req.params.id);
+    if (!center) {
+      return res.status(404).json({ message: 'Center not found' });
+    }
+
+    // Get image URLs from uploaded files
+    const newImages = req.files.map(file => file.location);
+
+    // Add new images to the center's images array
+    center.images = [...(center.images || []), ...newImages];
+    await center.save();
+
+    console.log('Images uploaded successfully:', newImages);
+    res.json(center);
+  } catch (error) {
+    console.error('Image upload failed:', error);
+    res.status(500).json({ 
+      message: 'Failed to upload images',
       error: error.message 
     });
   }

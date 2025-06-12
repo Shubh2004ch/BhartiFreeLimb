@@ -14,7 +14,7 @@ import {
 import { Search, ArrowBack, Star } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
-import { ENDPOINTS, getImageUrl } from '../constants';
+import { ENDPOINTS, getImageUrl } from '../config/constants';
 import api from '../services/api';
 
 const SuccessStoriesPage = () => {

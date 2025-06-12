@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Star } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { reviewService } from '../../services/api';
-import { getImageUrl } from '../../constants';
+import { getImageUrl } from '../../config/constants';
 
 const SuccessStoriesSection = () => {
   const [stories, setStories] = useState([]);
@@ -85,4 +85,4 @@ const SuccessStoriesSection = () => {
   );
 };
 
-export default SuccessStoriesSection;
+export { SuccessStoriesSection };

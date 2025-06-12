@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const successStoryController = require('../controllers/successStoryController');
-const upload = require('../middleware/upload');
+const successStoryController = require('../../controllers/public/successStoryController');
+const upload = require('../../middleware/upload');
 
 // List all success stories
 router.get('/', successStoryController.getAllStories);

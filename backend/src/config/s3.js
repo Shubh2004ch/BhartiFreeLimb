@@ -93,10 +93,20 @@ try {
   console.log('S3 client created successfully');
 } catch (error) {
   console.error('Failed to create S3 client:', error);
+  console.error('Error details:', {
+    message: error.message,
+    stack: error.stack,
+    env: {
+      region: process.env.AWS_REGION,
+      bucket: process.env.AWS_BUCKET_NAME,
+      hasAccessKey: !!process.env.AWS_ACCESS_KEY_ID,
+      hasSecretKey: !!process.env.AWS_SECRET_ACCESS_KEY
+    }
+  });
   // Create a dummy client that will throw errors when used
   s3Client = {
     send: () => {
-      throw new Error('S3 client not properly initialized. Check your AWS credentials.');
+      throw new Error('S3 client not properly initialized. Check your AWS credentials and environment variables.');
     }
   };
 }
@@ -110,7 +120,12 @@ const upload = multer({
     contentType: multerS3.AUTO_CONTENT_TYPE,
     metadata: function (req, file, cb) {
       try {
-        console.log('Processing file:', file.originalname);
+        console.log('Processing file:', {
+          originalname: file.originalname,
+          mimetype: file.mimetype,
+          size: file.size,
+          fieldname: file.fieldname
+        });
         cb(null, { fieldName: file.fieldname });
       } catch (error) {
         console.error('Error processing file metadata:', error);

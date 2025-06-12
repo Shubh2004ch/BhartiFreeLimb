@@ -1,43 +1,55 @@
 const Review = require('../models/Review');
 
-// List all reviews
+// Get all reviews
 exports.getAllReviews = async (req, res) => {
   try {
-    const reviews = await Review.find().sort({ createdAt: -1 });
+    const reviews = await Review.find();
     res.json(reviews);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Failed to fetch reviews', error: error.message });
   }
 };
 
-// Create review (with optional image upload)
+// Get a single review
+exports.getReview = async (req, res) => {
+  try {
+    const review = await Review.findById(req.params.id);
+    if (!review) return res.status(404).json({ message: 'Review not found' });
+    res.json(review);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch review', error: error.message });
+  }
+};
+
+// Create a review
 exports.createReview = async (req, res) => {
   try {
-    const { name, text, rating } = req.body;
-
-    const review = new Review({
-      name,
-      text,
-      rating: Number(rating),
-      imagePath: req.file ? req.file.location : undefined // Using location instead of path for S3
-    });
+    const review = new Review(req.body);
     await review.save();
     res.status(201).json(review);
   } catch (error) {
-    console.error('Error creating review:', error);
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ message: 'Failed to create review', error: error.message });
   }
 };
 
-// Delete review
+// Update a review
+exports.updateReview = async (req, res) => {
+  try {
+    const review = await Review.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!review) return res.status(404).json({ message: 'Review not found' });
+    res.json(review);
+  } catch (error) {
+    res.status(400).json({ message: 'Failed to update review', error: error.message });
+  }
+};
+
+// Delete a review
 exports.deleteReview = async (req, res) => {
   try {
     const review = await Review.findByIdAndDelete(req.params.id);
-    if (!review) {
-      return res.status(404).json({ message: 'Review not found' });
-    }
+    if (!review) return res.status(404).json({ message: 'Review not found' });
     res.json({ message: 'Review deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: 'Failed to delete review', error: error.message });
   }
 }; 

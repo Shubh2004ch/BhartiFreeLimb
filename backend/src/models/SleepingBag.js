@@ -7,7 +7,8 @@ const sleepingBagSchema = new mongoose.Schema({
   imagePath: String,
   contactNumber: String,
   availability: { type: Boolean, default: true },
-  quantity: { type: Number, default: 0 }
+  quantity: { type: Number, default: 0 },
+  images: [String]
 }, {
   timestamps: true
 });

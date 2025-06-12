@@ -33,10 +33,12 @@ import api from '../services/api';
 // Shelter Card Component
 const ShelterCard = ({ shelter, index }) => {
   const theme = useTheme();
+  const navigate = useNavigate();
   
   return (
     <Fade in timeout={500} style={{ transitionDelay: `${index * 100}ms` }}>
       <Card
+        onClick={() => navigate(`/shelters/${shelter._id}`)}
         sx={{
           height: '100%',
           display: 'flex',
@@ -48,6 +50,7 @@ const ShelterCard = ({ shelter, index }) => {
           overflow: 'hidden',
           position: 'relative',
           transition: 'transform 0.25s cubic-bezier(.4,0,.2,1), box-shadow 0.25s cubic-bezier(.4,0,.2,1)',
+          cursor: 'pointer',
           '&:hover': {
             transform: 'translateY(-10px) scale(1.03)',
             boxShadow: '0 10px 32px 0 rgba(59,130,246,0.18), 0 2px 8px 0 rgba(0,0,0,0.10)',
@@ -124,10 +127,10 @@ const ShelterCard = ({ shelter, index }) => {
           </Box>
 
           {shelter.contactNumber && (
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-              <Phone sx={{ color: 'success.main', fontSize: '1.15rem', mr: 0.7 }} />
-              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.97rem' }}>
-                {shelter.contactNumber}
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.2 }}>
+              <Phone sx={{ color: 'primary.main', fontSize: '1rem', mr: 1 }} />
+              <Typography variant="body1" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+                {shelter.contactNumber || 'Contact not available'}
               </Typography>
             </Box>
           )}
@@ -170,50 +173,11 @@ const ShelterCard = ({ shelter, index }) => {
             </Box>
           )}
 
-          <Box sx={{ display: 'flex', gap: 1, mt: 'auto' }}>
-            {shelter.contactNumber && (
-              <Button
-                variant="contained"
-                startIcon={<Phone />}
-                size="small"
-                fullWidth
-                href={`tel:${shelter.contactNumber}`}
-                sx={{
-                  bgcolor: 'success.main',
-                  color: 'white',
-                  fontWeight: 600,
-                  letterSpacing: 0.5,
-                  py: 0.8,
-                  '&:hover': { bgcolor: 'success.dark' },
-                }}
-              >
-                Call
-              </Button>
-            )}
-            <Button
-              variant="outlined"
-              startIcon={<Directions />}
-              size="small"
-              fullWidth
-              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                `${shelter.address}, ${shelter.city}, ${shelter.state}`
-              )}`}
-              target="_blank"
-              sx={{
-                borderColor: 'info.light',
-                color: 'info.main',
-                fontWeight: 600,
-                letterSpacing: 0.5,
-                py: 0.8,
-                '&:hover': {
-                  bgcolor: 'info.light',
-                  borderColor: 'info.main',
-                  color: 'white',
-                },
-              }}
-            >
-              Directions
-            </Button>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.2 }}>
+            <People sx={{ color: 'primary.main', fontSize: '1rem', mr: 1 }} />
+            <Typography variant="body1" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+              Capacity: {shelter.currentOccupancy}/{shelter.capacity}
+            </Typography>
           </Box>
         </CardContent>
       </Card>

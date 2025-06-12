@@ -1,170 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Container,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  CardMedia,
-  Box,
-  Chip,
-  Skeleton,
-  Fade,
-  useTheme,
-  useMediaQuery,
-  Button,
-} from '@mui/material';
-import {
-  LocationOn,
-  People,
-  Home,
-  ArrowForward,
-} from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { Container, Typography, Box, Skeleton, Fade, useTheme, useMediaQuery, Alert, Button } from '@mui/material';
+import { Home, ArrowForward } from '@mui/icons-material';
+import { ENDPOINTS, getImageUrl } from '../../constants';
 import { shelterService } from '../../services/api';
-import { getImageUrl } from '../../constants';
+import { useNavigate } from 'react-router-dom';
+import MainCard from '../MainCard';
 
-// Loading Skeleton
+// Loading Skeleton Component
 const LoadingSkeleton = () => (
   <Box sx={{ py: 8, bgcolor: 'background.paper' }}>
     <Container maxWidth="lg">
-      <Typography
-        variant="h3"
-        component="h2"
-        gutterBottom
-        align="center"
-        sx={{
-          mb: 6,
-          fontWeight: 'bold',
-          color: 'primary.main',
-          letterSpacing: 2,
-        }}
-      >
+      <Typography variant="h3" component="h2" gutterBottom align="center" sx={{ mb: 6 }}>
         Free Homeless Shelters
       </Typography>
-      <Grid container spacing={4}>
+      <Box sx={{ display: 'flex', gap: 2, overflowX: 'auto', pb: 2 }}>
         {[1, 2, 3].map((item) => (
-          <Grid item xs={12} sm={6} md={4} key={item}>
-            <Skeleton
-              variant="rounded"
-              height={210}
-              sx={{ borderRadius: 4, mb: 1 }}
-            />
-            <Skeleton variant="text" height={40} width="80%" />
-            <Skeleton variant="text" height={20} width="60%" />
-            <Skeleton variant="text" height={20} width="50%" />
-            <Skeleton variant="rectangular" height={32} width="60%" sx={{ borderRadius: 2, mt: 2 }} />
-          </Grid>
+          <Box key={item} sx={{ minWidth: '320px', flexShrink: 0 }}>
+            <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 2 }} />
+            <Skeleton variant="text" height={40} />
+            <Skeleton variant="text" height={20} />
+            <Skeleton variant="text" height={20} />
+          </Box>
         ))}
-      </Grid>
+      </Box>
     </Container>
   </Box>
 );
 
-// Shelter Card (with glassmorphism and animated hover)
-const ShelterCard = ({ item, index }) => (
-  <Fade in timeout={600} style={{ transitionDelay: `${index * 120}ms` }}>
-    <Card
-      sx={{
-        height: '100%',
-        width: 250,
-        mx: 'auto',
-        display: 'flex',
-        flexDirection: 'column',
-        borderRadius: 4,
-        boxShadow: '0 6px 32px 0 rgba(56, 189, 248, 0.10), 0 1.5px 4px 0 rgba(0,0,0,0.06)',
-        backdropFilter: 'blur(3.5px)',
-        background: 'linear-gradient(120deg,rgba(236, 254, 255, 0.75) 80%,rgba(236, 254, 255, 0.93) 100%)',
-        overflow: 'hidden',
-        position: 'relative',
-        transition: 'transform 0.25s cubic-bezier(.4,0,.2,1), box-shadow 0.25s cubic-bezier(.4,0,.2,1)',
-        '&:hover': {
-          transform: 'translateY(-10px) scale(1.03)',
-          boxShadow: '0 10px 32px 0 rgba(59,130,246,0.18), 0 2px 8px 0 rgba(0,0,0,0.10)',
-        },
-      }}
-    >
-      <Box sx={{ position: 'relative', overflow: 'hidden' }}>
-        {item.images?.length > 0 && (
-          <CardMedia
-            component="img"
-            height="160"
-            image={getImageUrl(item.images[0])}
-            alt={item.name}
-            sx={{
-              objectFit: 'cover',
-              filter: 'brightness(0.97)',
-              borderTopLeftRadius: 18,
-              borderTopRightRadius: 18,
-              transition: 'filter 0.3s',
-              '&:hover': { filter: 'brightness(0.92)' },
-            }}
-          />
-        )}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 10,
-            right: 10,
-            bgcolor: 'rgba(255,255,255,0.94)',
-            px: 1.5,
-            py: 0.5,
-            borderRadius: '9999px',
-            display: 'flex',
-            alignItems: 'center',
-            boxShadow: '0 2px 8px 0 rgba(59,130,246,0.07)',
-          }}
-        >
-          <People sx={{ color: 'primary.main', fontSize: '1.1rem', mr: 0.5 }} />
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            {item.currentOccupancy}/{item.capacity}
-          </Typography>
-        </Box>
-        <Home
-          sx={{
-            position: 'absolute',
-            left: 10,
-            top: 10,
-            color: '#2563eb',
-            fontSize: 30,
-            opacity: 0.85,
-          }}
-        />
-      </Box>
-      <CardContent sx={{ flexGrow: 1, p: 2, display: 'flex', flexDirection: 'column' }}>
-        <Typography
-          variant="h6"
-          component="h3"
-          sx={{
-            fontWeight: 'bold',
-            mb: 1,
-            color: 'primary.main',
-            fontSize: '1.17rem',
-            letterSpacing: 0.1,
-          }}
-        >
-          {item.name}
-        </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <LocationOn sx={{ color: 'info.main', fontSize: '1.15rem', mr: 0.7 }} />
-          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.97rem' }}>
-            {item.address}, {item.city}, {item.state}
-          </Typography>
-        </Box>
-        <Box sx={{ mb: 1 }}>
-          <Typography variant="body2" color="text.secondary">
-            {item.description}
-          </Typography>
-        </Box>
-      </CardContent>
-    </Card>
-  </Fade>
-);
-
-const ShelterSection = () => {
+// Main Component
+export const ShelterSection = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showAll, setShowAll] = useState(false);
+  const [error, setError] = useState(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const navigate = useNavigate();
@@ -175,134 +42,175 @@ const ShelterSection = () => {
 
   const fetchItems = async () => {
     try {
+      console.log('Fetching shelters...');
       const response = await shelterService.getShelters();
-      // Ensure each item has facilities array properly initialized
-      const processedItems = response.data.map(item => ({
-        ...item,
-        facilities: Array.isArray(item.facilities) ? item.facilities.filter(f => f) : []
-      }));
-      setItems(processedItems);
+      console.log('Shelters response:', response);
+      
+      if (!response || !response.data) {
+        console.error('Invalid response format:', response);
+        throw new Error('Invalid response format from server');
+      }
+
+      if (!Array.isArray(response.data)) {
+        console.error('Response data is not an array:', response.data);
+        throw new Error('Invalid data format received from server');
+      }
+
+      console.log('Setting shelters data:', response.data);
+      setItems(response.data);
+      setError(null);
     } catch (error) {
       console.error('Error fetching shelters:', error);
+      setError('Failed to load shelters. Please try again later.');
     } finally {
       setLoading(false);
     }
   };
 
-  const displayedItems = showAll ? items : items.slice(0, 3);
+  if (loading) {
+    return <LoadingSkeleton />;
+  }
 
-  if (loading) return <LoadingSkeleton />;
+  if (error) {
+    return (
+      <Box sx={{ py: 4, textAlign: 'center' }}>
+        <Alert severity="error" sx={{ maxWidth: 600, mx: 'auto' }}>
+          {error}
+        </Alert>
+      </Box>
+    );
+  }
+
+  if (!items || items.length === 0) {
+    return (
+      <Box sx={{ py: 4, textAlign: 'center' }}>
+        <Alert severity="info" sx={{ maxWidth: 600, mx: 'auto' }}>
+          No shelters available at the moment. Please check back later.
+        </Alert>
+      </Box>
+    );
+  }
+
+  console.log('Rendering shelters:', items);
 
   return (
-    <Box
-      sx={{
-        py: { xs: 4, sm: 6 },
+    <Box 
+      sx={{ 
+        py: 6, 
         bgcolor: 'background.default',
-        borderBottom: '1px solid',
-        borderColor: 'divider',
-        minHeight: '60vh',
+        borderRadius: 4,
+        boxShadow: '0 0 40px rgba(0,0,0,0.03)'
       }}
     >
       <Container maxWidth="lg">
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: { xs: 'flex-start', sm: 'center' },
-            flexDirection: { xs: 'column', sm: 'row' },
-            mb: 5,
-            gap: 1,
-            textAlign: { xs: 'center', sm: 'left' },
-          }}
-        >
-          <Typography
-            variant="h3"
-            component="h2"
-            sx={{
+        <Box sx={{ textAlign: 'center', mb: 6 }}>
+          <Typography 
+            variant="h4" 
+            component="h2" 
+            gutterBottom 
+            sx={{ 
               fontWeight: 900,
               color: 'primary.main',
-              letterSpacing: 1.5,
-              fontSize: { xs: '1.4rem', sm: '2rem' },
-              background: 'linear-gradient(90deg, #2563eb 30%, #38bdf8 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              display: 'inline-block',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 2
             }}
           >
+            <Home sx={{ fontSize: '2.5rem' }} />
             Free Homeless Shelters
           </Typography>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            {!loading && items.length > 3 && (
-              <Button
-                variant={showAll ? 'outlined' : 'contained'}
-                onClick={() => setShowAll(!showAll)}
-                size="small"
-                sx={{
-                  fontSize: '0.95rem',
-                  px: 3,
-                  borderRadius: 99,
-                  fontWeight: 700,
-                  letterSpacing: 0.3,
-                  textTransform: 'none',
-                  boxShadow: showAll ? 0 : 2,
-                  background: !showAll
-                    ? 'linear-gradient(to right, #38bdf8, #2563eb)'
-                    : undefined,
-                  color: !showAll ? '#fff' : undefined,
+          <Typography 
+            variant="subtitle1" 
+            color="text.secondary"
+            sx={{ maxWidth: '600px', mx: 'auto', fontSize: '1.1rem' }}
+          >
+            Find safe and comfortable shelters providing temporary accommodation
+          </Typography>
+        </Box>
+
+        <Box sx={{ 
+          display: 'flex', 
+          overflowX: 'auto', 
+          gap: 3, 
+          pb: 2,
+          px: 1,
+          '&::-webkit-scrollbar': {
+            height: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: '#f1f1f1',
+            borderRadius: '4px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: theme.palette.primary.main,
+            borderRadius: '4px',
+            '&:hover': {
+              background: theme.palette.primary.dark,
+            },
+          },
+        }}>
+          {items.map((item, index) => {
+            console.log('Rendering shelter item:', item);
+            return (
+              <Box 
+                key={item._id} 
+                sx={{ 
+                  minWidth: '320px', 
+                  flexShrink: 0,
+                  transition: 'transform 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                  }
                 }}
               >
-                {showAll ? 'Show Less' : 'View All'}
-              </Button>
-            )}
-            <Button
-              variant="contained"
-              endIcon={<ArrowForward />}
-              onClick={() => navigate('/shelters')}
-              size="small"
-              sx={{
-                fontSize: '0.95rem',
-                px: 3,
-                borderRadius: 99,
-                fontWeight: 700,
-                letterSpacing: 0.3,
-                textTransform: 'none',
-                boxShadow: 2,
-                background: 'linear-gradient(to right, #38bdf8, #2563eb)',
-                color: '#fff',
-              }}
-            >
-              See All
-            </Button>
-          </Box>
+                <Fade in timeout={500} style={{ transitionDelay: `${index * 100}ms` }}>
+                  <div>
+                    <MainCard
+                      image={item.images && item.images.length > 0 ? item.images[0] : ''}
+                      name={item.name}
+                      address={`${item.address}, ${item.city}, ${item.state} - ${item.pincode}`}
+                      phone={item.contactNumber}
+                      onClick={() => navigate(`/shelters/${item._id}`)}
+                      className="h-full cursor-pointer"
+                      imageClassName="hover:scale-105 transition-transform duration-300"
+                      nameClassName="text-xl font-bold text-gray-900"
+                      addressClassName="text-gray-700"
+                      phoneClassName="text-blue-600 hover:text-blue-800 font-medium"
+                    />
+                  </div>
+                </Fade>
+              </Box>
+            );
+          })}
         </Box>
-        <Typography
-          variant="subtitle1"
-          color="text.secondary"
-          sx={{
-            maxWidth: 600,
-            mx: 'auto',
-            mb: 1.5,
-            fontWeight: 500,
-            fontSize: { xs: '1.1rem', md: '1.25rem' },
-            textAlign: 'center',
-          }}
-        >
-          Find safe and secure shelters near you.
-        </Typography>
-
-        <Grid
-          container
-          spacing={5}
-          justifyContent="center"
-          alignItems="stretch"
-          sx={{ overflowX: 'auto', flexWrap: 'nowrap', pb: 2 }}
-        >
-          {displayedItems.slice(0, 3).map((item, index) => (
-            <Grid item key={item._id} sx={{ minWidth: 320 }}>
-              <ShelterCard item={item} index={index} />
-            </Grid>
-          ))}
-        </Grid>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <Button
+            variant="contained"
+            onClick={() => navigate('/shelters')}
+            endIcon={<ArrowForward />}
+            sx={{
+              minWidth: 200,
+              backgroundColor: 'primary.main',
+              color: 'white',
+              '&:hover': {
+                backgroundColor: 'primary.dark',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+              },
+              transition: 'all 0.3s ease',
+              textTransform: 'none',
+              fontSize: '1rem',
+              fontWeight: 600,
+              py: 1.5,
+              px: 4,
+              borderRadius: 2,
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            View All Shelters
+          </Button>
+        </Box>
       </Container>
     </Box>
   );

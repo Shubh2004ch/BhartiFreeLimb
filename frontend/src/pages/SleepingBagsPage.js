@@ -154,7 +154,9 @@ const SleepingBagsPage = () => {
                       },
                       bgcolor: 'rgba(255,255,255,0.92)',
                       backdropFilter: 'blur(3px)',
+                      cursor: 'pointer'
                     }}
+                    onClick={() => navigate(`/sleeping-bags/${bag._id}`)}
                   >
                     {bag.imagePath && (
                       <CardMedia
@@ -197,22 +199,13 @@ const SleepingBagsPage = () => {
                         </Typography>
                       </Box>
 
-                      {bag.phone && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                          <PhoneIcon sx={{ color: 'success.main', fontSize: 18, mr: 1 }} />
-                          <Typography variant="body2" sx={{ color: '#475569' }}>
-                            {bag.phone}
-                          </Typography>
-                        </Box>
-                      )}
-                      {bag.contactNumber && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                          <PhoneIcon sx={{ color: 'success.main', fontSize: 18, mr: 1 }} />
-                          <Typography variant="body2" sx={{ color: '#475569' }}>
-                            {bag.contactNumber}
-                          </Typography>
-                        </Box>
-                      )}
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.2 }}>
+                        <PhoneIcon sx={{ color: '#f472b6', mr: 1, fontSize: 20 }} />
+                        <Typography variant="body1" sx={{ color: '#475569', fontWeight: 500 }}>
+                          {bag.contactNumber}
+                        </Typography>
+                      </Box>
+
                       {bag.email && (
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                           <EmailIcon sx={{ color: 'info.main', fontSize: 18, mr: 1 }} />

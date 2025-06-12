@@ -1,4 +1,4 @@
-const WaterPond = require('../models/WaterPond');
+const WaterPond = require('../../models/WaterPond');
 
 // Get all active water ponds
 exports.getAllWaterPonds = async (req, res) => {
@@ -79,5 +79,38 @@ exports.deleteWaterPond = async (req, res) => {
     res.json({ message: 'Water pond deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+// Upload multiple images to water pond
+exports.uploadImages = async (req, res) => {
+  try {
+    console.log('Uploading images to water pond:', req.params.id);
+    console.log('Files:', req.files);
+
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: 'No files uploaded' });
+    }
+
+    const waterPond = await WaterPond.findById(req.params.id);
+    if (!waterPond) {
+      return res.status(404).json({ message: 'Water pond not found' });
+    }
+
+    // Get image URLs from uploaded files
+    const newImages = req.files.map(file => file.location);
+
+    // Add new images to the water pond's images array
+    waterPond.images = [...(waterPond.images || []), ...newImages];
+    await waterPond.save();
+
+    console.log('Images uploaded successfully:', newImages);
+    res.json(waterPond);
+  } catch (error) {
+    console.error('Image upload failed:', error);
+    res.status(500).json({ 
+      message: 'Failed to upload images',
+      error: error.message 
+    });
   }
 }; 

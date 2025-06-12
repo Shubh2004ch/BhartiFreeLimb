@@ -24,7 +24,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ENDPOINTS, getImageUrl } from '../constants';
+import { ENDPOINTS, getImageUrl } from '../config/constants';
 import api from '../services/api';
 
 // Loading skeleton for beautiful loading state

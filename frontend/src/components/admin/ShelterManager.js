@@ -23,17 +23,25 @@ import {
   Container,
   Fade,
   Tooltip,
+  ImageList,
+  ImageListItem,
+  Checkbox,
 } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, Home, LocationOn, Phone, People, Info } from '@mui/icons-material';
+import { Edit as EditIcon, Delete as DeleteIcon, Add as AddIcon, Home, LocationOn, Phone, People, Info, CloudUpload, AddCircleOutline } from '@mui/icons-material';
 import axios from 'axios';
 import { ENDPOINTS, getImageUrl } from '../../constants';
 import api from '../../services/api';
+import ImageUploadButton from '../common/ImageUploadButton';
 
 const ShelterManager = () => {
   const navigate = useNavigate();
   const [shelters, setShelters] = useState([]);
   const [open, setOpen] = useState(false);
   const [editingShelter, setEditingShelter] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [selectedImages, setSelectedImages] = useState({});
   const [formData, setFormData] = useState({
     name: '',
     address: '',
@@ -45,12 +53,12 @@ const ShelterManager = () => {
     currentOccupancy: '',
     facilities: [],
     description: '',
-    images: [],
+    imagePath: null,
+    images: []
   });
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const [previewUrls, setPreviewUrls] = useState([]);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [previewUrls, setPreviewUrls] = useState({
+    heroImage: null
+  });
 
   // Check authentication
   useEffect(() => {
@@ -89,25 +97,121 @@ const ShelterManager = () => {
 
   const fetchShelters = async () => {
     try {
-      const authConfig = getAuthConfig();
-      if (!authConfig) return;
-      
-      const response = await api.get(ENDPOINTS.SHELTERS, authConfig);
+      setLoading(true);
+      const response = await api.get(ENDPOINTS.SHELTERS);
       setShelters(response.data);
+      setError(null);
     } catch (error) {
-      if (error.response?.status === 401) {
-        navigate('/login');
-      } else {
-        setError('Failed to fetch shelters');
+      setError('Failed to fetch shelters');
+      console.error('Error fetching shelters:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleHeroImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFormData(prev => ({
+        ...prev,
+        imagePath: file
+      }));
+      setPreviewUrls(prev => ({
+        ...prev,
+        heroImage: URL.createObjectURL(file)
+      }));
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.name || !formData.address || !formData.contactNumber) {
+      alert('Please fill all required fields!');
+      return;
+    }
+
+    try {
+      const formDataToSend = new FormData();
+
+      // Append basic fields
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('address', formData.address);
+      formDataToSend.append('city', formData.city);
+      formDataToSend.append('state', formData.state);
+      formDataToSend.append('pincode', formData.pincode);
+      formDataToSend.append('contactNumber', formData.contactNumber);
+      formDataToSend.append('capacity', formData.capacity);
+      formDataToSend.append('currentOccupancy', formData.currentOccupancy);
+      formDataToSend.append('description', formData.description || '');
+
+      // Handle facilities array
+      if (formData.facilities && formData.facilities.length > 0) {
+        formDataToSend.append('facilities', JSON.stringify(formData.facilities));
       }
+
+      // Handle hero image
+      if (formData.imagePath instanceof File) {
+        formDataToSend.append('imagePath', formData.imagePath);
+      } else if (editingShelter && editingShelter.imagePath) {
+        // If editing and there's an existing image, keep it
+        formDataToSend.append('imagePath', editingShelter.imagePath);
+      }
+
+      // Handle gallery images
+      if (formData.images && formData.images.length > 0) {
+        formDataToSend.append('images', JSON.stringify(formData.images));
+      }
+
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      };
+
+      if (editingShelter) {
+        await api.put(`${ENDPOINTS.SHELTERS}/${editingShelter._id}`, formDataToSend, config);
+        setSuccess('Shelter updated successfully');
+      } else {
+        await api.post(ENDPOINTS.SHELTERS, formDataToSend, config);
+        setSuccess('Shelter added successfully');
+      }
+
+      fetchShelters();
+      handleClose();
+    } catch (error) {
+      setError('Failed to save shelter');
+      console.error('Error saving shelter:', error);
     }
   };
 
   const handleOpen = (shelter = null) => {
     if (shelter) {
       setEditingShelter(shelter);
-      setFormData(shelter);
-      setPreviewUrls(shelter.images.map(img => getImageUrl(img)) || []);
+      setFormData({
+        name: shelter.name || '',
+        address: shelter.address || '',
+        city: shelter.city || '',
+        state: shelter.state || '',
+        pincode: shelter.pincode || '',
+        contactNumber: shelter.contactNumber || '',
+        capacity: shelter.capacity || '',
+        currentOccupancy: shelter.currentOccupancy || '',
+        facilities: shelter.facilities || [],
+        description: shelter.description || '',
+        imagePath: null,
+        images: shelter.images || []
+      });
+      setPreviewUrls({
+        heroImage: shelter.imagePath ? getImageUrl(shelter.imagePath) : null
+      });
     } else {
       setEditingShelter(null);
       setFormData({
@@ -121,119 +225,100 @@ const ShelterManager = () => {
         currentOccupancy: '',
         facilities: [],
         description: '',
-        images: [],
+        imagePath: null,
+        images: []
       });
-      setPreviewUrls([]);
+      setPreviewUrls({
+        heroImage: null
+      });
     }
-    setSelectedFiles([]);
     setOpen(true);
+    setError('');
+    setSuccess('');
   };
 
   const handleClose = () => {
     setOpen(false);
+    setEditingShelter(null);
     setError('');
     setSuccess('');
-    setSelectedFiles([]);
-    setPreviewUrls([]);
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
-    setSelectedFiles(files);
-
-    // Create preview URLs
-    const newPreviewUrls = files.map(file => URL.createObjectURL(file));
-    setPreviewUrls(prev => [...prev, ...newPreviewUrls]);
-  };
-
-  const removeImage = (index) => {
-    setPreviewUrls(prev => prev.filter((_, i) => i !== index));
-    if (index < selectedFiles.length) {
-      setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-    } else {
-      // If it's an existing image, add it to keepImages
-      const existingImages = formData.images.filter((_, i) => i !== index);
-      setFormData(prev => ({
-        ...prev,
-        images: existingImages,
-        keepImages: existingImages.join(',')
-      }));
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const authConfig = getAuthConfig();
-    if (!authConfig) return;
-
-    try {
-      const formDataToSend = new FormData();
-      
-      // Append all form fields
-      Object.keys(formData).forEach(key => {
-        if (key === 'facilities') {
-          formDataToSend.append(key, JSON.stringify(formData[key]));
-        } else if (key !== 'images') {
-          formDataToSend.append(key, formData[key]);
-        }
-      });
-
-      // Append files
-      selectedFiles.forEach(file => {
-        formDataToSend.append('images', file);
-      });
-
-      // Add Content-Type header for multipart/form-data
-      const uploadConfig = {
-        ...authConfig,
-        headers: {
-          ...authConfig.headers,
-          'Content-Type': 'multipart/form-data',
-        }
-      };
-
-      if (editingShelter) {
-        await api.put(`${ENDPOINTS.SHELTERS}/${editingShelter._id}`, formDataToSend, uploadConfig);
-        setSuccess('Shelter updated successfully');
-      } else {
-        await api.post(ENDPOINTS.SHELTERS, formDataToSend, uploadConfig);
-        setSuccess('Shelter added successfully');
-      }
-      fetchShelters();
-      handleClose();
-    } catch (error) {
-      if (error.response?.status === 401) {
-        navigate('/login');
-      } else {
-        setError(error.response?.data?.message || 'Operation failed');
-      }
-    }
   };
 
   const handleDelete = async (id) => {
-    const authConfig = getAuthConfig();
-    if (!authConfig) return;
-
     if (window.confirm('Are you sure you want to delete this shelter?')) {
       try {
-        await api.delete(`${ENDPOINTS.SHELTERS}/${id}`, authConfig);
-        setSuccess('Shelter deleted successfully');
+        await api.delete(`${ENDPOINTS.SHELTERS}/${id}`);
         fetchShelters();
       } catch (error) {
-        if (error.response?.status === 401) {
-          navigate('/login');
-        } else {
-          setError('Failed to delete shelter');
-        }
+        setError('Failed to delete shelter');
+        console.error('Error deleting shelter:', error);
       }
+    }
+  };
+
+  const handleImageUploadSuccess = (response) => {
+    setSuccess('Images uploaded successfully');
+    fetchShelters();
+  };
+
+  const handleImageUploadError = (error) => {
+    setError(error.response?.data?.message || 'Failed to upload images');
+  };
+
+  const handleImageSelect = (shelterId, imageUrl) => {
+    setSelectedImages(prev => ({
+      ...prev,
+      [shelterId]: {
+        ...prev[shelterId],
+        [imageUrl]: !prev[shelterId]?.[imageUrl]
+      }
+    }));
+  };
+
+  const handleDeleteSelectedImages = async (shelterId) => {
+    const selectedUrls = Object.entries(selectedImages[shelterId] || {})
+      .filter(([_, selected]) => selected)
+      .map(([url]) => url);
+
+    if (selectedUrls.length === 0) return;
+
+    if (!window.confirm(`Are you sure you want to delete ${selectedUrls.length} selected images?`)) {
+      return;
+    }
+
+    try {
+      const shelter = shelters.find(s => s._id === shelterId);
+      const updatedImages = shelter.images.filter(img => !selectedUrls.includes(img));
+
+      const formData = new FormData();
+      formData.append('name', shelter.name);
+      formData.append('address', shelter.address);
+      formData.append('city', shelter.city);
+      formData.append('state', shelter.state);
+      formData.append('pincode', shelter.pincode);
+      formData.append('contactNumber', shelter.contactNumber);
+      formData.append('capacity', shelter.capacity);
+      formData.append('currentOccupancy', shelter.currentOccupancy);
+      formData.append('description', shelter.description || '');
+      formData.append('facilities', JSON.stringify(shelter.facilities || []));
+      formData.append('images', JSON.stringify(updatedImages));
+
+      await api.put(`${ENDPOINTS.SHELTERS}/${shelterId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      setSelectedImages(prev => ({
+        ...prev,
+        [shelterId]: {}
+      }));
+
+      fetchShelters();
+      setSuccess('Selected images deleted successfully');
+    } catch (error) {
+      setError('Failed to delete selected images');
+      console.error('Error deleting selected images:', error);
     }
   };
 
@@ -247,21 +332,19 @@ const ShelterManager = () => {
       }}
     >
       <Container maxWidth="lg">
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            mb: 4,
-            gap: 2,
-            justifyContent: { xs: 'center', md: 'flex-start' },
-          }}
-        >
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          mb: 4,
+          gap: 2,
+          justifyContent: { xs: 'center', md: 'flex-start' },
+        }}>
           <Home sx={{ fontSize: 44, color: 'primary.main', mr: 1 }} />
           <Typography
             variant="h4"
             fontWeight={900}
             sx={{
-              background: 'linear-gradient(90deg, #2563eb 30%, #f472b6 70%)',
+              background: 'linear-gradient(90deg, #2563eb 30%, #38bdf8 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               display: 'inline-block',
@@ -271,10 +354,11 @@ const ShelterManager = () => {
             Manage Homeless Shelters
           </Typography>
         </Box>
+
         <Button
           variant="contained"
           color="primary"
-          startIcon={<AddIcon />}
+          startIcon={<AddCircleOutline />}
           onClick={() => handleOpen()}
           sx={{
             mb: 5,
@@ -290,187 +374,227 @@ const ShelterManager = () => {
           Add New Shelter
         </Button>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
+        {error && (
+          <Box
+            sx={{
+              background: '#ffeded',
+              border: '1px solid #fca5a5',
+              color: '#b91c1c',
+              px: 4,
+              py: 2,
+              borderRadius: 2,
+              mb: 4,
+              fontWeight: 600,
+            }}
+          >
+            {error}
+          </Box>
+        )}
+
+        {success && (
+          <Alert severity="success" sx={{ mb: 4 }}>
+            {success}
+          </Alert>
+        )}
 
         <Grid container spacing={5}>
           {shelters.map((shelter, idx) => (
-          <Grid item xs={12} sm={6} md={4} key={shelter._id}>
+            <Grid item xs={12} sm={6} md={4} key={shelter._id}>
               <Fade in timeout={500} style={{ transitionDelay: `${idx * 80}ms` }}>
                 <Card
                   sx={{
                     borderRadius: 4,
-                    boxShadow:
-                      '0 6px 22px 0 rgba(59,130,246,0.09), 0 2px 8px 0 rgba(236,72,153,0.09)',
+                    boxShadow: '0 6px 22px 0 rgba(59,130,246,0.09), 0 2px 8px 0 rgba(236,72,153,0.09)',
                     display: 'flex',
                     flexDirection: 'column',
                     overflow: 'hidden',
-                    transition:
-                      'transform 0.22s cubic-bezier(.4,0,.2,1), box-shadow 0.22s cubic-bezier(.4,0,.2,1)',
+                    transition: 'transform 0.22s cubic-bezier(.4,0,.2,1), box-shadow 0.22s cubic-bezier(.4,0,.2,1)',
                     '&:hover': {
                       transform: 'translateY(-8px) scale(1.03)',
-                      boxShadow:
-                        '0 12px 36px 0 rgba(59,130,246,0.18), 0 3px 12px 0 rgba(236,72,153,0.16)',
+                      boxShadow: '0 12px 36px 0 rgba(59,130,246,0.18), 0 3px 12px 0 rgba(236,72,153,0.16)',
                     },
                     bgcolor: 'rgba(255,255,255,0.92)',
                     backdropFilter: 'blur(3px)',
                   }}
                 >
-                  {shelter.images && shelter.images[0] && (
-                <CardMedia
-                  component="img"
-                      height="200"
-                  image={getImageUrl(shelter.images[0])}
-                  alt={shelter.name}
-                      sx={{
-                        objectFit: 'cover',
-                        borderTopLeftRadius: 16,
-                        borderTopRightRadius: 16,
-                      }}
-                />
-              )}
-                  <CardContent
-                    sx={{
-                      flexGrow: 1,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      position: 'relative',
-                      p: 3,
-                    }}
-                  >
-                    <Typography
-                      variant="h6"
-                      fontWeight="bold"
-                      sx={{
-                        color: 'primary.main',
-                        fontSize: '1.16rem',
-                        letterSpacing: 0.1,
-                        mb: 1,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                      }}
-                    >
-                      <Home sx={{ fontSize: 24, color: 'primary.main', mr: 1 }} />
-                  {shelter.name}
-                </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                      <LocationOn sx={{ color: '#f472b6', fontSize: 20, mr: 1 }} />
-                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                        {shelter.address}, {shelter.city}, {shelter.state}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                      <Phone sx={{ color: 'success.main', fontSize: 18, mr: 1 }} />
-                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                        {shelter.contactNumber}
-                </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                      <People sx={{ color: '#38bdf8', fontSize: 18, mr: 1 }} />
-                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                  Capacity: {shelter.currentOccupancy}/{shelter.capacity}
-                </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, gap: 1 }}>
-                      <Info sx={{ color: '#2563eb', fontSize: 18, mr: 1 }} />
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
+                  <Box sx={{ position: 'relative' }}>
+                    {shelter.imagePath ? (
+                      <CardMedia
+                        component="img"
+                        height="200"
+                        image={getImageUrl(shelter.imagePath)}
+                        alt={shelter.name}
                         sx={{
-                          fontWeight: 500,
-                          fontStyle: 'italic',
+                          objectFit: 'cover',
+                          borderTopLeftRadius: 16,
+                          borderTopRightRadius: 16,
+                        }}
+                      />
+                    ) : (
+                      <Box
+                        sx={{
+                          height: 200,
+                          bgcolor: 'grey.100',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderTopLeftRadius: 16,
+                          borderTopRightRadius: 16,
                         }}
                       >
-                        {shelter.description}
-                      </Typography>
-                    </Box>
-                    {shelter.facilities && shelter.facilities.length > 0 && (
-                      <Box sx={{ mt: 1.2, mb: 1, display: 'flex', flexWrap: 'wrap', gap: 0.7 }}>
-                  {shelter.facilities.map((facility, index) => (
-                    <Chip
-                      key={index}
-                      label={facility}
-                      size="small"
-                            sx={{
-                              bgcolor: 'primary.light',
-                              color: 'primary.contrastText',
-                              fontWeight: 600,
-                              fontSize: 13,
-                              letterSpacing: 0.3,
-                            }}
-                    />
-                  ))}
-                </Box>
+                        <Home sx={{ fontSize: 48, color: 'grey.400' }} />
+                      </Box>
                     )}
-                    <Box
-                      sx={{
-                        mt: 2,
-                        display: 'flex',
-                        justifyContent: 'flex-end',
-                        gap: 1,
-                      }}
-                    >
-                      <Tooltip title="Edit" arrow>
+                  </Box>
+
+                  <CardContent>
+                    <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+                        {shelter.name}
+                      </Typography>
+                      <Box>
+                        <ImageUploadButton
+                          itemId={shelter._id}
+                          itemType="shelters"
+                          multiple={true}
+                          maxFiles={Infinity}
+                          onUploadSuccess={handleImageUploadSuccess}
+                          onUploadError={handleImageUploadError}
+                        />
                         <IconButton
                           onClick={() => handleOpen(shelter)}
-                          color="primary"
-                          sx={{ bgcolor: '#f1f7ff', mr: 0.5 }}
+                          sx={{ color: 'primary.main' }}
                         >
-                    <EditIcon />
-                  </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete" arrow>
+                          <EditIcon />
+                        </IconButton>
                         <IconButton
                           onClick={() => handleDelete(shelter._id)}
-                          color="error"
-                          sx={{ bgcolor: '#fff5f5' }}
+                          sx={{ color: 'error.main' }}
                         >
-                    <DeleteIcon />
-                  </IconButton>
-                      </Tooltip>
-                </Box>
-              </CardContent>
-            </Card>
+                          <DeleteIcon />
+                        </IconButton>
+                      </Box>
+                    </Box>
+
+                    {shelter.contactNumber && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <Phone sx={{ color: 'primary.main', mr: 1, fontSize: '1.2rem' }} />
+                        <Typography variant="body2" color="text.secondary">
+                          {shelter.contactNumber}
+                        </Typography>
+                      </Box>
+                    )}
+
+                    {shelter.address && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <LocationOn sx={{ color: 'primary.main', mr: 1, fontSize: '1.2rem' }} />
+                        <Typography variant="body2" color="text.secondary">
+                          {shelter.address}
+                        </Typography>
+                      </Box>
+                    )}
+
+                    {shelter.capacity && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <People sx={{ color: 'primary.main', mr: 1, fontSize: '1.2rem' }} />
+                        <Typography variant="body2" color="text.secondary">
+                          Capacity: {shelter.capacity} | Current: {shelter.currentOccupancy}
+                        </Typography>
+                      </Box>
+                    )}
+
+                    {shelter.description && (
+                      <Box sx={{ mt: 2, mb: 2 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          {shelter.description}
+                        </Typography>
+                      </Box>
+                    )}
+
+                    {/* Images Section */}
+                    {shelter.images && shelter.images.length > 0 && (
+                      <Box sx={{ mt: 3, borderTop: '1px solid', borderColor: 'divider', pt: 2 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                          <Typography variant="subtitle2" color="text.secondary">
+                            Gallery Images
+                          </Typography>
+                          {Object.values(selectedImages[shelter._id] || {}).some(selected => selected) && (
+                            <Button
+                              size="small"
+                              color="error"
+                              onClick={() => handleDeleteSelectedImages(shelter._id)}
+                              startIcon={<DeleteIcon />}
+                            >
+                              Delete Selected
+                            </Button>
+                          )}
+                        </Box>
+                        <Grid container spacing={1}>
+                          {shelter.images.map((image, index) => (
+                            <Grid item xs={4} key={index}>
+                              <Box sx={{ position: 'relative' }}>
+                                <img
+                                  src={getImageUrl(image)}
+                                  alt={`Gallery ${index + 1}`}
+                                  style={{
+                                    width: '100%',
+                                    height: 80,
+                                    objectFit: 'cover',
+                                    borderRadius: 8,
+                                  }}
+                                />
+                                <Checkbox
+                                  checked={!!selectedImages[shelter._id]?.[image]}
+                                  onChange={() => handleImageSelect(shelter._id, image)}
+                                  sx={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    right: 0,
+                                    color: 'white',
+                                    '&.Mui-checked': {
+                                      color: 'white',
+                                    },
+                                  }}
+                                />
+                              </Box>
+                            </Grid>
+                          ))}
+                        </Grid>
+                      </Box>
+                    )}
+                  </CardContent>
+                </Card>
               </Fade>
-          </Grid>
-        ))}
-      </Grid>
+            </Grid>
+          ))}
+        </Grid>
 
         <Dialog
           open={open}
           onClose={handleClose}
-          maxWidth="sm"
+          maxWidth="md"
           fullWidth
           PaperProps={{
-            sx: { borderRadius: 4, p: 1 },
+            sx: {
+              borderRadius: 4,
+              p: 2,
+            },
           }}
         >
-        <DialogTitle>
-            <Typography variant="h5" color="primary" fontWeight={700}>
-          {editingShelter ? 'Edit Shelter' : 'Add New Shelter'}
+          <DialogTitle>
+            <Typography variant="h5" fontWeight={700}>
+              {editingShelter ? 'Edit Shelter' : 'Add New Shelter'}
             </Typography>
-        </DialogTitle>
-        <DialogContent>
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+          </DialogTitle>
+          <DialogContent>
+            <Grid container spacing={2} sx={{ mt: 1 }}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   label="Name"
                   name="name"
                   value={formData.name}
-                  onChange={handleChange}
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Contact Number"
-                  name="contactNumber"
-                  value={formData.contactNumber}
-                  onChange={handleChange}
+                  onChange={handleInputChange}
                   required
                 />
               </Grid>
@@ -480,37 +604,49 @@ const ShelterManager = () => {
                   label="Address"
                   name="address"
                   value={formData.address}
-                  onChange={handleChange}
+                  onChange={handleInputChange}
                   required
+                  multiline
+                  rows={2}
                 />
               </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="City"
                   name="city"
                   value={formData.city}
-                  onChange={handleChange}
+                  onChange={handleInputChange}
                   required
                 />
               </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="State"
                   name="state"
                   value={formData.state}
-                  onChange={handleChange}
+                  onChange={handleInputChange}
                   required
                 />
               </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label="Pincode"
                   name="pincode"
                   value={formData.pincode}
-                  onChange={handleChange}
+                  onChange={handleInputChange}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Contact Number"
+                  name="contactNumber"
+                  value={formData.contactNumber}
+                  onChange={handleInputChange}
                   required
                 />
               </Grid>
@@ -521,7 +657,7 @@ const ShelterManager = () => {
                   name="capacity"
                   type="number"
                   value={formData.capacity}
-                  onChange={handleChange}
+                  onChange={handleInputChange}
                   required
                 />
               </Grid>
@@ -532,7 +668,7 @@ const ShelterManager = () => {
                   name="currentOccupancy"
                   type="number"
                   value={formData.currentOccupancy}
-                  onChange={handleChange}
+                  onChange={handleInputChange}
                   required
                 />
               </Grid>
@@ -541,98 +677,60 @@ const ShelterManager = () => {
                   fullWidth
                   label="Description"
                   name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
                   multiline
                   rows={4}
-                  value={formData.description}
-                  onChange={handleChange}
-                  required
                 />
               </Grid>
               <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Facilities (comma-separated)"
-                  name="facilities"
-                  value={formData.facilities.join(', ')}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev,
-                      facilities: e.target.value.split(',').map(f => f.trim()).filter(f => f)
-                  }))}
-                  helperText="Enter facilities separated by commas"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <Button
-                  variant="outlined"
-                  component="label"
-                  fullWidth
-                    sx={{
-                      textTransform: 'none',
-                      borderRadius: 2,
-                      borderColor: 'primary.light',
-                    }}
-                >
-                  Upload Images
-                  <input
-                    type="file"
+                <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                  Hero Image
+                </Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                  <label htmlFor="hero-image-upload">
+                    <Button
+                      variant="outlined"
+                      component="span"
+                      startIcon={<CloudUpload />}
+                      sx={{
+                        borderRadius: 2,
+                        textTransform: 'none',
+                        px: 3,
+                      }}
+                    >
+                      Upload Hero Image
+                    </Button>
+                    <input
                       accept="image/*"
-                    hidden
-                    multiple
-                    onChange={handleFileChange}
-                  />
-                </Button>
-              {previewUrls.length > 0 && (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
-                    {previewUrls.map((url, index) => (
-                      <Box key={index} sx={{ position: 'relative' }}>
-                        <img
-                            src={url}
-                          alt={`Preview ${index + 1}`}
-                            style={{
-                              width: 100,
-                              height: 100,
-                              objectFit: 'cover',
-                              borderRadius: 8,
-                            }}
-                        />
-                        <IconButton
-                          size="small"
-                            onClick={() => removeImage(index)}
-                          sx={{
-                            position: 'absolute',
-                            top: -8,
-                            right: -8,
-                            bgcolor: 'background.paper',
-                            '&:hover': { bgcolor: 'background.paper' }
-                          }}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Box>
-                    ))}
-                  </Box>
+                      type="file"
+                      onChange={handleHeroImageChange}
+                      style={{ display: 'none' }}
+                      id="hero-image-upload"
+                    />
+                  </label>
+                  {previewUrls.heroImage && (
+                    <Box sx={{ mt: 2, maxWidth: 300 }}>
+                      <img
+                        src={previewUrls.heroImage}
+                        alt="Preview"
+                        style={{ width: '100%', height: 'auto', borderRadius: 8 }}
+                      />
+                    </Box>
                   )}
-                </Grid>
+                </Box>
+              </Grid>
             </Grid>
-          </Box>
-        </DialogContent>
-          <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={handleClose}>Cancel</Button>
-            <Button
-              onClick={handleSubmit}
-              variant="contained"
-              color="primary"
-              sx={{
-                fontWeight: 700,
-                borderRadius: 8,
-                textTransform: 'none',
-                px: 4,
-              }}
-            >
-            {editingShelter ? 'Update' : 'Add'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose} color="inherit">
+              Cancel
+            </Button>
+            <Button onClick={handleSubmit} variant="contained" color="primary">
+              {editingShelter ? 'Update' : 'Add'} Shelter
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Container>
     </Box>
   );

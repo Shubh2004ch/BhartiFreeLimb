@@ -1,33 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Container,
-  Typography,
-  Box,
-  Card,
-  CardContent,
-  CardMedia,
-  Chip,
-  Skeleton,
-  Fade,
-  useTheme,
-  useMediaQuery,
-  Button,
-  Alert,
-  Rating
-} from '@mui/material';
-import {
-  LocationOn,
-  AccessTime,
-  Phone,
-  Directions,
-  Restaurant,
-  LocalDining,
-  Schedule,
-  Fastfood,
-  EmojiFoodBeverage
-} from '@mui/icons-material';
-import { ENDPOINTS, getImageUrl } from '../../constants';
-import { foodStallService } from '../../services/api';
+import { Container, Typography, Box, Skeleton, Fade, useTheme, useMediaQuery, Alert, Button } from '@mui/material';
+import { LocalDining, ArrowForward } from '@mui/icons-material';
+import { ENDPOINTS, getImageUrl } from '../../config/constants';
+import { centerService } from '../../services/api';
+import { useNavigate } from 'react-router-dom';
+import MainCard from '../MainCard';
 
 // Loading Skeleton Component
 const LoadingSkeleton = () => (
@@ -50,171 +27,14 @@ const LoadingSkeleton = () => (
   </Box>
 );
 
-// Food Stall Card Component
-const FoodStallCard = ({ item, index }) => {
-  const theme = useTheme();
-
-  return (
-    <Fade in timeout={500} style={{ transitionDelay: `${index * 100}ms` }}>
-      <Card 
-        sx={{ 
-          height: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          width: '320px',
-          mx: 'auto',
-          borderRadius: 3,
-          overflow: 'hidden',
-          transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-          '&:hover': {
-            transform: 'translateY(-8px)',
-            boxShadow: theme.shadows[8]
-          }
-        }}
-      >
-        <Box sx={{ position: 'relative' }}>
-          <CardMedia
-            component="img"
-            height="180"
-            image={getImageUrl(item.imagePath)}
-            alt={item.name}
-            sx={{
-              objectFit: 'cover',
-              position: 'relative',
-            }}
-          />
-          <Box 
-            sx={{ 
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-              background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.6) 100%)',
-            }}
-          />
-          <Box 
-            sx={{ 
-              position: 'absolute', 
-              top: 12, 
-              right: 12,
-              bgcolor: 'success.main',
-              color: 'white',
-              px: 2,
-              py: 0.5,
-              borderRadius: '9999px',
-              fontSize: '0.875rem',
-              fontWeight: 'bold',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.5,
-              boxShadow: 2
-            }}
-          >
-            <EmojiFoodBeverage sx={{ fontSize: '1rem' }} />
-            Free Food
-          </Box>
-        </Box>
-
-        <CardContent sx={{ flexGrow: 1, p: 3 }}>
-          <Typography variant="h6" component="h3" sx={{ 
-            fontWeight: 'bold', 
-            mb: 2,
-            color: 'text.primary',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1
-          }}>
-            <Restaurant sx={{ color: 'primary.main' }} />
-            {item.name}
-          </Typography>
-          
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-            <LocationOn sx={{ color: 'primary.main', fontSize: '1.2rem', mr: 1 }} />
-            <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
-              {item.address}
-            </Typography>
-          </Box>
-
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-            <Schedule sx={{ color: 'primary.main', fontSize: '1.2rem', mr: 1 }} />
-            <Typography variant="body2" color="text.secondary">
-              {item.timings || 'Open 24/7'}
-            </Typography>
-          </Box>
-
-          {item.specialties && item.specialties.length > 0 && (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 2 }}>
-              {item.specialties.map((specialty, idx) => (
-              <Chip 
-                key={idx}
-                  icon={<Fastfood />}
-                  label={specialty} 
-                size="small"
-                sx={{ 
-                    bgcolor: 'primary.soft',
-                    color: 'primary.dark',
-                    '& .MuiChip-icon': {
-                      color: 'primary.main'
-                    }
-                }}
-              />
-            ))}
-          </Box>
-          )}
-
-          <Box sx={{ display: 'flex', gap: 1, mt: 'auto' }}>
-            <Button
-              variant="contained"
-              startIcon={<Phone />}
-              size="large"
-              fullWidth
-              href={`tel:${item.contact}`}
-              disabled={!item.contact}
-              sx={{ 
-                py: 1,
-                bgcolor: 'primary.main',
-                '&:hover': {
-                  bgcolor: 'primary.dark'
-                }
-              }}
-            >
-              Call Now
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<Directions />}
-              size="large"
-              fullWidth
-              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.address)}`}
-              target="_blank"
-              disabled={!item.address}
-              sx={{ 
-                py: 1,
-                borderColor: 'primary.main',
-                color: 'primary.main',
-                '&:hover': {
-                  borderColor: 'primary.dark',
-                  bgcolor: 'primary.soft'
-                }
-              }}
-            >
-              Directions
-            </Button>
-          </Box>
-        </CardContent>
-      </Card>
-    </Fade>
-  );
-};
-
 // Main Component
-export const FoodStallsSection = () => {
+export const ProstheticCentersSection = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchItems();
@@ -222,17 +42,17 @@ export const FoodStallsSection = () => {
 
   const fetchItems = async () => {
     try {
-      console.log('Fetching food stalls...');
-      const response = await foodStallService.getFoodStalls();
-      console.log('Food stalls response:', response);
+      console.log('Fetching prosthetic centers...');
+      const response = await centerService.getCenters();
+      console.log('Prosthetic centers response:', response);
       if (!response.data || !Array.isArray(response.data)) {
         throw new Error('Invalid data format received from server');
       }
       setItems(response.data);
       setError(null);
     } catch (error) {
-      console.error('Error fetching food stalls:', error);
-      setError('Failed to load food stalls. Please try again later.');
+      console.error('Error fetching prosthetic centers:', error);
+      setError('Failed to load prosthetic centers. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -256,7 +76,7 @@ export const FoodStallsSection = () => {
     return (
       <Box sx={{ py: 4, textAlign: 'center' }}>
         <Alert severity="info" sx={{ maxWidth: 600, mx: 'auto' }}>
-          No food stalls available at the moment. Please check back later.
+          No prosthetic centers available at the moment. Please check back later.
         </Alert>
       </Box>
     );
@@ -265,36 +85,36 @@ export const FoodStallsSection = () => {
   return (
     <Box 
       sx={{ 
-        py: 6, 
-        bgcolor: 'background.default',
-        borderRadius: 4,
-        boxShadow: '0 0 40px rgba(0,0,0,0.03)'
+        py: 6,
+        bgcolor: 'background.paper',
+        borderBottom: '1px solid',
+        borderColor: 'divider'
       }}
     >
       <Container maxWidth="lg">
-        <Box sx={{ textAlign: 'center', mb: 6 }}>
+        <Box sx={{ 
+          textAlign: 'center', 
+          mb: 4
+        }}>
           <Typography 
             variant="h4" 
             component="h2" 
             gutterBottom 
             sx={{ 
-              fontWeight: 900,
+              fontWeight: 'bold',
               color: 'primary.main',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 2
+              textShadow: '2px 2px 4px rgba(0,0,0,0.1)'
             }}
           >
-            <LocalDining sx={{ fontSize: '2.5rem' }} />
-            Free Food Stalls
+            Free Limb Centers
           </Typography>
           <Typography 
-            variant="subtitle1" 
+            variant="subtitle2" 
             color="text.secondary"
-            sx={{ maxWidth: '600px', mx: 'auto', fontSize: '1.1rem' }}
+            sx={{ maxWidth: '600px', mx: 'auto', mb: 3 }}
           >
-            Find free food stalls near prosthetic centers providing nutritious meals to those in need
+            Find prosthetic centers and support services. 
+            Our network ensures everyone has access to quality prosthetic care.
           </Typography>
         </Box>
 
@@ -321,12 +141,49 @@ export const FoodStallsSection = () => {
         }}>
           {items.map((item, index) => (
             <Box key={item._id} sx={{ minWidth: '320px', flexShrink: 0 }}>
-              <FoodStallCard 
-                item={item}
-                index={index}
-              />
+              <Fade in timeout={500} style={{ transitionDelay: `${index * 100}ms` }}>
+                <div>
+                  <MainCard
+                    image={getImageUrl(item.imagePath)}
+                    name={item.name}
+                    address={item.address}
+                    phone={item.contact}
+                    description={item.description}
+                    features={item.specialties}
+                    onClick={() => navigate(`/prosthetic-centers/${item._id}`)}
+                    className="h-full"
+                  />
+                </div>
+              </Fade>
             </Box>
           ))}
+        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <Button
+            variant="contained"
+            onClick={() => navigate('/prosthetic-centers')}
+            endIcon={<ArrowForward />}
+            sx={{
+              minWidth: 200,
+              backgroundColor: 'primary.main',
+              color: 'white',
+              '&:hover': {
+                backgroundColor: 'primary.dark',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+              },
+              transition: 'all 0.3s ease',
+              textTransform: 'none',
+              fontSize: '1rem',
+              fontWeight: 600,
+              py: 1.5,
+              px: 4,
+              borderRadius: 2,
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            View All Prosthetic Centers
+          </Button>
         </Box>
       </Container>
     </Box>

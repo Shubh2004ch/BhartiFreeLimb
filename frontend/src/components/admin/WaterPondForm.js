@@ -29,7 +29,7 @@ import {
   Opacity,
   WaterDrop,
 } from '@mui/icons-material';
-import { ENDPOINTS, getImageUrl } from '../../constants';
+import { ENDPOINTS, getImageUrl } from '../../config/constants';
 import api from '../../services/api';
 import { waterPondService } from '../../services/api';
 

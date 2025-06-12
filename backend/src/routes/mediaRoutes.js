@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const mediaController = require('../controllers/mediaController');
+const mediaController = require('../controllers/public/mediaController');
 const upload = require('../middleware/upload');
 
 // Configure upload middleware

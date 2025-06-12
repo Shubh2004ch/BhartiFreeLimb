@@ -1,4 +1,4 @@
-const SuccessStory = require('../models/SuccessStory');
+const SuccessStory = require('../../models/SuccessStory');
 
 // List all success stories
 exports.getAllStories = async (req, res) => {

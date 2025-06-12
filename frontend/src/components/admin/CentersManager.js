@@ -20,6 +20,11 @@ import {
   Chip,
   Stack,
   Alert,
+  Switch,
+  FormControlLabel,
+  Checkbox,
+  ImageList,
+  ImageListItem,
 } from '@mui/material';
 import {
   Delete as DeleteIcon,
@@ -34,10 +39,15 @@ import {
   Phone,
   Star,
   Close as CloseIcon,
+  CheckCircle,
 } from '@mui/icons-material';
 import axios from 'axios';
 import { ENDPOINTS, getImageUrl } from '../../constants';
 import api from '../../services/api';
+import ImageUpload from '../common/ImageUpload';
+import { imageService } from '../../services/imageService';
+import ImageUploadButton from '../common/ImageUploadButton';
+import { centerService } from '../../services/api';
 
 // Skeleton loader for loading state
 const CentersSkeleton = () => (
@@ -82,13 +92,14 @@ const CentersManager = () => {
     email: '',
     description: '',
     imagePath: null,
-    beneficiaryImages: []
+    operatingHours: '',
+    services: '',
   });
   const [previewUrls, setPreviewUrls] = useState({
-    heroImage: null,
-    beneficiaryImages: []
+    heroImage: null
   });
   const [success, setSuccess] = useState(null);
+  const [selectedImages, setSelectedImages] = useState({});
 
   useEffect(() => {
     fetchCenters();
@@ -130,32 +141,6 @@ const CentersManager = () => {
     }
   };
 
-  const handleBeneficiaryImagesChange = (e) => {
-    const files = Array.from(e.target.files);
-    setFormData(prev => ({
-      ...prev,
-      beneficiaryImages: [...prev.beneficiaryImages, ...files]
-    }));
-    setPreviewUrls(prev => ({
-      ...prev,
-      beneficiaryImages: [
-        ...prev.beneficiaryImages,
-        ...files.map(file => URL.createObjectURL(file))
-      ]
-    }));
-  };
-
-  const removeBeneficiaryImage = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      beneficiaryImages: prev.beneficiaryImages.filter((_, i) => i !== index)
-    }));
-    setPreviewUrls(prev => ({
-      ...prev,
-      beneficiaryImages: prev.beneficiaryImages.filter((_, i) => i !== index)
-    }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.address || !formData.contact || !formData.email) {
@@ -165,26 +150,19 @@ const CentersManager = () => {
 
     try {
       const formDataToSend = new FormData();
-      
+
       // Append basic fields
       formDataToSend.append('name', formData.name);
       formDataToSend.append('address', formData.address);
       formDataToSend.append('contact', formData.contact);
       formDataToSend.append('email', formData.email);
       formDataToSend.append('description', formData.description || '');
+      formDataToSend.append('operatingHours', formData.operatingHours || '');
+      formDataToSend.append('services', formData.services || '');
 
       // Handle hero image
       if (formData.imagePath instanceof File) {
         formDataToSend.append('heroImage', formData.imagePath);
-      }
-
-      // Handle beneficiary images
-      if (formData.beneficiaryImages && formData.beneficiaryImages.length > 0) {
-        formData.beneficiaryImages.forEach(file => {
-          if (file instanceof File) {
-            formDataToSend.append('beneficiaryImages', file);
-          }
-        });
       }
 
       const config = {
@@ -218,12 +196,11 @@ const CentersManager = () => {
       email: center.email || '',
       description: center.description || '',
       imagePath: null,
-      beneficiaryImages: []
+      operatingHours: center.operatingHours || '',
+      services: center.services || '',
     });
     setPreviewUrls({
-      heroImage: center.imagePath ? getImageUrl(center.imagePath) : null,
-      beneficiaryImages: center.beneficiaryImages ? 
-                        center.beneficiaryImages.map(img => getImageUrl(img)) : []
+      heroImage: center.imagePath ? getImageUrl(center.imagePath) : null
     });
     setIsModalOpen(true);
   };
@@ -250,12 +227,74 @@ const CentersManager = () => {
       email: '',
       description: '',
       imagePath: null,
-      beneficiaryImages: []
+      operatingHours: '',
+      services: '',
     });
     setPreviewUrls({
-      heroImage: null,
-      beneficiaryImages: []
+      heroImage: null
     });
+  };
+
+  const handleImageUploadSuccess = (response) => {
+    setSuccess('Images uploaded successfully');
+    fetchCenters();
+  };
+
+  const handleImageUploadError = (error) => {
+    setError(error.response?.data?.message || 'Failed to upload images');
+  };
+
+  const handleImageSelect = (centerId, imageUrl) => {
+    setSelectedImages(prev => ({
+      ...prev,
+      [centerId]: {
+        ...prev[centerId],
+        [imageUrl]: !prev[centerId]?.[imageUrl]
+      }
+    }));
+  };
+
+  const handleDeleteSelectedImages = async (centerId) => {
+    const selectedUrls = Object.entries(selectedImages[centerId] || {})
+      .filter(([_, selected]) => selected)
+      .map(([url]) => url);
+
+    if (selectedUrls.length === 0) {
+      setError('Please select images to delete');
+      return;
+    }
+
+    if (window.confirm(`Are you sure you want to delete ${selectedUrls.length} selected images?`)) {
+      try {
+        // Get the current center
+        const center = centers.find(c => c._id === centerId);
+        if (!center) {
+          throw new Error('Center not found');
+        }
+
+        // Filter out the selected images from the images array
+        const updatedImages = center.images.filter(img => !selectedUrls.includes(img));
+        
+        // Update the center with the filtered images
+        await api.put(`${ENDPOINTS.CENTERS}/${centerId}`, {
+          images: updatedImages
+        }, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        setSuccess('Selected images deleted successfully');
+        setSelectedImages(prev => ({
+          ...prev,
+          [centerId]: {}
+        }));
+        fetchCenters();
+      } catch (error) {
+        console.error('Error deleting images:', error);
+        setError(error.response?.data?.message || 'Failed to delete images');
+      }
+    }
   };
 
   return (
@@ -338,105 +377,146 @@ const CentersManager = () => {
           <Grid container spacing={4}>
             {centers.map((center) => (
               <Grid item key={center._id} xs={12} sm={6} md={4}>
-                <Card
-                  sx={{
-                    borderRadius: 4,
-                    boxShadow: 4,
-                    overflow: 'hidden',
-                    transition: 'transform 0.3s ease-in-out',
-                    '&:hover': {
-                      transform: 'translateY(-8px)',
-                    },
-                  }}
-                >
-                  {center.imagePath && (
-                  <CardMedia
-                    component="img"
-                    height="200"
-                      image={getImageUrl(center.imagePath)}
-                    alt={center.name}
-                      onError={(e) => {
-                        console.error('Image failed to load:', e.target.src);
-                        e.target.style.display = 'none';
-                      }}
-                      sx={{
-                        objectFit: 'cover',
-                        borderTopLeftRadius: 16,
-                        borderTopRightRadius: 16,
-                      }}
-                  />
-                  )}
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom fontWeight={700}>
-                      {center.name}
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <LocationOn sx={{ color: 'primary.main', mr: 1, fontSize: '1.2rem' }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {center.address}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <Phone sx={{ color: 'primary.main', mr: 1, fontSize: '1.2rem' }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {center.contact}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                      <EmailIcon sx={{ color: 'primary.main', mr: 1, fontSize: '1.2rem' }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {center.email}
-                      </Typography>
-                    </Box>
-                    {center.description && (
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                        {center.description}
-                      </Typography>
+                <Fade in timeout={500} style={{ transitionDelay: `${center._id * 80}ms` }}>
+                  <Card
+                    sx={{
+                      borderRadius: 4,
+                      boxShadow: 4,
+                      overflow: 'hidden',
+                      transition: 'transform 0.3s ease-in-out',
+                      '&:hover': {
+                        transform: 'translateY(-8px)',
+                      },
+                    }}
+                  >
+                    {center.imagePath && (
+                      <CardMedia
+                        component="img"
+                        height="200"
+                        image={getImageUrl(center.imagePath)}
+                        alt={center.name}
+                        onError={(e) => {
+                          console.error('Image failed to load:', e.target.src);
+                          e.target.style.display = 'none';
+                        }}
+                        sx={{
+                          objectFit: 'cover',
+                          borderTopLeftRadius: 16,
+                          borderTopRightRadius: 16,
+                        }}
+                      />
                     )}
-                    {center.beneficiaryImages && center.beneficiaryImages.length > 0 && (
-                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
-                        {center.beneficiaryImages.map((img, index) => (
-                          <Box
-                            key={index}
-                            component="img"
-                            src={getImageUrl(img)}
-                            alt={`Beneficiary ${index + 1}`}
-                            onError={(e) => {
-                              console.error('Image failed to load:', e.target.src);
-                              e.target.style.display = 'none';
-                            }}
-                            sx={{
-                              width: 60,
-                              height: 60,
-                              borderRadius: 2,
-                              objectFit: 'cover',
-                            }}
+                    <CardContent>
+                      <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+                          {center.name}
+                        </Typography>
+                        <Box>
+                          <ImageUploadButton
+                            itemId={center._id}
+                            itemType="centers"
+                            multiple={true}
+                            maxFiles={Infinity}
+                            onUploadSuccess={handleImageUploadSuccess}
+                            onUploadError={handleImageUploadError}
                           />
-                        ))}
+                          <IconButton
+                            onClick={() => handleEdit(center)}
+                            sx={{ color: 'primary.main' }}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                          <IconButton
+                            onClick={() => handleDelete(center._id)}
+                            sx={{ color: 'error.main' }}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Box>
                       </Box>
-                    )}
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-                      <IconButton
-                        onClick={() => handleEdit(center)}
-                        sx={{
-                          color: 'primary.main',
-                          '&:hover': { bgcolor: 'primary.light' },
-                        }}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => handleDelete(center._id)}
-                        sx={{
-                          color: 'error.main',
-                          '&:hover': { bgcolor: 'error.light' },
-                        }}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Box>
-                  </CardContent>
-                </Card>
+
+                      <Stack spacing={1}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <LocationOn color="primary" fontSize="small" />
+                          <Typography variant="body2" color="text.secondary">
+                            {center.address}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Phone color="primary" fontSize="small" />
+                          <Typography variant="body2" color="text.secondary">
+                            {center.contact}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <EmailIcon color="primary" fontSize="small" />
+                          <Typography variant="body2" color="text.secondary">
+                            {center.email}
+                          </Typography>
+                        </Box>
+                        {center.operatingHours && (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <AccessTime color="primary" fontSize="small" />
+                            <Typography variant="body2" color="text.secondary">
+                              {center.operatingHours}
+                            </Typography>
+                          </Box>
+                        )}
+                      </Stack>
+
+                      {center.description && (
+                        <Box sx={{ mt: 2, mb: 2 }}>
+                          <Typography variant="body2" color="text.secondary">
+                            {center.description}
+                          </Typography>
+                        </Box>
+                      )}
+
+                      {/* Images Section - Moved to bottom */}
+                      {center.images && center.images.length > 0 && (
+                        <Box sx={{ mt: 3, borderTop: '1px solid', borderColor: 'divider', pt: 2 }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                            <Typography variant="subtitle2" color="text.secondary">
+                              Images
+                            </Typography>
+                            {Object.values(selectedImages[center._id] || {}).some(selected => selected) && (
+                              <Button
+                                size="small"
+                                color="error"
+                                onClick={() => handleDeleteSelectedImages(center._id)}
+                                startIcon={<DeleteIcon />}
+                              >
+                                Delete Selected
+                              </Button>
+                            )}
+                          </Box>
+                          <ImageList sx={{ width: '100%', height: 200 }} cols={2} rowHeight={100}>
+                            {center.images.map((imageUrl, index) => (
+                              <ImageListItem key={index} sx={{ position: 'relative' }}>
+                                <img
+                                  src={imageUrl}
+                                  alt={`${center.name} image ${index + 1}`}
+                                  loading="lazy"
+                                  style={{ height: '100%', objectFit: 'cover' }}
+                                />
+                                <Checkbox
+                                  checked={!!selectedImages[center._id]?.[imageUrl]}
+                                  onChange={() => handleImageSelect(center._id, imageUrl)}
+                                  sx={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    right: 0,
+                                    bgcolor: 'rgba(255, 255, 255, 0.8)',
+                                  }}
+                                />
+                              </ImageListItem>
+                            ))}
+                          </ImageList>
+                        </Box>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Fade>
               </Grid>
             ))}
           </Grid>
@@ -460,11 +540,11 @@ const CentersManager = () => {
             </Typography>
           </DialogTitle>
           <DialogContent>
-            <Grid container spacing={3} sx={{ mt: 1 }}>
+            <Grid container spacing={2} sx={{ mt: 1 }}>
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Center Name"
+                  label="Name"
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
@@ -479,6 +559,8 @@ const CentersManager = () => {
                   value={formData.address}
                   onChange={handleInputChange}
                   required
+                  multiline
+                  rows={2}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -489,8 +571,6 @@ const CentersManager = () => {
                   value={formData.contact}
                   onChange={handleInputChange}
                   required
-                  margin="normal"
-                  helperText="Enter contact number"
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -516,109 +596,37 @@ const CentersManager = () => {
                 />
               </Grid>
               <Grid item xs={12}>
-                <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                  Hero Image
-                </Typography>
-                <input
-                  accept="image/*"
-                  type="file"
-                  id="hero-image"
-                  onChange={handleHeroImageChange}
-                  style={{ display: 'none' }}
+                <TextField
+                  fullWidth
+                  label="Operating Hours"
+                  name="operatingHours"
+                  value={formData.operatingHours}
+                  onChange={handleInputChange}
                 />
-                <label htmlFor="hero-image">
-                  <Button
-                    variant="outlined"
-                    component="span"
-                    sx={{ mb: 2 }}
-                  >
-                    Upload Hero Image
-                  </Button>
-                </label>
-                {previewUrls.heroImage && (
-                  <Box
-                    sx={{
-                      mt: 2,
-                      position: 'relative',
-                      width: '100%',
-                      height: 200,
-                      borderRadius: 2,
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <img
-                      src={previewUrls.heroImage}
-                      alt="Hero preview"
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                      }}
-                    />
-                  </Box>
-                )}
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Services"
+                  name="services"
+                  value={formData.services}
+                  onChange={handleInputChange}
+                  multiline
+                  rows={2}
+                />
               </Grid>
               <Grid item xs={12}>
                 <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                  Beneficiary Images
+                  Hero Image
                 </Typography>
-                <input
-                  accept="image/*"
-                  type="file"
-                  id="beneficiary-images"
-                  multiple
-                  onChange={handleBeneficiaryImagesChange}
-                  style={{ display: 'none' }}
+                <ImageUpload
+                  value={formData.imagePath}
+                  onChange={(file) => setFormData(prev => ({ ...prev, imagePath: file }))}
+                  label="Upload Hero Image"
+                  previewHeight={200}
+                  error={error}
+                  helperText="Upload a high-quality image for the center"
                 />
-                <label htmlFor="beneficiary-images">
-                  <Button
-                    variant="outlined"
-                    component="span"
-                    sx={{ mb: 2 }}
-                  >
-                    Upload Beneficiary Images
-                  </Button>
-                </label>
-                <Grid container spacing={2}>
-                  {previewUrls.beneficiaryImages.map((url, index) => (
-                    <Grid item xs={12} sm={6} md={4} key={index}>
-                      <Box
-                        sx={{
-                          position: 'relative',
-                          width: '100%',
-                          height: 200,
-                          borderRadius: 2,
-                          overflow: 'hidden',
-                        }}
-                      >
-                        <img
-                          src={url}
-                          alt={`Beneficiary ${index + 1}`}
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                          }}
-                        />
-                        <IconButton
-                          onClick={() => removeBeneficiaryImage(index)}
-                          sx={{
-                            position: 'absolute',
-                            top: 8,
-                            right: 8,
-                            bgcolor: 'rgba(0,0,0,0.5)',
-                            color: 'white',
-                            '&:hover': {
-                              bgcolor: 'rgba(0,0,0,0.7)',
-                            },
-                          }}
-                        >
-                          <CloseIcon />
-                        </IconButton>
-                      </Box>
-                    </Grid>
-                  ))}
-                </Grid>
               </Grid>
             </Grid>
           </DialogContent>

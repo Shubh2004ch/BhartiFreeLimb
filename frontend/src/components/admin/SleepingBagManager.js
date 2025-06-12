@@ -19,6 +19,9 @@ import {
   Alert,
   Switch,
   FormControlLabel,
+  Checkbox,
+  ImageList,
+  ImageListItem,
 } from '@mui/material';
 import {
   Delete as DeleteIcon,
@@ -32,6 +35,8 @@ import {
 } from '@mui/icons-material';
 import { ENDPOINTS, getImageUrl } from '../../constants';
 import api from '../../services/api';
+import { sleepingBagService } from '../../services/api';
+import ImageUploadButton from '../common/ImageUploadButton';
 
 const SleepingBagManager = () => {
   const [sleepingBags, setSleepingBags] = useState([]);
@@ -40,6 +45,7 @@ const SleepingBagManager = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [selectedImages, setSelectedImages] = useState({});
   const [formData, setFormData] = useState({
     name: '',
     location: '',
@@ -48,6 +54,8 @@ const SleepingBagManager = () => {
     availability: true,
     quantity: 0,
     image: null,
+    operatingHours: '',
+    capacity: '',
   });
 
   useEffect(() => {
@@ -79,6 +87,8 @@ const SleepingBagManager = () => {
         availability: item.availability,
         quantity: item.quantity,
         image: null,
+        operatingHours: item.operatingHours,
+        capacity: item.capacity,
       });
     } else {
       setEditingItem(null);
@@ -90,6 +100,8 @@ const SleepingBagManager = () => {
         availability: true,
         quantity: 0,
         image: null,
+        operatingHours: '',
+        capacity: '',
       });
     }
     setOpen(true);
@@ -115,6 +127,8 @@ const SleepingBagManager = () => {
     formDataToSend.append('contactNumber', formData.contactNumber);
     formDataToSend.append('availability', formData.availability);
     formDataToSend.append('quantity', formData.quantity);
+    formDataToSend.append('operatingHours', formData.operatingHours);
+    formDataToSend.append('capacity', formData.capacity);
 
     // Add image with the correct field name 'file'
     if (formData.image) {
@@ -163,6 +177,84 @@ const SleepingBagManager = () => {
         setError('Failed to delete sleeping bag');
       }
     }
+  };
+
+  const handleImageSelect = (itemId, imageUrl) => {
+    setSelectedImages(prev => ({
+      ...prev,
+      [itemId]: {
+        ...prev[itemId],
+        [imageUrl]: !prev[itemId]?.[imageUrl]
+      }
+    }));
+  };
+
+  const handleDeleteSelectedImages = async (itemId) => {
+    const selectedUrls = Object.entries(selectedImages[itemId] || {})
+      .filter(([_, selected]) => selected)
+      .map(([url]) => url);
+
+    if (selectedUrls.length === 0) {
+      setError('Please select images to delete');
+      return;
+    }
+
+    if (window.confirm(`Are you sure you want to delete ${selectedUrls.length} selected images?`)) {
+      try {
+        // Get the current item
+        const item = sleepingBags.find(s => s._id === itemId);
+        if (!item) {
+          throw new Error('Sleeping bag not found');
+        }
+
+        // Filter out the selected images from the images array
+        const updatedImages = item.images.filter(img => !selectedUrls.includes(img));
+        
+        // Update the item with the filtered images
+        await api.put(`${ENDPOINTS.SLEEPING_BAGS}/${itemId}`, {
+          images: updatedImages
+        }, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        setSuccess('Selected images deleted successfully');
+        setSelectedImages(prev => ({
+          ...prev,
+          [itemId]: {}
+        }));
+        fetchSleepingBags();
+      } catch (error) {
+        console.error('Error deleting images:', error);
+        setError(error.response?.data?.message || 'Failed to delete images');
+      }
+    }
+  };
+
+  const handleImageUploadSuccess = async (url, itemId) => {
+    if (itemId) {
+      // For existing item, update the images array
+      const item = sleepingBags.find(s => s._id === itemId);
+      if (item) {
+        const updatedImages = [...(item.images || []), url];
+        try {
+          await api.put(`${ENDPOINTS.SLEEPING_BAGS}/${itemId}`, {
+            images: updatedImages
+          });
+          setSuccess('Image uploaded successfully');
+          fetchSleepingBags();
+        } catch (error) {
+          console.error('Error updating sleeping bag with new image:', error);
+          setError('Failed to update sleeping bag with new image');
+        }
+      }
+    }
+  };
+
+  const handleImageUploadError = (error) => {
+    console.error('Image upload error:', error);
+    setError(error.message || 'Failed to upload image');
   };
 
   return (
@@ -328,6 +420,14 @@ const SleepingBagManager = () => {
                           gap: 1,
                         }}
                       >
+                        <ImageUploadButton
+                          itemId={item._id}
+                          itemType="sleepingbags"
+                          onUploadSuccess={(url) => handleImageUploadSuccess(url, item._id)}
+                          onUploadError={handleImageUploadError}
+                          multiple={true}
+                          maxFiles={10}
+                        />
                         <Tooltip title="Edit" arrow>
                           <IconButton
                             onClick={() => handleOpen(item)}
@@ -347,6 +447,48 @@ const SleepingBagManager = () => {
                           </IconButton>
                         </Tooltip>
                       </Box>
+                      {/* Images Section */}
+                      {item.images && item.images.length > 0 && (
+                        <Box sx={{ mt: 3, borderTop: '1px solid', borderColor: 'divider', pt: 2 }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                            <Typography variant="subtitle2" color="text.secondary">
+                              Images
+                            </Typography>
+                            {Object.values(selectedImages[item._id] || {}).some(selected => selected) && (
+                              <Button
+                                size="small"
+                                color="error"
+                                onClick={() => handleDeleteSelectedImages(item._id)}
+                                startIcon={<DeleteIcon />}
+                              >
+                                Delete Selected
+                              </Button>
+                            )}
+                          </Box>
+                          <ImageList sx={{ width: '100%', height: 200 }} cols={2} rowHeight={100}>
+                            {item.images.map((imageUrl, index) => (
+                              <ImageListItem key={index} sx={{ position: 'relative' }}>
+                                <img
+                                  src={imageUrl}
+                                  alt={`${item.name} image ${index + 1}`}
+                                  loading="lazy"
+                                  style={{ height: '100%', objectFit: 'cover' }}
+                                />
+                                <Checkbox
+                                  checked={!!selectedImages[item._id]?.[imageUrl]}
+                                  onChange={() => handleImageSelect(item._id, imageUrl)}
+                                  sx={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    right: 0,
+                                    bgcolor: 'rgba(255, 255, 255, 0.8)',
+                                  }}
+                                />
+                              </ImageListItem>
+                            ))}
+                          </ImageList>
+                        </Box>
+                      )}
                     </CardContent>
                   </Card>
                 </Fade>
@@ -433,6 +575,24 @@ const SleepingBagManager = () => {
                 }
                 label="Available"
                 sx={{ mt: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Operating Hours"
+                value={formData.operatingHours}
+                onChange={(e) =>
+                  setFormData({ ...formData, operatingHours: e.target.value })
+                }
+                margin="normal"
+              />
+              <TextField
+                fullWidth
+                label="Capacity"
+                value={formData.capacity}
+                onChange={(e) =>
+                  setFormData({ ...formData, capacity: e.target.value })
+                }
+                margin="normal"
               />
               <Box sx={{ mt: 2 }}>
                 <Button

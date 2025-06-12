@@ -255,39 +255,16 @@ const CenterDetailsPage = () => {
             </Paper>
           </Grid>
 
-          {/* Description */}
+          {/* Image Galleries */}
           <Grid item xs={12} md={8}>
-            <Paper
-              elevation={3}
-              sx={{
-                p: 3,
-                borderRadius: 2,
-                height: '100%',
-              }}
-            >
-              <Typography variant="h6" sx={{ mb: 3, fontWeight: 700 }}>
-                About the Center
-              </Typography>
-              <Typography
-                variant="body1"
-                sx={{ lineHeight: 1.8, color: 'text.secondary' }}
-              >
-                {center.description}
-              </Typography>
-            </Paper>
-          </Grid>
-
-          {/* Beneficiary Images */}
-          {center.beneficiaryImages && center.beneficiaryImages.length > 0 && (
-            <Grid item xs={12}>
-              <Typography variant="h5" sx={{ mb: 3, fontWeight: 700 }}>
-                Our Beneficiaries
-              </Typography>
-              <Grid container spacing={3}>
-                {center.beneficiaryImages.map((image, index) => {
-                  const imageUrl = getImageUrl(image);
-                  console.log(`Beneficiary image ${index} URL:`, imageUrl); // Debug log
-                  return (
+            {/* Center Images Gallery */}
+            {center.images && center.images.length > 0 && (
+              <Box sx={{ mb: 4 }}>
+                <Typography variant="h5" sx={{ mb: 3, fontWeight: 700 }}>
+                  Center Gallery ({center.images.length} images)
+                </Typography>
+                <Grid container spacing={3}>
+                  {center.images.map((image, index) => (
                     <Grid item xs={12} sm={6} md={4} key={index}>
                       <Paper
                         elevation={3}
@@ -305,28 +282,73 @@ const CenterDetailsPage = () => {
                           justifyContent: 'center',
                         }}
                       >
-                        {imageUrl ? (
-                          <Box
-                            component="img"
-                            src={imageUrl}
-                            alt={`Beneficiary ${index + 1}`}
-                            onError={handleImageError}
-                            sx={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover',
-                            }}
-                          />
-                        ) : (
-                          <ImageIcon sx={{ fontSize: 60, color: 'grey.400' }} />
-                        )}
+                        <Box
+                          component="img"
+                          src={image}
+                          alt={`Center Image ${index + 1}`}
+                          onError={(e) => {
+                            console.error('Failed to load image:', image);
+                            handleImageError(e);
+                          }}
+                          sx={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                          }}
+                        />
                       </Paper>
                     </Grid>
-                  );
-                })}
-              </Grid>
-            </Grid>
-          )}
+                  ))}
+                </Grid>
+              </Box>
+            )}
+
+            {/* Beneficiary Images Gallery */}
+            {center.beneficiaryImages && center.beneficiaryImages.length > 0 && (
+              <Box>
+                <Typography variant="h5" sx={{ mb: 3, fontWeight: 700 }}>
+                  Our Beneficiaries ({center.beneficiaryImages.length} images)
+                </Typography>
+                <Grid container spacing={3}>
+                  {center.beneficiaryImages.map((image, index) => (
+                    <Grid item xs={12} sm={6} md={4} key={index}>
+                      <Paper
+                        elevation={3}
+                        sx={{
+                          borderRadius: 2,
+                          overflow: 'hidden',
+                          transition: 'transform 0.3s ease-in-out',
+                          '&:hover': {
+                            transform: 'scale(1.02)',
+                          },
+                          height: 300,
+                          bgcolor: 'grey.200',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Box
+                          component="img"
+                          src={image}
+                          alt={`Beneficiary ${index + 1}`}
+                          onError={(e) => {
+                            console.error('Failed to load image:', image);
+                            handleImageError(e);
+                          }}
+                          sx={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                          }}
+                        />
+                      </Paper>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
+            )}
+          </Grid>
         </Grid>
       </Container>
     </Box>

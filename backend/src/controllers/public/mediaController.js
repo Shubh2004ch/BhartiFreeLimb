@@ -1,4 +1,4 @@
-const Media = require('../models/Media');
+const Media = require('../../models/Media');
 const path = require('path');
 
 // List all media

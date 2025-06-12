@@ -5,7 +5,8 @@ const waterPondSchema = new mongoose.Schema({
   location: {type: String,required: true},
   contactNumber: {type: String,required: true},
   imagePath: {type: String,required: true},
-  isActive: {type: Boolean,default: true}
+  isActive: {type: Boolean,default: true},
+  images: [String]
 }, {
   timestamps: true
 });
