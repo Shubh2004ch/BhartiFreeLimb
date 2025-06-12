@@ -157,7 +157,7 @@ app.use('/api/centers', centerRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/success-stories', successStoryRoutes);
-app.use('/api/foodstalls', foodStallRoutes);
+app.use('/api/food-stalls', foodStallRoutes);
 app.use('/api/clinics', clinicRoutes);
 app.use('/api/sleepingbags', sleepingBagRoutes);
 app.use('/api/waterponds', waterPonds);

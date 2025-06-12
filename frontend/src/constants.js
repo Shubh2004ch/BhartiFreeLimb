@@ -27,7 +27,7 @@ export const STATIC_FILES_URL = isDevelopment
 
 // API Endpoints
 export const ENDPOINTS = {
-  FOOD_STALLS: '/api/foodstalls',
+  FOOD_STALLS: '/api/food-stalls',
   CLINICS: '/api/clinics',
   SLEEPING_BAGS: '/api/sleepingbags',
   WATER_PONDS: '/api/waterponds',
