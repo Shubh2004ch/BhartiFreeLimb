@@ -1,4 +1,5 @@
 const FoodStall = require('../models/FoodStall');
+const { deleteFileFromS3 } = require('../config/s3');
 
 // Get all food stalls
 exports.getAllFoodStalls = async (req, res) => {
@@ -90,13 +91,29 @@ exports.updateFoodStall = async (req, res) => {
 // Delete food stall
 exports.deleteFoodStall = async (req, res) => {
   try {
-    const foodStall = await FoodStall.findByIdAndDelete(req.params.id);
-    if (!foodStall) {
-      return res.status(404).json({ message: 'Food stall not found' });
+    const foodStall = await FoodStall.findById(req.params.id);
+    if (!foodStall) return res.status(404).json({ message: 'Food stall not found' });
+
+    // Delete hero image from S3
+    if (foodStall.imagePath) {
+      await deleteFileFromS3(foodStall.imagePath);
     }
-    res.json({ message: 'Food stall deleted successfully' });
+
+    // Delete additional images from S3
+    if (foodStall.images && foodStall.images.length > 0) {
+      await Promise.all(foodStall.images.map(image => deleteFileFromS3(image)));
+    }
+
+    // Delete the food stall from database
+    await FoodStall.findByIdAndDelete(req.params.id);
+    
+    res.json({ message: 'Food stall and associated images deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Food stall deletion failed:', error);
+    res.status(500).json({ 
+      message: 'Failed to delete food stall',
+      error: error.message 
+    });
   }
 };
 

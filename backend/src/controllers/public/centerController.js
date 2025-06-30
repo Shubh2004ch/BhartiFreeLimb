@@ -1,4 +1,5 @@
 const Center = require('../../models/Center');
+const { deleteFileFromS3 } = require('../../config/s3');
 
 // Get all centers
 exports.getAllCenters = async (req, res) => {
@@ -150,9 +151,23 @@ exports.updateCenter = async (req, res) => {
 // Delete center
 exports.deleteCenter = async (req, res) => {
   try {
-    const center = await Center.findByIdAndDelete(req.params.id);
+    const center = await Center.findById(req.params.id);
     if (!center) return res.status(404).json({ message: 'Center not found' });
-    res.json({ message: 'Center deleted successfully' });
+
+    // Delete hero image from S3
+    if (center.imagePath) {
+      await deleteFileFromS3(center.imagePath);
+    }
+
+    // Delete beneficiary images from S3
+    if (center.beneficiaryImages && center.beneficiaryImages.length > 0) {
+      await Promise.all(center.beneficiaryImages.map(image => deleteFileFromS3(image)));
+    }
+
+    // Delete the center from database
+    await Center.findByIdAndDelete(req.params.id);
+    
+    res.json({ message: 'Center and associated images deleted successfully' });
   } catch (error) {
     console.error('Center deletion failed:', error);
     res.status(500).json({ 

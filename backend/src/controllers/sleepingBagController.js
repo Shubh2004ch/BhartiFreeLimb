@@ -1,4 +1,5 @@
 const SleepingBag = require('../models/SleepingBag');
+const { deleteFileFromS3 } = require('../config/s3');
 
 // Get all sleeping bags
 exports.getAllSleepingBags = async (req, res) => {
@@ -136,14 +137,29 @@ exports.updateSleepingBag = async (req, res) => {
 // Delete sleeping bag
 exports.deleteSleepingBag = async (req, res) => {
   try {
-    const sleepingBag = await SleepingBag.findByIdAndDelete(req.params.id);
-    if (!sleepingBag) {
-      return res.status(404).json({ message: 'Sleeping bag not found' });
+    const sleepingBag = await SleepingBag.findById(req.params.id);
+    if (!sleepingBag) return res.status(404).json({ message: 'Sleeping bag not found' });
+
+    // Delete hero image from S3
+    if (sleepingBag.imagePath) {
+      await deleteFileFromS3(sleepingBag.imagePath);
     }
-    res.json({ message: 'Sleeping bag deleted successfully' });
+
+    // Delete additional images from S3
+    if (sleepingBag.images && sleepingBag.images.length > 0) {
+      await Promise.all(sleepingBag.images.map(image => deleteFileFromS3(image)));
+    }
+
+    // Delete the sleeping bag from database
+    await SleepingBag.findByIdAndDelete(req.params.id);
+    
+    res.json({ message: 'Sleeping bag and associated images deleted successfully' });
   } catch (error) {
-    console.error('Error deleting sleeping bag:', error);
-    res.status(500).json({ message: error.message });
+    console.error('Sleeping bag deletion failed:', error);
+    res.status(500).json({ 
+      message: 'Failed to delete sleeping bag',
+      error: error.message 
+    });
   }
 };
 

@@ -13,6 +13,9 @@ A comprehensive web application for managing and displaying various community su
   - Sleeping bag distribution points
 - Detailed information for each service location
 - Image management with AWS S3 integration
+  - Automatic image deletion when services are removed
+  - Support for multiple images per service
+  - Secure image storage and delivery
 - Rating and review system
 - Location-based search
 - Responsive design with Material-UI
@@ -39,20 +42,42 @@ A comprehensive web application for managing and displaying various community su
 bharti/
 ├── frontend/
 │   ├── src/
-│   │   ├── components/    # React components
-│   │   ├── pages/        # Page components
-│   │   ├── services/     # API services
-│   │   ├── constants/    # Configuration constants
-│   │   └── App.js        # Main React component
-│   └── package.json      # Frontend dependencies
-└── backend/
-    ├── src/
-    │   ├── controllers/  # Route controllers
-    │   ├── models/       # Database models
-    │   ├── routes/       # API routes
-    │   ├── middleware/   # Custom middleware
-    │   └── config/       # Configuration files
-    └── package.json      # Backend dependencies
+│   │   ├── components/
+│   │   │   ├── admin/           # Admin panel components
+│   │   │   ├── common/          # Shared components
+│   │   │   ├── forms/           # Form components
+│   │   │   ├── layout/          # Layout components
+│   │   │   ├── sections/        # Page sections
+│   │   │   └── ui/              # UI components
+│   │   ├── pages/
+│   │   │   ├── DetailsPages/    # Detail view pages
+│   │   │   ├── admin/           # Admin pages
+│   │   │   └── public/          # Public pages
+│   │   ├── services/            # API services
+│   │   ├── config/              # Configuration files
+│   │   ├── constants/           # Constants and enums
+│   │   ├── hooks/               # Custom React hooks
+│   │   ├── utils/               # Utility functions
+│   │   └── App.js               # Main React component
+│   └── package.json             # Frontend dependencies
+├── backend/
+│   ├── src/
+│   │   ├── controllers/
+│   │   │   ├── public/          # Public controllers
+│   │   │   └── admin/           # Admin controllers
+│   │   ├── models/              # Database models
+│   │   ├── routes/
+│   │   │   ├── public/          # Public routes
+│   │   │   └── admin/           # Admin routes
+│   │   ├── middleware/          # Custom middleware
+│   │   ├── config/              # Configuration files
+│   │   └── utils/               # Utility functions
+│   └── package.json             # Backend dependencies
+├── nixpacks.toml                # Deployment configuration
+├── package.json                 # Root package.json
+├── Procfile                     # Heroku deployment file
+├── .gitignore                   # Git ignore rules
+└── .npmrc                       # NPM configuration
 ```
 
 ## Setup Instructions
@@ -92,6 +117,7 @@ AWS_ACCESS_KEY_ID=your_aws_access_key
 AWS_SECRET_ACCESS_KEY=your_aws_secret_key
 AWS_REGION=your_aws_region
 AWS_BUCKET_NAME=your_s3_bucket_name
+JWT_SECRET=your_jwt_secret
 ```
 
 ## API Endpoints
@@ -101,35 +127,40 @@ AWS_BUCKET_NAME=your_s3_bucket_name
 - `POST /api/centers` - Create a new center
 - `GET /api/centers/:id` - Get a specific center
 - `PUT /api/centers/:id` - Update a center
-- `DELETE /api/centers/:id` - Delete a center
+- `DELETE /api/centers/:id` - Delete a center and its images
+- `POST /api/centers/:id/images` - Upload additional images
 
 ### Food Stalls
-- `GET /api/foodstalls` - Get all food stalls
-- `POST /api/foodstalls` - Create a new food stall
-- `GET /api/foodstalls/:id` - Get a specific food stall
-- `PUT /api/foodstalls/:id` - Update a food stall
-- `DELETE /api/foodstalls/:id` - Delete a food stall
+- `GET /api/food-stalls` - Get all food stalls
+- `POST /api/food-stalls` - Create a new food stall
+- `GET /api/food-stalls/:id` - Get a specific food stall
+- `PUT /api/food-stalls/:id` - Update a food stall
+- `DELETE /api/food-stalls/:id` - Delete a food stall and its images
+- `POST /api/food-stalls/:id/images` - Upload additional images
 
 ### Clinics
 - `GET /api/clinics` - Get all clinics
 - `POST /api/clinics` - Create a new clinic
 - `GET /api/clinics/:id` - Get a specific clinic
 - `PUT /api/clinics/:id` - Update a clinic
-- `DELETE /api/clinics/:id` - Delete a clinic
+- `DELETE /api/clinics/:id` - Delete a clinic and its images
+- `POST /api/clinics/:id/images` - Upload additional images
 
 ### Shelters
 - `GET /api/shelters` - Get all shelters
 - `POST /api/shelters` - Create a new shelter
 - `GET /api/shelters/:id` - Get a specific shelter
 - `PUT /api/shelters/:id` - Update a shelter
-- `DELETE /api/shelters/:id` - Delete a shelter
+- `DELETE /api/shelters/:id` - Delete a shelter and its images
+- `POST /api/shelters/:id/images` - Upload additional images
 
 ### Water Points
 - `GET /api/waterponds` - Get all water points
 - `POST /api/waterponds` - Create a new water point
 - `GET /api/waterponds/:id` - Get a specific water point
 - `PUT /api/waterponds/:id` - Update a water point
-- `DELETE /api/waterponds/:id` - Delete a water point
+- `DELETE /api/waterponds/:id` - Delete a water point and its images
+- `POST /api/waterponds/:id/images` - Upload additional images
 
 ### Reviews
 - `POST /api/reviews` - Create a new review
@@ -137,13 +168,16 @@ AWS_BUCKET_NAME=your_s3_bucket_name
 - `PUT /api/reviews/:id` - Update a review
 - `DELETE /api/reviews/:id` - Delete a review
 
-## Image Upload
+## Image Management
 
-The application uses AWS S3 for image storage. Images are uploaded directly to S3 when creating or updating service locations. The system:
-- Supports multiple image uploads
-- Stores full S3 URLs in the database
-- Handles image deletion when services are removed
-- Provides secure, scalable image storage
+The application uses AWS S3 for image storage with the following features:
+- Automatic image deletion when services are removed
+- Support for multiple images per service
+- Secure image storage and delivery
+- Image upload size limit: 50MB
+- Supported formats: JPEG, PNG, GIF, WebP
+- Direct upload to S3 with public read access
+- Unique file names to prevent conflicts
 
 ## Contributing
 

@@ -5,7 +5,7 @@ const handleUploadError = (error, req, res, next) => {
   console.error('Error stack:', error.stack);
   
   if (error.code === 'LIMIT_FILE_SIZE') {
-    return res.status(400).json({ message: 'File size too large. Maximum size is 5MB.' });
+    return res.status(400).json({ message: 'File size too large. Maximum size is 50MB.' });
   }
   
   if (error.code === 'LIMIT_UNEXPECTED_FILE') {

@@ -1,58 +1,18 @@
 const ProstheticCenter = require('../../models/ProstheticCenter');
-const { uploadToS3, deleteFromS3 } = require('../utils/s3');
+const { uploadToS3, deleteFromS3, deleteFileFromS3 } = require('../utils/s3');
 
-/**
- * @swagger
- * /api/prosthetic-centers:
- *   get:
- *     summary: Get all active prosthetic centers
- *     tags: [Prosthetic Centers]
- *     responses:
- *       200:
- *         description: List of active prosthetic centers
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/ProstheticCenter'
- *       500:
- *         description: Server error
- */
+// Get all prosthetic centers
 exports.getAllCenters = async (req, res) => {
   try {
-    const centers = await ProstheticCenter.find({ isActive: true });
+    const centers = await ProstheticCenter.find().sort({ createdAt: -1 });
     res.json(centers);
   } catch (error) {
+    console.error('Error fetching centers:', error);
     res.status(500).json({ message: error.message });
   }
 };
 
-/**
- * @swagger
- * /api/prosthetic-centers/{id}:
- *   get:
- *     summary: Get a specific prosthetic center by ID
- *     tags: [Prosthetic Centers]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Prosthetic center ID
- *     responses:
- *       200:
- *         description: Prosthetic center details
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ProstheticCenter'
- *       404:
- *         description: Prosthetic center not found
- *       500:
- *         description: Server error
- */
+// Get single prosthetic center by ID
 exports.getCenterById = async (req, res) => {
   try {
     const center = await ProstheticCenter.findById(req.params.id);
@@ -61,234 +21,136 @@ exports.getCenterById = async (req, res) => {
     }
     res.json(center);
   } catch (error) {
+    console.error('Error fetching center:', error);
     res.status(500).json({ message: error.message });
   }
 };
 
-/**
- * @swagger
- * /api/prosthetic-centers:
- *   post:
- *     summary: Create a new prosthetic center
- *     tags: [Prosthetic Centers]
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               location:
- *                 type: string
- *               description:
- *                 type: string
- *               contactNumber:
- *                 type: string
- *               services:
- *                 type: array
- *                 items:
- *                   type: string
- *               hero:
- *                 type: string
- *                 format: binary
- *               beneficiaries:
- *                 type: array
- *                 items:
- *                   type: string
- *                   format: binary
- *     responses:
- *       201:
- *         description: Prosthetic center created successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ProstheticCenter'
- *       400:
- *         description: Invalid input
- *       500:
- *         description: Server error
- */
+// Create new prosthetic center
 exports.createCenter = async (req, res) => {
   try {
+    console.log('Creating new prosthetic center');
+    console.log('Request body:', req.body);
+    console.log('Files:', req.files);
+
+    // Create center object
     const center = new ProstheticCenter({
       name: req.body.name,
-      location: req.body.location,
-      description: req.body.description,
-      contactNumber: req.body.contactNumber,
-      services: req.body.services,
-      heroImage: req.files?.hero?.[0]?.location,
-      beneficiaryImages: req.files?.beneficiaries?.map(file => file.location) || [],
+      address: req.body.address,
+      contact: req.body.contact,
+      features: req.body.features ? JSON.parse(req.body.features) : [],
+      rating: isNaN(Number(req.body.rating)) ? 0 : Number(req.body.rating),
+      heroImage: req.files?.heroImage?.[0]?.location,
+      beneficiaryImages: req.files?.beneficiaries?.map(file => file.location) || []
     });
 
-    const newCenter = await center.save();
-    res.status(201).json(newCenter);
+    // Validate required fields
+    if (!center.name || !center.address) {
+      return res.status(400).json({
+        message: 'Name and address are required fields'
+      });
+    }
+
+    // Save to database
+    await center.save();
+    console.log('Center created successfully:', center._id);
+    res.status(201).json(center);
   } catch (error) {
-    console.error('Error creating prosthetic center:', error);
-    res.status(400).json({ message: error.message });
+    console.error('Center creation failed:', error);
+    res.status(500).json({ 
+      message: 'Failed to create center',
+      error: error.message,
+      details: error.stack
+    });
   }
 };
 
-/**
- * @swagger
- * /api/prosthetic-centers/{id}:
- *   put:
- *     summary: Update a prosthetic center
- *     tags: [Prosthetic Centers]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Prosthetic center ID
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               location:
- *                 type: string
- *               description:
- *                 type: string
- *               contactNumber:
- *                 type: string
- *               services:
- *                 type: array
- *                 items:
- *                   type: string
- *               hero:
- *                 type: string
- *                 format: binary
- *               beneficiaries:
- *                 type: array
- *                 items:
- *                   type: string
- *                   format: binary
- *     responses:
- *       200:
- *         description: Prosthetic center updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ProstheticCenter'
- *       404:
- *         description: Prosthetic center not found
- *       400:
- *         description: Invalid input
- *       500:
- *         description: Server error
- */
+// Update prosthetic center
 exports.updateCenter = async (req, res) => {
   try {
-    const center = await ProstheticCenter.findById(req.params.id);
-    if (!center) {
-      return res.status(404).json({ message: 'Prosthetic center not found' });
-    }
+    console.log('Updating prosthetic center:', req.params.id);
+    console.log('Update data:', req.body);
+    console.log('Files:', req.files ? Object.keys(req.files) : 'No files');
 
-    center.name = req.body.name || center.name;
-    center.location = req.body.location || center.location;
-    center.description = req.body.description || center.description;
-    center.contactNumber = req.body.contactNumber || center.contactNumber;
-    center.services = req.body.services || center.services;
+    const updateData = { ...req.body };
     
-    if (req.files?.hero?.[0]) {
-      center.heroImage = req.files.hero[0].location;
+    // Handle file uploads
+    if (req.files?.heroImage?.[0]?.location) {
+      console.log('Updating hero image:', req.files.heroImage[0].location);
+      updateData.heroImage = req.files.heroImage[0].location;
     }
     
     if (req.files?.beneficiaries) {
-      center.beneficiaryImages = req.files.beneficiaries.map(file => file.location);
+      console.log('Updating beneficiary images:', req.files.beneficiaries.map(f => f.location));
+      updateData.beneficiaryImages = req.files.beneficiaries.map(file => file.location);
     }
 
-    const updatedCenter = await center.save();
-    res.json(updatedCenter);
+    // Parse features if present
+    if (updateData.features) {
+      try {
+        updateData.features = JSON.parse(updateData.features);
+      } catch (error) {
+        console.error('Error parsing features:', error);
+        return res.status(400).json({
+          message: 'Invalid features format',
+          error: error.message
+        });
+      }
+    }
+
+    const center = await ProstheticCenter.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    if (!center) {
+      console.log('Center not found:', req.params.id);
+      return res.status(404).json({ message: 'Center not found' });
+    }
+
+    console.log('Center updated successfully:', center._id);
+    res.json(center);
   } catch (error) {
-    console.error('Error updating prosthetic center:', error);
-    res.status(400).json({ message: error.message });
+    console.error('Center update failed:', error);
+    res.status(500).json({ 
+      message: 'Failed to update center',
+      error: error.message,
+      details: error.stack
+    });
   }
 };
 
-/**
- * @swagger
- * /api/prosthetic-centers/{id}:
- *   delete:
- *     summary: Soft delete a prosthetic center
- *     tags: [Prosthetic Centers]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Prosthetic center ID
- *     responses:
- *       200:
- *         description: Prosthetic center deleted successfully
- *       404:
- *         description: Prosthetic center not found
- *       500:
- *         description: Server error
- */
+// Delete prosthetic center
 exports.deleteCenter = async (req, res) => {
   try {
     const center = await ProstheticCenter.findById(req.params.id);
-    if (!center) {
-      return res.status(404).json({ message: 'Prosthetic center not found' });
+    if (!center) return res.status(404).json({ message: 'Center not found' });
+
+    // Delete hero image from S3
+    if (center.heroImage) {
+      await deleteFileFromS3(center.heroImage);
     }
 
-    center.isActive = false;
-    await center.save();
+    // Delete beneficiary images from S3
+    if (center.beneficiaryImages && center.beneficiaryImages.length > 0) {
+      await Promise.all(center.beneficiaryImages.map(image => deleteFileFromS3(image)));
+    }
+
+    // Delete the center from database
+    await ProstheticCenter.findByIdAndDelete(req.params.id);
     
-    res.json({ message: 'Prosthetic center deleted successfully' });
+    res.json({ message: 'Center and associated images deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Center deletion failed:', error);
+    res.status(500).json({ 
+      message: 'Failed to delete center',
+      error: error.message 
+    });
   }
 };
 
-/**
- * @swagger
- * /api/prosthetic-centers/{id}/images:
- *   post:
- *     summary: Upload multiple images to a prosthetic center
- *     tags: [Prosthetic Centers]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: Prosthetic center ID
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               images:
- *                 type: array
- *                 items:
- *                   type: string
- *                   format: binary
- *     responses:
- *       200:
- *         description: Images uploaded successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ProstheticCenter'
- *       400:
- *         description: No files uploaded
- *       404:
- *         description: Prosthetic center not found
- *       500:
- *         description: Server error
- */
+// Upload multiple images to prosthetic center
 exports.uploadImages = async (req, res) => {
   try {
     console.log('Uploading images to prosthetic center:', req.params.id);
@@ -300,7 +162,7 @@ exports.uploadImages = async (req, res) => {
 
     const center = await ProstheticCenter.findById(req.params.id);
     if (!center) {
-      return res.status(404).json({ message: 'Prosthetic center not found' });
+      return res.status(404).json({ message: 'Center not found' });
     }
 
     // Get image URLs from uploaded files

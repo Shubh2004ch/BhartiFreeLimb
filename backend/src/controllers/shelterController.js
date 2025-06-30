@@ -1,4 +1,5 @@
 const Shelter = require('../models/Shelter');
+const { deleteFileFromS3 } = require('../config/s3');
 
 // Get all shelters
 exports.getAllShelters = async (req, res) => {
@@ -174,14 +175,28 @@ exports.updateShelter = async (req, res) => {
 exports.deleteShelter = async (req, res) => {
   try {
     const shelter = await Shelter.findById(req.params.id);
-    if (!shelter) {
-      return res.status(404).json({ message: 'Shelter not found' });
+    if (!shelter) return res.status(404).json({ message: 'Shelter not found' });
+
+    // Delete hero image from S3
+    if (shelter.imagePath) {
+      await deleteFileFromS3(shelter.imagePath);
     }
 
-    await shelter.deleteOne();
-    res.json({ message: 'Shelter deleted successfully' });
+    // Delete additional images from S3
+    if (shelter.images && shelter.images.length > 0) {
+      await Promise.all(shelter.images.map(image => deleteFileFromS3(image)));
+    }
+
+    // Delete the shelter from database
+    await Shelter.findByIdAndDelete(req.params.id);
+    
+    res.json({ message: 'Shelter and associated images deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Shelter deletion failed:', error);
+    res.status(500).json({ 
+      message: 'Failed to delete shelter',
+      error: error.message 
+    });
   }
 };
 

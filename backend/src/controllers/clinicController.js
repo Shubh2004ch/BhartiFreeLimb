@@ -1,4 +1,5 @@
 const Clinic = require('../models/Clinic');
+const { deleteFileFromS3 } = require('../config/s3');
 
 // Get all clinics
 exports.getAllClinics = async (req, res) => {
@@ -91,13 +92,29 @@ exports.updateClinic = async (req, res) => {
 // Delete clinic
 exports.deleteClinic = async (req, res) => {
   try {
-    const clinic = await Clinic.findByIdAndDelete(req.params.id);
-    if (!clinic) {
-      return res.status(404).json({ message: 'Clinic not found' });
+    const clinic = await Clinic.findById(req.params.id);
+    if (!clinic) return res.status(404).json({ message: 'Clinic not found' });
+
+    // Delete hero image from S3
+    if (clinic.imagePath) {
+      await deleteFileFromS3(clinic.imagePath);
     }
-    res.json({ message: 'Clinic deleted successfully' });
+
+    // Delete additional images from S3
+    if (clinic.images && clinic.images.length > 0) {
+      await Promise.all(clinic.images.map(image => deleteFileFromS3(image)));
+    }
+
+    // Delete the clinic from database
+    await Clinic.findByIdAndDelete(req.params.id);
+    
+    res.json({ message: 'Clinic and associated images deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Clinic deletion failed:', error);
+    res.status(500).json({ 
+      message: 'Failed to delete clinic',
+      error: error.message 
+    });
   }
 };
 

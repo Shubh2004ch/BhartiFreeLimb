@@ -1,4 +1,4 @@
-const { S3Client } = require('@aws-sdk/client-s3');
+const { S3Client, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
 const path = require('path');
@@ -148,7 +148,7 @@ const upload = multer({
     },
   }),
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB limit
+    fileSize: 50 * 1024 * 1024, // 50MB limit
   },
   fileFilter: (req, file, cb) => {
     // Log file information
@@ -205,8 +205,29 @@ const handleMulterError = (error, req, res, next) => {
   next();
 };
 
+// Function to delete a file from S3
+const deleteFileFromS3 = async (fileUrl) => {
+  try {
+    if (!fileUrl) return;
+    
+    // Extract the key from the URL
+    const key = fileUrl.split('/').slice(-2).join('/'); // Gets 'uploads/filename.ext'
+    
+    const command = new DeleteObjectCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: key
+    });
+
+    await s3Client.send(command);
+    console.log('Successfully deleted file from S3:', key);
+  } catch (error) {
+    console.error('Error deleting file from S3:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   upload,
-  s3Client,
+  deleteFileFromS3,
   handleMulterError
 };
