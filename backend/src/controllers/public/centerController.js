@@ -180,32 +180,94 @@ exports.deleteCenter = async (req, res) => {
 // Upload multiple images to center
 exports.uploadImages = async (req, res) => {
   try {
-    console.log('Uploading images to center:', req.params.id);
-    console.log('Files:', req.files);
+    console.log('=== Controller: Upload Images ===');
+    console.log('Center ID:', req.params.id);
+    console.log('Files received:', req.files ? req.files.length : 0);
+    console.log('Files details:', req.files);
 
     if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: 'No files uploaded' });
+      console.log('No files uploaded');
+      return res.status(400).json({ 
+        message: 'No valid files uploaded. Please ensure you are uploading image files (JPEG, PNG, GIF, WebP).',
+        suggestion: 'Only image files are allowed. Please check your file types and try again.'
+      });
+    }
+
+    // Validate center ID
+    if (!req.params.id) {
+      console.error('No center ID provided');
+      return res.status(400).json({ message: 'Center ID is required' });
     }
 
     const center = await Center.findById(req.params.id);
     if (!center) {
+      console.error('Center not found:', req.params.id);
       return res.status(404).json({ message: 'Center not found' });
     }
 
+    console.log('Center found:', center._id);
+
+    // Validate uploaded files
+    const validFiles = req.files.filter(file => file && file.location);
+    if (validFiles.length === 0) {
+      console.error('No valid files with location found');
+      return res.status(400).json({ 
+        message: 'No valid files uploaded. All files must be successfully uploaded to S3.',
+        uploadedFiles: req.files.length,
+        validFiles: validFiles.length,
+        suggestion: 'Please ensure all files are valid image formats and try again.'
+      });
+    }
+
     // Get image URLs from uploaded files
-    const newImages = req.files.map(file => file.location);
+    const newImages = validFiles.map(file => file.location);
+    console.log('New image URLs:', newImages);
+
+    // Initialize images array if it doesn't exist
+    if (!center.images) {
+      center.images = [];
+    }
 
     // Add new images to the center's images array
-    center.images = [...(center.images || []), ...newImages];
-    await center.save();
+    const previousImages = center.images.length;
+    center.images = [...center.images, ...newImages];
+    
+    console.log(`Adding ${newImages.length} images to center. Previous: ${previousImages}, New total: ${center.images.length}`);
 
-    console.log('Images uploaded successfully:', newImages);
-    res.json(center);
+    const savedCenter = await center.save();
+    console.log('Center saved successfully with new images');
+
+    // Check if all files were processed
+    const totalFiles = req.files.length;
+    const processedFiles = validFiles.length;
+    const skippedFiles = totalFiles - processedFiles;
+
+    let responseMessage = 'Images uploaded successfully';
+    if (skippedFiles > 0) {
+      responseMessage = `${processedFiles} images uploaded successfully. ${skippedFiles} files were skipped (invalid format).`;
+    }
+
+    res.json({
+      message: responseMessage,
+      images: newImages,
+      center: savedCenter,
+      uploadSummary: {
+        totalFiles,
+        processedFiles,
+        skippedFiles
+      }
+    });
   } catch (error) {
-    console.error('Image upload failed:', error);
+    console.error('=== Controller Error ===');
+    console.error('Error uploading images:', error);
+    console.error('Error stack:', error.stack);
+    console.error('Request params:', req.params);
+    console.error('Request files:', req.files);
+    
     res.status(500).json({ 
       message: 'Failed to upload images',
-      error: error.message 
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 };

@@ -149,6 +149,7 @@ const upload = multer({
   }),
   limits: {
     fileSize: 50 * 1024 * 1024, // 50MB limit
+    files: 10, // Maximum 10 files
   },
   fileFilter: (req, file, cb) => {
     // Log file information
@@ -159,12 +160,20 @@ const upload = multer({
       size: file.size
     });
 
+    // Validate field name
+    if (file.fieldname !== 'images') {
+      console.error('Invalid field name:', file.fieldname);
+      return cb(new Error(`Invalid field name "${file.fieldname}". Expected "images".`), false);
+    }
+
     // Validate file type
     const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     if (allowedMimes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed.'), false);
+      console.warn(`Skipping invalid file type: ${file.originalname} (${file.mimetype})`);
+      // Instead of rejecting, we'll skip this file but continue processing others
+      cb(null, false);
     }
   }
 });
@@ -176,7 +185,26 @@ const handleMulterError = (error, req, res, next) => {
   if (error instanceof multer.MulterError) {
     if (error.code === 'LIMIT_FILE_SIZE') {
       return res.status(400).json({
-        message: 'File too large. Maximum size is 5MB.',
+        message: 'File too large. Maximum size is 50MB.',
+        error: error.message
+      });
+    }
+    if (error.code === 'LIMIT_UNEXPECTED_FILE') {
+      console.error('Unexpected field error details:', {
+        field: error.field,
+        expectedField: 'images',
+        message: error.message
+      });
+      return res.status(400).json({
+        message: `Unexpected field name "${error.field}". Expected field name is "images". Please ensure you are uploading images with the correct field name.`,
+        error: error.message,
+        expectedField: 'images',
+        receivedField: error.field
+      });
+    }
+    if (error.code === 'LIMIT_FILE_COUNT') {
+      return res.status(400).json({
+        message: 'Too many files. Maximum allowed is 10 files.',
         error: error.message
       });
     }
